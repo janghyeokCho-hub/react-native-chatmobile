@@ -1,0 +1,152 @@
+import React from 'react';
+import {
+  getFileExtension,
+  isAllImage,
+  //openFilePreview,
+} from '@/lib/fileUtil';
+//import { openPopup } from '@/lib/common';
+import { View, StyleSheet } from 'react-native';
+import File from '@C/chat/message/types/File';
+import FileThumbList from './types/FileThumbList';
+
+const FileMessageBox = ({ fileObj, id, isTemp }) => {
+  const handleFileList = fileObj => {
+    let isAllimg = isAllImage(fileObj);
+
+    if (isAllimg) {
+      return (
+        <View style={[styles.fileThumbListMessageBox]} id={id || ''}>
+          {fileObj.map((item, index) => {
+            return (
+              <FileThumbList
+                key={index}
+                index={index}
+                len={fileObj.length}
+                type="list"
+                item={item}
+                preview={handlePreview}
+                id={id}
+                isTemp={isTemp}
+              />
+            );
+          })}
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={[styles.fileMessageBox, styles.fileMessageList]}
+          id={id || ''}
+        >
+          {fileObj.map((item, index) => {
+            return (
+              <File
+                key={index}
+                type="list"
+                item={item}
+                preview={handlePreview}
+                id={id}
+                isTemp={isTemp}
+              />
+            );
+          })}
+        </View>
+      );
+    }
+  };
+
+  const handlePreview = item => {
+    let imageList = null;
+    if (Array.isArray(fileObj)) {
+      imageList = fileObj.filter(item => {
+        return getFileExtension(item.ext) == 'img';
+      });
+    }
+    const extension = getFileExtension(item.ext);
+
+    if (extension == 'img') {
+      if (imageList && imageList.length > 1) {
+        //openFilePreview(item, imageList, 'L', null);
+      } else {
+        //openFilePreview(item, null, 'N', null);
+      }
+    }
+  };
+
+  if (Array.isArray(fileObj) && fileObj.length > 1) {
+    return <>{handleFileList(fileObj)}</>;
+  } else {
+    return (
+      <File
+        type="unit"
+        item={fileObj}
+        preview={handlePreview}
+        id={id}
+        isTemp={isTemp}
+      />
+    );
+  }
+};
+
+const styles = StyleSheet.create({
+  fileMessageBox: {
+    minWidth: '60%',
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 10,
+    padding: 10,
+    margin: 5,
+  },
+  fileMessage: {
+    flexDirection: 'row',
+    padding: 10,
+  },
+  fileMessageList: {
+    flexDirection: 'column',
+  },
+  fileListItem: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    margin: 5,
+  },
+  fileName: { flex: 1, fontSize: 13 },
+  fileSize: {
+    fontSize: 12,
+    color: '#999',
+  },
+  sFileIco: {
+    width: 15,
+    height: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5,
+  },
+  fileInfoTxt: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  fileTypeIco: {
+    width: 25,
+    height: 25,
+    justifyContent: 'center',
+    margin: 15,
+  },
+  fileNameBig: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  fileThumbListMessageBox: {
+    minWidth: 204,
+    maxWidth: 204,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    // borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 10,
+    // padding: 10,
+    margin: 5,
+  },
+});
+
+export default React.memo(FileMessageBox);

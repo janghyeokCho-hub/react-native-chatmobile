@@ -1,0 +1,172 @@
+import axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage';
+import { logoutRequest } from '@/lib/api/login';
+import VersionCheck from 'react-native-version-check';
+
+let configInstance = {};
+
+const APP_VERSION = VersionCheck.getCurrentVersion();
+
+export const initConfig = async (domain, configs) => {
+  let parseConfigs = null;
+  if (typeof configs != 'object') {
+    parseConfigs = JSON.parse(configs);
+  } else {
+    parseConfigs = configs;
+  }
+
+  // setting 설정 정보 load
+  let lang = await AsyncStorage.getItem('covi_user_lang');
+  let theme = await AsyncStorage.getItem('covi_user_theme');
+  let jobInfo = await AsyncStorage.getItem('covi_user_jobInfo');
+  let fontSize = await AsyncStorage.getItem('covi_user_fontSize');
+
+  // lang, theme, jobInfo 기본값 맵핑
+  if (parseConfigs.config) {
+    if (!lang) {
+      lang = parseConfigs.config.DefaultClientLang || 'ko';
+      AsyncStorage.setItem('covi_user_lang', lang);
+    }
+    if (!theme) {
+      theme = parseConfigs.config.DefaultTheme || 'blue';
+      AsyncStorage.setItem('covi_user_theme', theme);
+    }
+    if (!jobInfo) {
+      jobInfo = parseConfigs.config.DefaultClientJobInfo || 'PN';
+      AsyncStorage.setItem('covi_user_jobInfo', jobInfo);
+    }
+
+    if (!fontSize) {
+      fontSize = parseConfigs.config.DefaultFontSize || 'm';
+      AsyncStorage.setItem('covi_user_fontSize', fontSize);
+    }
+  } else {
+    if (!lang) {
+      lang = 'ko';
+    }
+    if (!theme) {
+      theme = 'blue';
+    }
+    if (!jobInfo) {
+      jobInfo = 'PN';
+    }
+
+    if (!fontSize) {
+      fontSize = 'm';
+    }
+  }
+  configInstance = {
+    serverURL: {
+      HOST: domain,
+      CHAT: `${domain}/server`,
+      MANAGE: `${domain}/restful`,
+      MANAGER: `${domain}/manager`,
+      EVENT: `${domain}`,
+    },
+    setting: {
+      lang,
+      theme,
+      jobInfo,
+      fontSize,
+    },
+    config: {
+      ...parseConfigs.config,
+    },
+    dic: {
+      ...parseConfigs.dic,
+    },
+  };
+};
+
+export const getServerConfigs = domain => {
+  return axios({
+    method: 'get',
+    url: `${domain}/restful/na/nf/config`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Covi-User-Access-Version': APP_VERSION,
+      'Covi-User-Device-Type': 'covision.mobile.app',
+    },
+  });
+};
+
+export const getServerDictionary = (domain, lang) => {
+  return axios({
+    method: 'get',
+    url: `${domain}/restful/na/nf/config?lang=${lang}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Covi-User-Access-Version': APP_VERSION,
+      'Covi-User-Device-Type': 'covision.mobile.app',
+    },
+  });
+};
+
+export const getServer = key => {
+  if (configInstance && configInstance.serverURL) {
+    const searchConfig = search(configInstance.serverURL, key);
+    if (searchConfig != undefined) return searchConfig;
+  }
+  return '';
+};
+
+export const getConfig = (key, defaultValue) => {
+  if (configInstance && configInstance.config) {
+    const searchConfig = search(configInstance.config, key);
+    if (searchConfig != undefined) return searchConfig;
+  }
+  return defaultValue;
+};
+
+export const getSetting = (key, defaultValue) => {
+  if (configInstance && configInstance.setting) {
+    const searchConfig = search(configInstance.setting, key);
+    if (searchConfig != undefined) return searchConfig;
+  }
+  return defaultValue;
+};
+
+export const getDic = (key, defaultValue) => {
+  if (configInstance && configInstance.dic) {
+    const searchConfig = search(configInstance.dic, key);
+    /**
+     * 2021.02.15 TODO 팝업 메시지에서 HTML br태그 newline 처리 - 추후 보완 필요
+     */
+    if (searchConfig !== undefined) return searchConfig.replace(/<br\s?\/>/g, '\n');
+  }
+  return defaultValue;
+};
+
+const search = (object, key) => {
+  let path = key.split('.');
+  for (let i = 0; i < path.length; i++) {
+    if (object[path[i]] === undefined) {
+      return undefined;
+    }
+    object = object[path[i]];
+  }
+  return object;
+};
+
+export const initHostInfo = () => {
+  return new Promise((resolve, reject) => {
+    const removeHost = async () => {
+      const token = await AsyncStorage.getItem('covi_user_access_token');
+      const id = await AsyncStorage.getItem('covi_user_access_id');
+      if (token) {
+        const response = await logoutRequest({ token, id });
+      }
+
+      // host info 삭제
+      AsyncStorage.removeItem('EHINF');
+    };
+    try {
+      removeHost();
+      resolve(true);
+    } catch (e) {
+      reject(false);
+    }
+  });
+};

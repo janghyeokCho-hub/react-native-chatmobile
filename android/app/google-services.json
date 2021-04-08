@@ -1,0 +1,299 @@
+{
+  "project_info": {
+    "project_number": "138702967038",
+    "firebase_url": "https://api-project-138702967038.firebaseio.com",
+    "project_id": "api-project-138702967038",
+    "storage_bucket": "api-project-138702967038.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:4f9092a7e74f4060",
+        "android_client_info": {
+          "package_name": "com.CoviMDM.kcc.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:6292706daf757670f695af",
+        "android_client_info": {
+          "package_name": "com.chatmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:95675266b44261b4",
+        "android_client_info": {
+          "package_name": "com.covimdm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:f91e27bfb5a59c22",
+        "android_client_info": {
+          "package_name": "com.covimdm.bundle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:05b3cb06ccbd0e89",
+        "android_client_info": {
+          "package_name": "com.covimdm.lg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:e326ddfe903dcf1f",
+        "android_client_info": {
+          "package_name": "com.covimdm.samsung"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:c4e7b2d1f2b1dab3f695af",
+        "android_client_info": {
+          "package_name": "com.covision.mdm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138702967038:android:05cb861e41e961d8",
+        "android_client_info": {
+          "package_name": "com.covision.moapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOrMdWZHO5ovYgLvHFh-Lmc6jkNXdRn-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138702967038-vatp3cg97pm3ae5upeno4baj13s1s1rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "138702967038-8oqlggrteqhreohsgfmf8fv5nqf5ojit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.covision.moapptest"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
