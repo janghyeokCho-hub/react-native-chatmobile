@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>329950255988-prms6n71cha2acm9crtl83h69iu9e0u4.apps.googleusercontent.com</string>
+	<string>138702967038-qibu2d2bsj0lmmhksl2m2is1ic2el09n.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.329950255988-prms6n71cha2acm9crtl83h69iu9e0u4</string>
+	<string>com.googleusercontent.apps.138702967038-qibu2d2bsj0lmmhksl2m2is1ic2el09n</string>
 	<key>API_KEY</key>
-	<string>AIzaSyB3IJZpoXUsefVb1HhvpjcL4Y5knxJoiDg</string>
+	<string>AIzaSyDKra1FNNczRbC_Xzh6CBnYIr_rPHpxBrQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>329950255988</string>
+	<string>138702967038</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.chatmobile</string>
+	<string>com.covision.eumtalk</string>
 	<key>PROJECT_ID</key>
-	<string>myproject-86929</string>
+	<string>api-project-138702967038</string>
 	<key>STORAGE_BUCKET</key>
-	<string>myproject-86929.appspot.com</string>
+	<string>api-project-138702967038.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:329950255988:ios:816c0915e8a40ac1d0aa21</string>
+	<string>1:138702967038:ios:4f9970463e24e1e2f695af</string>
 	<key>DATABASE_URL</key>
-	<string>https://myproject-86929.firebaseio.com</string>
+	<string>https://api-project-138702967038.firebaseio.com</string>
 </dict>
 </plist>
