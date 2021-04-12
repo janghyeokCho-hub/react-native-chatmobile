@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* chatmobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* chatmobileTests.m */; };
+		0F475F4A150ED0EE76D2CA80 /* libPods-chatmobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7726C52626159AA7007E2B06 /* libPods-chatmobile.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -17,12 +18,12 @@
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* chatmobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* chatmobileTests.m */; };
 		45781405CD215A4706911D83 /* libPods-chatmobile-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CC3EDCB98D8A664FEFAB1F49 /* libPods-chatmobile-tvOS.a */; };
-		49801ED82429EB3C00DF818F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49801ED72429EB3C00DF818F /* GoogleService-Info.plist */; };
 		49B5D97224E36F8F0087E99A /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49B5D97024E36F8F0087E99A /* MainInterface.storyboard */; };
 		49B5D97624E36F8F0087E99A /* eumtalkShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49B5D96B24E36F8F0087E99A /* eumtalkShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		49B5D97E24E3706F0087E99A /* EumtalkShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 49B5D97C24E3706F0087E99A /* EumtalkShare.m */; };
 		5B31A8A1E22BEF475536CEE1 /* libPods-chatmobile-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72DCAC599FC4D34DC6672AED /* libPods-chatmobile-tvOSTests.a */; };
-		7726C52726159AA7007E2B06 /* libPods-chatmobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7726C52626159AA7007E2B06 /* libPods-chatmobile.a */; };
+		77FC6CEC2623E03F001A39E9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4982E08124111EC60056E745 /* GoogleService-Info.plist */; };
+		77FC6CED2623E048001A39E9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4982E08124111EC60056E745 /* GoogleService-Info.plist */; };
 		9CA0A791D1DA22BC2462FCEE /* libPods-chatmobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FBBC8AC0A96592AEB3E3E2D /* libPods-chatmobile.a */; };
 		A7A7F4E4B92FC09880F4EF00 /* libPods-chatmobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C7D6BCA375B47E0DCDDE160 /* libPods-chatmobileTests.a */; };
 		C20EE283E500C736EC391B2B /* libPods-chatmobile-eumtalkShare.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73421BA97973B8DA786B1F84 /* libPods-chatmobile-eumtalkShare.a */; };
@@ -84,7 +85,6 @@
 		2D02E4901E0B4A5D006451C7 /* chatmobile-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "chatmobile-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		493C53CC24123D8D00212EC6 /* chatmobile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = chatmobile.entitlements; path = chatmobile/chatmobile.entitlements; sourceTree = "<group>"; };
 		49801ED62429CFDF00DF818F /* chatmobileDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = chatmobileDebug.entitlements; path = chatmobile/chatmobileDebug.entitlements; sourceTree = "<group>"; };
-		49801ED72429EB3C00DF818F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4982E08124111EC60056E745 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		49B5D96B24E36F8F0087E99A /* eumtalkShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = eumtalkShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B5D97124E36F8F0087E99A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
@@ -97,7 +97,6 @@
 		655BB0367A9C160F352D1B56 /* Pods-chatmobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobileTests.release.xcconfig"; path = "Target Support Files/Pods-chatmobileTests/Pods-chatmobileTests.release.xcconfig"; sourceTree = "<group>"; };
 		72DCAC599FC4D34DC6672AED /* libPods-chatmobile-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-chatmobile-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73421BA97973B8DA786B1F84 /* libPods-chatmobile-eumtalkShare.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-chatmobile-eumtalkShare.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7726C52626159AA7007E2B06 /* libPods-chatmobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libPods-chatmobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		845442FEEBDB39DD2ACA5AE3 /* Pods-chatmobile-eumtalkShare.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-eumtalkShare.debug.xcconfig"; path = "Target Support Files/Pods-chatmobile-eumtalkShare/Pods-chatmobile-eumtalkShare.debug.xcconfig"; sourceTree = "<group>"; };
 		8A9A60FA918F8D8EB60847AF /* Pods-chatmobile-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-tvOS.release.xcconfig"; path = "Target Support Files/Pods-chatmobile-tvOS/Pods-chatmobile-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		8DBC9C2B64343E40CEB821BE /* Pods-chatmobile-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-chatmobile-tvOSTests/Pods-chatmobile-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -123,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9CA0A791D1DA22BC2462FCEE /* libPods-chatmobile.a in Frameworks */,
+				0F475F4A150ED0EE76D2CA80 /* libPods-chatmobile.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,7 +147,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C20EE283E500C736EC391B2B /* libPods-chatmobile-eumtalkShare.a in Frameworks */,
-				7726C52726159AA7007E2B06 /* libPods-chatmobile.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,7 +190,6 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7726C52626159AA7007E2B06 /* libPods-chatmobile.a */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				5FBBC8AC0A96592AEB3E3E2D /* libPods-chatmobile.a */,
@@ -224,7 +222,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				49801ED72429EB3C00DF818F /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* chatmobile */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* chatmobileTests */,
@@ -440,9 +437,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77FC6CEC2623E03F001A39E9 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
-				49801ED82429EB3C00DF818F /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,6 +462,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77FC6CED2623E048001A39E9 /* GoogleService-Info.plist in Resources */,
 				49B5D97224E36F8F0087E99A /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

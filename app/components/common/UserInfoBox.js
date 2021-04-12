@@ -208,6 +208,7 @@ const UserInfoBox = ({
           ) : (
             myAbsence.code && (
               <View style={styles.rightMessageAbsenceBox}>
+                <View style={styles.absenceDot} />
                 <Text
                   adjustsFontSizeToFit={Platform.OS == 'android'}
                   style={{
@@ -449,6 +450,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     paddingBottom: 5,
     marginLeft: 'auto',
+    flexDirection: 'row',
     borderWidth: 0.5,
     borderColor: '#ff4000',
     maxWidth: wp('100%') - 95,
@@ -457,9 +459,11 @@ const styles = StyleSheet.create({
   absenceDot: {
     width: 10,
     height: 10,
+    marginTop: 1,
+    marginRight: 10,
     borderRadius: 50,
-    marginLeft: 5,
-    borderWidth: 1.5,
+    padding: 3,
+    borderWidth: 1,
     borderColor: '#ff2000',
   },
 });

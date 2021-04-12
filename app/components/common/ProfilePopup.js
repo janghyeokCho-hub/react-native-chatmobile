@@ -190,15 +190,19 @@ const ProfilePopup = ({ route, navigation }) => {
                       <Text
                         style={{
                           ...styles.profileDeptInfo,
-                          fontSize: sizes.large,
+                          marginTop: 7,
+                          fontSize: sizes.medium,
                         }}
                       >
                         {format(
                           new Date(targetAbsenceInfo.startDate),
-                          'MM.dd',
+                          'yyyy.MM.dd',
                         ) +
                           ' ~ ' +
-                          format(new Date(targetAbsenceInfo.endDate), 'MM.dd')}
+                          format(
+                            new Date(targetAbsenceInfo.endDate),
+                            'yyyy.MM.dd',
+                          )}
                       </Text>
                     </View>
                   )}
