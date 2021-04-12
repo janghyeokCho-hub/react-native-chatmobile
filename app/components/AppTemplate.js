@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import ContactList from '@C/contact/ContactList';
 import ChatList from '@C/chat/ChatList';
 import OrgChartList from '@C/orgchart/OrgChartList';
@@ -13,12 +13,14 @@ import PushContainer from '@/components/PushContainer';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import AppTemplateBack from './AppTemplateBack';
 import { getServer, getConfig } from '@/config';
+import SecondAuth from '@C/auth/SecondAuth';
 
 const Tab = createBottomTabNavigator();
 
 const AppTemplate = ({ navigation }) => {
   const myInfo = useSelector(({ login }) => login.userInfo);
   const [useChannel, setUseChannel] = useState('Y');
+  const [secondAuth, setSecondAuth] = useState(false);
 
   useEffect(() => {
     const useChannelConfig = getConfig('UseChannel', 'Y');
@@ -53,7 +55,23 @@ const AppTemplate = ({ navigation }) => {
     (left, right) => left == right,
   );
 
-  return (
+  return !secondAuth ? (
+    <SecondAuth
+      title="2차 비밀번호를 입력해주세요."
+      subtitle="4자리 숫자로 된 PIN 번호를 입력해주세요."
+      bioAuth
+      handlePasswordConfirmEvent={data => {
+        if (data.join('') === '1234') {
+          setSecondAuth(true);
+          return true;
+        } else return false;
+      }}
+      handlePasswordSuccessEvent={() => {
+        setSecondAuth(true);
+      }}
+    />
+  ) : (
+    // <Text>dd</Text>
     <View
       style={{
         width: '100%',
