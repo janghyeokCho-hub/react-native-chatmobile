@@ -60,3 +60,4 @@ buck-out/
 
 #test
 __tests__
+package-lock.json
