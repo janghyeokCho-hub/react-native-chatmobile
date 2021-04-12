@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, Alert, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { useSelector } from 'react-redux';
 import IconButton from '@COMMON/buttons/IconButton';
 import * as db from '@/lib/appData/connector';

@@ -60,4 +60,8 @@ buck-out/
 
 #test
 __tests__
+
+# Lock files
 package-lock.json
+yarn.lock
+ios/Podfile.lock
