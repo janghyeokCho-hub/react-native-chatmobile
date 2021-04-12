@@ -10,9 +10,9 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
-  AsyncStorage,
+  ScrollView
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import RNExitApp from 'react-native-exit-app';
 import {
   widthPercentageToDP as wp,
