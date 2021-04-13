@@ -1787,3 +1787,50 @@ export const saveFailMessages = async param => {
       });
   });
 };
+
+export const updateSecondPassword = async param => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  await dbCon.transaction(tx => {
+    if (param == null) {
+      db.tx(tx, 'access')
+        .update({
+          reserved: null,
+        })
+        .where(`id = '${LoginInfo.getLoginInfo().getID()}'`)
+        .execute();
+    } else {
+      db.tx(tx, 'access')
+        .update({
+          reserved: JSON.stringify({
+            secondPass: param.secondAuth,
+            useBioAuth: param.useBioAuth,
+          }),
+        })
+        .where(`id = '${LoginInfo.getLoginInfo().getID()}'`)
+        .execute();
+    }
+  });
+};
+
+export const getSecondPasswordInfo = async () => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+
+  const secondPasswordInfo = await new Promise((resolve, reject) => {
+    dbCon.transaction(tx => {
+      db.tx(tx, 'access')
+        .select(['reserved'])
+        .where(`id = '${LoginInfo.getLoginInfo().getID()}'`)
+        .execute(
+          (tx, result) => {
+            const raw = result.rows.raw();
+            resolve(JSON.parse(raw[0].reserved));
+          },
+          error => {
+            reject(error);
+          },
+        );
+    });
+  });
+
+  return secondPasswordInfo;
+};

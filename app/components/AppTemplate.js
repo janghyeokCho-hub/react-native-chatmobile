@@ -14,6 +14,7 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import AppTemplateBack from './AppTemplateBack';
 import { getServer, getConfig } from '@/config';
 import SecondAuth from '@C/auth/SecondAuth';
+import * as dbAction from '@/lib/appData/action';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,10 +22,15 @@ const AppTemplate = ({ navigation }) => {
   const myInfo = useSelector(({ login }) => login.userInfo);
   const [useChannel, setUseChannel] = useState('Y');
   const [secondAuth, setSecondAuth] = useState(false);
+  const [secondAuthInfo, setSecondAuthInfo] = useState(null);
 
   useEffect(() => {
     const useChannelConfig = getConfig('UseChannel', 'Y');
     setUseChannel(useChannelConfig);
+
+    dbAction.getSecondPasswordInfo().then(data => {
+      setSecondAuthInfo(data);
+    });
   }, []);
 
   const unreadCnt = useSelector(
@@ -55,13 +61,13 @@ const AppTemplate = ({ navigation }) => {
     (left, right) => left == right,
   );
 
-  return !secondAuth ? (
+  return secondAuthInfo != null && !secondAuth ? (
     <SecondAuth
       title="2차 비밀번호를 입력해주세요."
       subtitle="4자리 숫자로 된 PIN 번호를 입력해주세요."
-      bioAuth
+      bioAuth={secondAuthInfo.useBioAuth}
       handlePasswordConfirmEvent={data => {
-        if (data.join('') === '1234') {
+        if (data.join('') === secondAuthInfo.secondPass) {
           setSecondAuth(true);
           return true;
         } else return false;
@@ -71,7 +77,6 @@ const AppTemplate = ({ navigation }) => {
       }}
     />
   ) : (
-    // <Text>dd</Text>
     <View
       style={{
         width: '100%',

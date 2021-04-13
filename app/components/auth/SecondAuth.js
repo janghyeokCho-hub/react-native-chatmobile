@@ -12,6 +12,8 @@ import BackButtonIcon from '@C/common/icons/BackButtonIcon';
 import BiometricsContainer from '@C/biometrics/BiometricsContainer';
 
 const SecondAuth = ({
+  route,
+  navigation,
   title,
   subtitle,
   handlePasswordConfirmEvent,
@@ -27,8 +29,12 @@ const SecondAuth = ({
     });
     if (ref.length < 4) ref.push(value);
     if (ref.length == 4) {
-      if (handlePasswordConfirmEvent != null) {
-        if (!handlePasswordConfirmEvent(ref)) {
+      const handleEvent =
+        route != null
+          ? route.params.handlePasswordConfirmEvent
+          : handlePasswordConfirmEvent;
+      if (handleEvent != null) {
+        if (!handleEvent(ref)) {
           Vibration.vibrate(100);
           setErrorMsg('비밀번호가 틀렸습니다 !!');
           Animated.sequence([
@@ -57,6 +63,10 @@ const SecondAuth = ({
           });
 
           setSecPassword([]);
+        } else {
+          if (navigation != null) {
+            navigation.goBack();
+          }
         }
         return;
       }
@@ -87,8 +97,12 @@ const SecondAuth = ({
         />
       )}
       <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={styles.title}>
+          {route != null ? route.params.title : title}
+        </Text>
+        <Text style={styles.subtitle}>
+          {route != null ? route.params.subtitle : subtitle}
+        </Text>
         <Animated.View style={{ transform: [{ translateY: shakeErrMsg }] }}>
           <Text style={styles.errorMsg}>{errorMsg}</Text>
         </Animated.View>
