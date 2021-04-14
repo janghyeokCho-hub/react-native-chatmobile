@@ -257,7 +257,7 @@ const Root = ({ stack, theme }) => {
                 name="AppLockSetting"
                 component={AppLockSetting}
                 options={({ navigation }) => ({
-                  title: getDic('AppLock'),
+                  title: getDic('AppLockSetting'),
                   headerShown: true,
                   headerLeft: () => (
                     <TouchableOpacity

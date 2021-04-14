@@ -142,7 +142,7 @@ const UserSetting = ({ navigation }) => {
               <Text
                 style={{ ...styles.wrapButtonTitle, fontSize: sizes.default }}
               >
-                {getDic('AppLock')}
+                {getDic('AppLockSetting')}
               </Text>
             </View>
           </TouchableOpacity>
