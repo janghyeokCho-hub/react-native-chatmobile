@@ -192,32 +192,24 @@ const ChatSetting = ({ navigation }) => {
   }, [dispatch]);
 
   const openJobInfoModal = useCallback(() => {
-    const modalBtn = [
-      {
-        title: '직위',
+    const config = getConfig('jobCode', [
+      { name: '표시안함', value: 'NN' },
+      { name: '직위', value: 'PN' },
+      { name: '직급', value: 'LN' },
+      { name: '직책', value: 'TN' },
+    ]);
+
+    var modalBtn = [];
+
+    config.map(data => {
+      modalBtn.push({
+        title: data.name,
         onPress: () => {
-          closeJobInfoModal('PN');
+          closeJobInfoModal(data.value);
         },
-      },
-      {
-        title: '직급',
-        onPress: () => {
-          closeJobInfoModal('LN');
-        },
-      },
-      {
-        title: '직책',
-        onPress: () => {
-          closeJobInfoModal('TN');
-        },
-      },
-      {
-        title: '사용안함',
-        onPress: () => {
-          closeJobInfoModal('NN');
-        },
-      },
-    ];
+      });
+    });
+
     dispatch(
       changeModal({
         modalData: {
