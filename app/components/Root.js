@@ -41,6 +41,7 @@ import {
   ChannelInfoDetailView,
   ChangeChannelInfoView,
 } from '@C/channel/layer';
+import SecondAuth from '@C/auth/SecondAuth';
 import ModalContainer from './ModalContainer';
 
 import { getDic } from '@/config';
@@ -90,6 +91,7 @@ const Root = ({ stack, theme }) => {
                 component={InviteChannelMember}
               />
               <Stack.Screen name="InviteExtUser" component={InviteExtUser} />
+              <Stack.Screen name="SecondAuth" component={SecondAuth} />
               <Stack.Screen
                 name="CategorySelect"
                 component={CategorySelectView}
@@ -255,7 +257,7 @@ const Root = ({ stack, theme }) => {
                 name="AppLockSetting"
                 component={AppLockSetting}
                 options={({ navigation }) => ({
-                  title: getDic('AppLock'),
+                  title: getDic('AppLockSetting'),
                   headerShown: true,
                   headerLeft: () => (
                     <TouchableOpacity

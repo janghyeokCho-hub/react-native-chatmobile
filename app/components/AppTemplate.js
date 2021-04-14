@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import ContactList from '@C/contact/ContactList';
 import ChatList from '@C/chat/ChatList';
 import OrgChartList from '@C/orgchart/OrgChartList';
@@ -13,16 +13,24 @@ import PushContainer from '@/components/PushContainer';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import AppTemplateBack from './AppTemplateBack';
 import { getServer, getConfig } from '@/config';
+import SecondAuth from '@C/auth/SecondAuth';
+import * as dbAction from '@/lib/appData/action';
 
 const Tab = createBottomTabNavigator();
 
 const AppTemplate = ({ navigation }) => {
   const myInfo = useSelector(({ login }) => login.userInfo);
   const [useChannel, setUseChannel] = useState('Y');
+  const [secondAuth, setSecondAuth] = useState(false);
+  const [secondAuthInfo, setSecondAuthInfo] = useState(null);
 
   useEffect(() => {
     const useChannelConfig = getConfig('UseChannel', 'Y');
     setUseChannel(useChannelConfig);
+
+    dbAction.getSecondPasswordInfo().then(data => {
+      setSecondAuthInfo(data);
+    });
   }, []);
 
   const unreadCnt = useSelector(
@@ -53,7 +61,22 @@ const AppTemplate = ({ navigation }) => {
     (left, right) => left == right,
   );
 
-  return (
+  return secondAuthInfo != null && !secondAuth ? (
+    <SecondAuth
+      title="2차 비밀번호를 입력해주세요."
+      subtitle="4자리 숫자로 된 PIN 번호를 입력해주세요."
+      bioAuth={secondAuthInfo.useBioAuth}
+      handlePasswordConfirmEvent={data => {
+        if (data.join('') === secondAuthInfo.secondPass) {
+          setSecondAuth(true);
+          return true;
+        } else return false;
+      }}
+      handlePasswordSuccessEvent={() => {
+        setSecondAuth(true);
+      }}
+    />
+  ) : (
     <View
       style={{
         width: '100%',
