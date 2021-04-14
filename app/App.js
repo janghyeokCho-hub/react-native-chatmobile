@@ -15,7 +15,6 @@ import Orientation from 'react-native-orientation';
 import DeviceInfo from 'react-native-device-info';
 import getUpdater from '@/lib/class/Updater';
 import getTheme from '@/config/theme';
-import BiometricsContainer from '@/components/biometrics/BiometricsContainer';
 
 // OS 폰트 크기 무시
 Text.defaultProps = Text.defaultProps || {};
@@ -93,7 +92,6 @@ class App extends Component {
         <SocketContainer />
         <PresenceContainer />
         <NetInfoHandler />
-        <BiometricsContainer />
         <Root stack={this.props.stack} theme={this.state.theme} />
       </>
     );
