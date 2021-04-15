@@ -65,3 +65,4 @@ __tests__
 package-lock.json
 yarn.lock
 ios/Podfile.lock
+android/java_pid*

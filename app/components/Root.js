@@ -46,8 +46,6 @@ import ModalContainer from './ModalContainer';
 
 import { getDic } from '@/config';
 
-const useChannel = 'N';
-
 const Root = ({ stack, theme }) => {
   const Stack = stack;
 

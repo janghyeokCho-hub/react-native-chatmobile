@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import ContactList from '@C/contact/ContactList';
 import ChatList from '@C/chat/ChatList';
 import OrgChartList from '@C/orgchart/OrgChartList';
@@ -120,7 +120,6 @@ const AppTemplate = ({ navigation }) => {
             shadowOpacity: 0, // remove shadow on iOS
             borderTopWidth: 0.6,
             borderTopColor: '#DDD',
-            paddingBottom: getBottomPadding(),
             paddingLeft: 10,
             paddingRight: 10,
           },
