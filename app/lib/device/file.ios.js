@@ -124,90 +124,66 @@ export const downloadByToken = async (
 };
 
 export const downloadByTokenAlert = (item, progressCallback) => {
-  Alert.alert(
-    null,
-    getDic('Msg_DownloadConfirm'),
-    [
-      { text: getDic('Cancel') },
-      {
-        text: getDic('Ok'),
-        onPress: () => {
-          downloadByToken(
-            item.token,
-            item.fileName,
-            data => {
-              if (!data.imageOrVideo) {
-                Alert.alert(
-                  null,
-                  data.message,
-                  [
-                    {
-                      text: getDic('Open'),
-                      onPress: () => {
-                        RNFetchBlob.ios.openDocument(data.path);
-                      },
-                    },
-                    {
-                      text: getDic('Ok'),
-                    },
-                  ],
-                  { cancelable: true },
-                );
-              } else {
-                Alert.alert(
-                  null,
-                  data.message,
-                  [
-                    {
-                      text: getDic('Ok'),
-                    },
-                  ],
-                  { cancelable: true },
-                );
-              }
+  downloadByToken(
+    item.token,
+    item.fileName,
+    data => {
+      if (!data.imageOrVideo) {
+        Alert.alert(
+          null,
+          data.message,
+          [
+            {
+              text: getDic('Open'),
+              onPress: () => {
+                RNFetchBlob.ios.openDocument(data.path);
+              },
             },
-            progressCallback,
-          );
-        },
-      },
-    ],
-    { cancelable: true },
+            {
+              text: getDic('Ok'),
+            },
+          ],
+          { cancelable: true },
+        );
+      } else {
+        Alert.alert(
+          null,
+          data.message,
+          [
+            {
+              text: getDic('Ok'),
+            },
+          ],
+          { cancelable: true },
+        );
+      }
+    },
+    progressCallback,
   );
 };
 
 export const viewerByTokenAlert = item => {
-  Alert.alert(
-    null,
-    getDic('Msg_RunViewer'),
-    [
-      { text: getDic('Cancel') },
-      {
-        text: getDic('Ok'),
-        onPress: () => {
-          let url = getConfig('SynapDocViewServer');
-          sendViewerServer('get', url, item)
-            .then(response => {
-              let sendURL = response.config.url.indexOf('job');
-              sendURL = response.config.url.substring(0, sendURL);
-              Linking.openURL(`${sendURL}view/${response.data.key}`);
-            })
-            .catch(response => {
-              Alert.alert(
-                getDic('Eumtalk'),
-                getDic('Msg_FileExpired'),
-                [
-                  {
-                    text: getDic('Ok'),
-                  },
-                ],
-                { cancelable: true },
-              );
-            });
-        },
-      },
-    ],
-    { cancelable: true },
-  );
+  const synapURL = getConfig('SynapDocViewServer', null);
+  if (synapURL != null) {
+    sendViewerServer('get', synapURL, item)
+      .then(response => {
+        let sendURL = response.config.url.indexOf('job');
+        sendURL = response.config.url.substring(0, sendURL);
+        Linking.openURL(`${sendURL}view/${response.data.key}`);
+      })
+      .catch(response => {
+        Alert.alert(
+          getDic('Eumtalk'),
+          getDic('Msg_FileExpired'),
+          [
+            {
+              text: getDic('Ok'),
+            },
+          ],
+          { cancelable: true },
+        );
+      });
+  }
 };
 
 export const downloadAndShare = item => {
