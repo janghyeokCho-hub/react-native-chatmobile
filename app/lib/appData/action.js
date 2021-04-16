@@ -1337,53 +1337,39 @@ export const unreadCountSync = async (param, callback) => {
         });
       }
     } else if (roomType === 'G') {
-      // console.log('TODO :: group chat unread count sync');
-      // const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
-      // // 시작 지점 확인
-      // const unreadMessageIdx = await new Promise((resolve, reject) => {
-      //   dbCon.transaction(tx => {
-      //     db.tx(tx, 'message')
-      //       .select(['messageId'])
-      //       .where(`roomId = ${roomId} AND unreadCnt = 0`)
-      //       .orderBy('messageId', 'DESC')
-      //       .limit(1)
-      //       .execute((exec, result) => {
-      //         if (result.rows.length > 0) {
-      //           resolve(result.rows.raw()[0].messageId);
-      //         } else resolve(null);
-      //       });
-      //   });
-      // });
-      // // 만약 MessageId가 0 이상이라면 관련된 메시지 리스트를 확인
-      // let updateMesssages = null;
-      // if (unreadMessageIdx > 0) {
-      //   updateMesssages = await new Promise((resolve, reject) => {
-      //     dbCon.transaction(tx => {
-      //       db.tx(tx, 'message')
-      //         .select(['messageId'])
-      //         .where(
-      //           `roomId = ${roomId} AND unreadCnt > 0 AND messageId < ${unreadMessageIdx}`,
-      //         )
-      //         .execute((exec, result) => {
-      //           if (result.rows.length > 0) {
-      //             resolve(result);
-      //           } else resolve(null);
-      //         });
-      //     });
-      //   });
-      // }
-      // // 업데이트할 메시지 리스트가 존재 한다면 업데이트
-      // if (updateMesssages && updateMesssages.rows.length > 0) {
-      //   console.log(updateMesssages.rows.raw());
-      //   updateMesssages.rows.raw().forEach(data => {
-      //     dbCon.transaction(tx => {
-      //       db.tx(tx, 'message')
-      //         .update({ unreadCnt: 0 })
-      //         .where(`roomId = ${roomId} AND messageId = ${data.messageId}`)
-      //         .execute();
-      //     });
-      //   });
-      // }
+      const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+
+      // 역순으로 모든 메시지 리스트를 가져옴
+      const updateMesssages = await new Promise((resolve, reject) => {
+        dbCon.transaction(tx => {
+          db.tx(tx, 'message')
+            .select(['messageId', 'unreadCnt'])
+            .where(`roomId = ${roomId}`)
+            .orderBy('messageId', 'DESC')
+            .execute((exec, result) => {
+              if (result.rows.length > 0) {
+                resolve(result.rows.row());
+              } else resolve(null);
+            });
+        });
+      });
+
+      // 업데이트할 메시지 리스트가 존재 한다면 업데이트
+      if (updateMesssages && updateMesssages.length > 0) {
+        let pivotMessageUnreadCount = updateMesssages[0].unreadCnt;
+        updateMesssages.forEach(data => {
+          if (pivotMessageUnreadCount > data.unreadCnt) {
+            pivotMessageUnreadCount = data.unreadCnt;
+          } else if (pivotMessageUnreadCount < data.unreadCnt) {
+            dbCon.transaction(tx => {
+              db.tx(tx, 'message')
+                .update({ unreadCnt: pivotMessageUnreadCount })
+                .where(`roomId = ${roomId} AND messageId = ${data.messageId}`)
+                .execute();
+            });
+          }
+        });
+      }
     }
 
     callback();
