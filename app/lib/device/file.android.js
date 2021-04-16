@@ -67,7 +67,7 @@ export const loggerInit = () => {
 
 const fileDownload = async (optionObj, callback) => {
   RNFS.downloadFile(optionObj).promise.then(response => {
-    console.log('#####',response)
+    console.log('#####', response);
     if (optionObj.imageOrVideo) {
       CameraRoll.save(`file://${optionObj.toFile}`, {
         album: 'eumtalk',
@@ -123,8 +123,8 @@ export const downloadByToken = async (
     headers: await getHeaders(),
     imageOrVideo: imageOrVideo,
   };
-  console.log('optionObj',optionObj)
-  console.log('optionObj.toFile',optionObj.toFile)
+  console.log('optionObj', optionObj);
+  console.log('optionObj.toFile', optionObj.toFile);
 
   const callbackFn = response => {
     if (response.statusCode == 204) {
@@ -159,7 +159,7 @@ export const downloadByToken = async (
       null,
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('@@@@@', result)
+      console.log('@@@@@', result);
       if (result) fileDownload(optionObj, callbackFn);
       else {
         RNFS.mkdir(filePath).then(result => {
@@ -176,111 +176,85 @@ export const downloadByToken = async (
 };
 
 export const downloadByTokenAlert = (item, progressCallback) => {
-  console.log('item', item)
-  Alert.alert(
-    null,
-    getDic('Msg_DownloadConfirm'),
-    [
-      { text: getDic('Cancel') },
-      {
-        text: getDic('Ok'),
-        onPress: () => {
-          downloadByToken(
-            item.token,
-            item.fileName,
-            data => {
-              console.log('data', data)
-              Alert.alert(
-                null,
-                data.message,
-                [
-                  {
-                    text: getDic('Open'),
-                    onPress: () => {
-                      RNFetchBlob.android
-                        .actionViewIntent(
-                          isVideo(data.path)
-                            ? data.path.replace('Pictures', 'Movies')
-                            : data.path,
-                          getFileMimeByFileName(data.path),
-                        )
-                        .catch(() => {
-                          let ext = getFileExtensionByFileName(data.path);
-                          let message = '';
-                          if (ext) {
-                            message = getDic('Msg_MobileAndroidNoAvailableApp');
-                          } else {
-                            message = getDic('Msg_MobileFileOpenError');
-                          }
-                          Alert.alert(null, message, [
-                            ext != null && {
-                              text: getDic('Search'),
-                              onPress: () => {
-                                Linking.openURL(
-                                  `market://search?q=${ext}`,
-                                ).catch(() => {
-                                  Linking.openURL(
-                                    `https://play.google.com/store/apps/search?q=${ext}`,
-                                  ).catch(() => {});
-                                });
-                              },
-                            },
-                            {
-                              text: getDic('Close'),
-                            },
-                          ]);
-                        });
+  downloadByToken(
+    item.token,
+    item.fileName,
+    data => {
+      Alert.alert(
+        null,
+        data.message,
+        [
+          {
+            text: getDic('Open'),
+            onPress: () => {
+              RNFetchBlob.android
+                .actionViewIntent(
+                  isVideo(data.path)
+                    ? data.path.replace('Pictures', 'Movies')
+                    : data.path,
+                  getFileMimeByFileName(data.path),
+                )
+                .catch(() => {
+                  let ext = getFileExtensionByFileName(data.path);
+                  let message = '';
+                  if (ext) {
+                    message = getDic('Msg_MobileAndroidNoAvailableApp');
+                  } else {
+                    message = getDic('Msg_MobileFileOpenError');
+                  }
+                  Alert.alert(null, message, [
+                    ext != null && {
+                      text: getDic('Search'),
+                      onPress: () => {
+                        Linking.openURL(`market://search?q=${ext}`).catch(
+                          () => {
+                            Linking.openURL(
+                              `https://play.google.com/store/apps/search?q=${ext}`,
+                            ).catch(() => {});
+                          },
+                        );
+                      },
                     },
-                  },
-                  {
-                    text: getDic('Ok'),
-                  },
-                ],
-                { cancelable: true },
-              );
+                    {
+                      text: getDic('Close'),
+                    },
+                  ]);
+                });
             },
-            progressCallback,
-          );
-        },
-      },
-    ],
-    { cancelable: true },
+          },
+          {
+            text: getDic('Ok'),
+          },
+        ],
+        { cancelable: true },
+      );
+    },
+    progressCallback,
   );
 };
 
-export const viewerByTokenAlert = (item) => {
-  Alert.alert(
-    null,
-    getDic('Msg_RunViewer'),
-    [
-      { text: getDic('Cancel') },
-      {
-        text: getDic('Ok'),
-        onPress: () => {
-          // let url = 'http://192.168.11.149/SynapDocViewServer/job/';
-          let url = getConfig('SynapDocViewServer');
-          sendViewerServer('get',url,item).then(response => {
-            let sendURL = response.config.url.indexOf('job');
-            sendURL = response.config.url.substring(0,sendURL);
-            // Linking.openURL(`http://192.168.11.149/SynapDocViewServer/view/${response.data.key}`)
-            Linking.openURL(`${sendURL}view/${response.data.key}`)
-            }).catch(response => {
-              Alert.alert(
-                getDic('Eumtalk'),
-                getDic('Msg_FileExpired'),
-                [
-                  {
-                    text: getDic('Ok'),
-                  },
-                ],
-                { cancelable: true },
-              );
-            })
-          }
-        },  
-    ],
-    { cancelable: true },
-  );
+export const viewerByTokenAlert = item => {
+  const synapURL = getConfig('SynapDocViewServer', null);
+  if (synapURL != null) {
+    sendViewerServer('get', synapURL, item)
+      .then(response => {
+        let sendURL = response.config.url.indexOf('job');
+        sendURL = response.config.url.substring(0, sendURL);
+        Linking.openURL(`${sendURL}view/${response.data.key}`);
+      })
+      .catch(response => {
+        Alert.alert(
+          getDic('Eumtalk'),
+          getDic('Msg_FileExpired'),
+          [
+            {
+              text: getDic('Ok'),
+            },
+          ],
+          { cancelable: true },
+        );
+      });
+  }
 };
 
 export const downloadAndShare = item => {
