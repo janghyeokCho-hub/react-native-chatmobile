@@ -9,6 +9,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -57,6 +58,8 @@ const LoginBox = ({ route }) => {
     const data = {
       id: userId,
       pw: encryptPassword,
+      da: Platform.OS,
+      dp: 'mobile',
     };
 
     if (isExtUser) {
