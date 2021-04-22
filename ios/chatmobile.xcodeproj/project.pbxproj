@@ -22,6 +22,8 @@
 		49B5D97624E36F8F0087E99A /* eumtalkShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49B5D96B24E36F8F0087E99A /* eumtalkShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		49B5D97E24E3706F0087E99A /* EumtalkShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 49B5D97C24E3706F0087E99A /* EumtalkShare.m */; };
 		5B31A8A1E22BEF475536CEE1 /* libPods-chatmobile-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72DCAC599FC4D34DC6672AED /* libPods-chatmobile-tvOSTests.a */; };
+		77B0ADAF26314400003E8793 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 77B0ADAD26314400003E8793 /* InfoPlist.strings */; };
+		77B0ADB026314400003E8793 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 77B0ADAD26314400003E8793 /* InfoPlist.strings */; };
 		77FC6CEC2623E03F001A39E9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4982E08124111EC60056E745 /* GoogleService-Info.plist */; };
 		77FC6CED2623E048001A39E9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4982E08124111EC60056E745 /* GoogleService-Info.plist */; };
 		9CA0A791D1DA22BC2462FCEE /* libPods-chatmobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FBBC8AC0A96592AEB3E3E2D /* libPods-chatmobile.a */; };
@@ -73,7 +75,7 @@
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* chatmobileTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = chatmobileTests.m; sourceTree = "<group>"; };
 		0CE2714B085BBF206BFF7881 /* Pods-chatmobile-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-chatmobile-tvOSTests/Pods-chatmobile-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* Otalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Otalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* Eumtalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eumtalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = chatmobile/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = chatmobile/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -97,6 +99,13 @@
 		655BB0367A9C160F352D1B56 /* Pods-chatmobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobileTests.release.xcconfig"; path = "Target Support Files/Pods-chatmobileTests/Pods-chatmobileTests.release.xcconfig"; sourceTree = "<group>"; };
 		72DCAC599FC4D34DC6672AED /* libPods-chatmobile-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-chatmobile-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73421BA97973B8DA786B1F84 /* libPods-chatmobile-eumtalkShare.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-chatmobile-eumtalkShare.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		77B0ADAE26314400003E8793 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = chatmobile/Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		77B0AE0E263144D2003E8793 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = chatmobile/ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		77B0AE1426314EF9003E8793 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = chatmobile/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		77B0AECF26315219003E8793 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = chatmobile/ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		77B0AED026315221003E8793 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "chatmobile/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		77B0AED126315229003E8793 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "chatmobile/zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		77B0AED226315230003E8793 /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "chatmobile/zh-HK.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		845442FEEBDB39DD2ACA5AE3 /* Pods-chatmobile-eumtalkShare.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-eumtalkShare.debug.xcconfig"; path = "Target Support Files/Pods-chatmobile-eumtalkShare/Pods-chatmobile-eumtalkShare.debug.xcconfig"; sourceTree = "<group>"; };
 		8A9A60FA918F8D8EB60847AF /* Pods-chatmobile-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-tvOS.release.xcconfig"; path = "Target Support Files/Pods-chatmobile-tvOS/Pods-chatmobile-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		8DBC9C2B64343E40CEB821BE /* Pods-chatmobile-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatmobile-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-chatmobile-tvOSTests/Pods-chatmobile-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -183,6 +192,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				77B0ADAD26314400003E8793 /* InfoPlist.strings */,
 			);
 			name = chatmobile;
 			sourceTree = "<group>";
@@ -212,18 +222,10 @@
 			path = eumtalkShare;
 			sourceTree = "<group>";
 		};
-		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Libraries;
-			sourceTree = "<group>";
-		};
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* chatmobile */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* chatmobileTests */,
 				49B5D96C24E36F8F0087E99A /* eumtalkShare */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -238,7 +240,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* Otalk.app */,
+				13B07F961A680F5B00A75B9A /* Eumtalk.app */,
 				00E356EE1AD99517003FC87E /* chatmobileTests.xctest */,
 				2D02E47B1E0B4A5D006451C7 /* chatmobile-tvOS.app */,
 				2D02E4901E0B4A5D006451C7 /* chatmobile-tvOSTests.xctest */,
@@ -307,7 +309,7 @@
 			);
 			name = chatmobile;
 			productName = chatmobile;
-			productReference = 13B07F961A680F5B00A75B9A /* Otalk.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* Eumtalk.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2D02E47A1E0B4A5D006451C7 /* chatmobile-tvOS */ = {
@@ -410,6 +412,11 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
+				ja,
+				"zh-Hans",
+				"zh-Hant",
+				"zh-HK",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -438,6 +445,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77FC6CEC2623E03F001A39E9 /* GoogleService-Info.plist in Resources */,
+				77B0ADAF26314400003E8793 /* InfoPlist.strings in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
@@ -448,6 +456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */,
+				77B0ADB026314400003E8793 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +801,20 @@
 			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
+		77B0ADAD26314400003E8793 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				77B0ADAE26314400003E8793 /* Base */,
+				77B0AE0E263144D2003E8793 /* ko */,
+				77B0AE1426314EF9003E8793 /* en */,
+				77B0AECF26315219003E8793 /* ja */,
+				77B0AED026315221003E8793 /* zh-Hans */,
+				77B0AED126315229003E8793 /* zh-Hant */,
+				77B0AED226315230003E8793 /* zh-HK */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -815,7 +838,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Otalk.app/Otalk";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Eumtalk.app/Eumtalk";
 			};
 			name = Debug;
 		};
@@ -836,7 +859,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Otalk.app/Otalk";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Eumtalk.app/Eumtalk";
 			};
 			name = Release;
 		};
@@ -848,20 +871,20 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobileDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010901;
+				CURRENT_PROJECT_VERSION = 010902;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.9.1;
+				MARKETING_VERSION = 1.9.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk;
-				PRODUCT_NAME = Otalk;
+				PRODUCT_NAME = Eumtalk;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -876,19 +899,19 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobile.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010901;
+				CURRENT_PROJECT_VERSION = 010902;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.9.1;
+				MARKETING_VERSION = 1.9.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk;
-				PRODUCT_NAME = Otalk;
+				PRODUCT_NAME = Eumtalk;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1019,14 +1042,14 @@
 				CODE_SIGN_ENTITLEMENTS = eumtalkShare/eumtalkShare.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010901;
+				CURRENT_PROJECT_VERSION = 010902;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = eumtalkShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.9.1;
+				MARKETING_VERSION = 1.9.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk.eumtalkshare;
@@ -1051,14 +1074,14 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 010901;
+				CURRENT_PROJECT_VERSION = 010902;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = eumtalkShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.9.1;
+				MARKETING_VERSION = 1.9.2;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk.eumtalkshare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
