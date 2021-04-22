@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import IconButton from '@COMMON/buttons/IconButton';
 import SlideCheckedBox from '@COMMON/SlideCheckedBox';
 import { getDic } from '@/config';
+import { restartApp } from '@/lib/device/common';
 import * as dbAction from '@/lib/appData/action';
 
 const AppLockSetting = ({ navigation }) => {
@@ -34,18 +35,18 @@ const AppLockSetting = ({ navigation }) => {
             setSecondPasswordSetting(false);
           } else {
             navigation.navigate('SecondAuth', {
-              title: '2차 비밀번호를 입력해주세요.',
-              subtitle: '4자리로 된 PIN 번호를 입력해주세요.',
-              handlePasswordConfirmEvent: data => {
-                dbAction.updateSecondPassword({
+              title: getDic('Msg_InputSecondPassword'),
+              subtitle: getDic('Msg_InputPinNumber'),
+              handlePasswordDoubleCheckEvent: async data => {
+                await dbAction.updateSecondPassword({
                   secondAuth: data.join(''),
                   useBioAuth: false,
                 });
-                dbAction.getSecondPasswordInfo().then(data => {
+                await dbAction.getSecondPasswordInfo().then(data => {
                   setSecondAuthInfo(data);
                 });
-                setSecondPasswordSetting(true);
-                return true;
+                await setSecondPasswordSetting(true);
+                restartApp();
               },
             });
           }
@@ -59,7 +60,7 @@ const AppLockSetting = ({ navigation }) => {
                 color: secondPasswordSetting ? '#12cfee' : '#808080',
               }}
             >
-              {secondPasswordSetting ? '켜짐' : '꺼짐'}
+              {secondPasswordSetting ? getDic('On') : getDic('Off')}
             </Text>
           </View>
         }
@@ -70,18 +71,18 @@ const AppLockSetting = ({ navigation }) => {
             title={getDic('SecondPasswordChange')}
             onPress={() => {
               navigation.navigate('SecondAuth', {
-                title: '2차 비밀번호를 입력해주세요.',
-                subtitle: '4자리로 된 PIN 번호를 입력해주세요.',
-                handlePasswordConfirmEvent: data => {
-                  dbAction.updateSecondPassword({
+                title: getDic('Msg_ChangeSecondPassword'),
+                subtitle: getDic('Msg_InputPinNumber'),
+                handlePasswordDoubleCheckEvent: async data => {
+                  await dbAction.updateSecondPassword({
                     secondAuth: data.join(''),
                     useBioAuth: false,
                   });
-                  dbAction.getSecondPasswordInfo().then(data => {
+                  await dbAction.getSecondPasswordInfo().then(data => {
                     setSecondAuthInfo(data);
                   });
-                  setSecondPasswordSetting(true);
-                  return true;
+                  await setSecondPasswordSetting(true);
+                  restartApp();
                 },
               });
             }}
@@ -89,16 +90,17 @@ const AppLockSetting = ({ navigation }) => {
           <SlideCheckedBox
             title={getDic('BioAuthSetting')}
             checkValue={bioAuthSetting}
-            onPress={() => {
+            onPress={async () => {
               const changeBioAuth = !secondAuthInfo.useBioAuth;
               setBioAuthSetting(changeBioAuth);
-              dbAction.updateSecondPassword({
+              await dbAction.updateSecondPassword({
                 secondAuth: secondAuthInfo.secondPass,
                 useBioAuth: changeBioAuth,
               });
-              dbAction.getSecondPasswordInfo().then(data => {
+              await dbAction.getSecondPasswordInfo().then(data => {
                 setSecondAuthInfo(data);
               });
+              restartApp();
             }}
           />
         </View>

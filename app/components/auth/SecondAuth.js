@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import {
   View,
@@ -8,6 +8,7 @@ import {
   Vibration,
   Animated,
 } from 'react-native';
+import { getDic } from '@/config';
 import BackButtonIcon from '@C/common/icons/BackButtonIcon';
 import BiometricsContainer from '@C/biometrics/BiometricsContainer';
 
@@ -21,7 +22,13 @@ const SecondAuth = ({
   bioAuth,
 }) => {
   const [secPassword, setSecPassword] = useState([]);
+  const [checkPassword, setCheckPassword] = useState(null);
+
   const [errorMsg, setErrorMsg] = useState('');
+
+  const [checkTitle, setCheckTitle] = useState(null);
+  const [checkSubTitle, setCheckSubTitle] = useState(null);
+
   const handleInputPassword = value => {
     let ref = [];
     secPassword.map(item => {
@@ -29,6 +36,52 @@ const SecondAuth = ({
     });
     if (ref.length < 4) ref.push(value);
     if (ref.length == 4) {
+      const doubleCheckEvent =
+        route != null ? route.params.handlePasswordDoubleCheckEvent : null;
+      if (doubleCheckEvent && checkPassword == null) {
+        setCheckPassword(ref.join(''));
+        setSecPassword([]);
+        setCheckTitle(getDic('Msg_InputPasswordCheck'));
+        setCheckSubTitle(getDic('Msg_ChangeSecondPasswordSubTitle'));
+        return;
+      } else if (doubleCheckEvent && checkPassword != null) {
+        if (checkPassword == ref.join('')) {
+          doubleCheckEvent(ref);
+          if (navigation != null) {
+            navigation.goBack();
+          }
+        } else {
+          Vibration.vibrate(100);
+          setErrorMsg(getDic('Msg_WrongSecondCheckPassword'));
+          Animated.sequence([
+            Animated.timing(shakeErrMsg, {
+              toValue: 5,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeErrMsg, {
+              toValue: -5,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeErrMsg, {
+              toValue: 5,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeErrMsg, {
+              toValue: 0,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            setErrorMsg('');
+          });
+
+          setSecPassword([]);
+        }
+        return;
+      }
       const handleEvent =
         route != null
           ? route.params.handlePasswordConfirmEvent
@@ -36,7 +89,7 @@ const SecondAuth = ({
       if (handleEvent != null) {
         if (!handleEvent(ref)) {
           Vibration.vibrate(100);
-          setErrorMsg('비밀번호가 틀렸습니다 !!');
+          setErrorMsg(getDic('Msg_WrongSecondPassword'));
           Animated.sequence([
             Animated.timing(shakeErrMsg, {
               toValue: 5,
@@ -98,10 +151,18 @@ const SecondAuth = ({
       )}
       <View style={styles.header}>
         <Text style={styles.title}>
-          {route != null ? route.params.title : title}
+          {checkTitle != null
+            ? checkTitle
+            : route != null
+            ? route.params.title
+            : title}
         </Text>
         <Text style={styles.subtitle}>
-          {route != null ? route.params.subtitle : subtitle}
+          {checkSubTitle != null
+            ? checkSubTitle
+            : route != null
+            ? route.params.subtitle
+            : subtitle}
         </Text>
         <Animated.View style={{ transform: [{ translateY: shakeErrMsg }] }}>
           <Text style={styles.errorMsg}>{errorMsg}</Text>

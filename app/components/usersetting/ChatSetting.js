@@ -335,7 +335,7 @@ const ChatSetting = ({ navigation }) => {
       {
         <>
           <IconButton
-            title="글씨 크기"
+            title={getDic('FontSize')}
             onPress={() => {
               openFontSizeModal();
             }}
@@ -348,7 +348,7 @@ const ChatSetting = ({ navigation }) => {
             }
           />
           <IconButton
-            title="테마"
+            title={getDic('Theme')}
             onPress={() => {
               openThemeModal();
             }}
