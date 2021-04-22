@@ -1,0 +1,10 @@
+/* 
+  InfoPlist.strings
+  chatmobile
+
+  Created by 이동현 on 2021/04/22.
+  Copyright © 2021 Facebook. All rights reserved.
+*/
+
+CFBundleDisplayName = "Eumtalk";
+CFBundleName = "Eumtalk";
