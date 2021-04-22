@@ -109,44 +109,42 @@ const UserSetting = ({ navigation }) => {
             </View>
           </TouchableOpacity>
         )}
-        {__DEV__ && (
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('AppLockSetting');
-            }}
-          >
-            <View style={styles.wrapButton}>
-              <Svg
-                id="blocked-padlock"
-                width="15"
-                height="15"
-                viewBox="0 0 45.922 56.237"
-              >
-                <G id="그룹_106" data-name="그룹 106" transform="translate(0)">
-                  <Path
-                    id="패스_182"
-                    data-name="패스 182"
-                    d="M52.416,56.237H81.34a8.388,8.388,0,0,0,8.5-8.35V29.209a8.275,8.275,0,0,0-6.169-8.078v-5.9A15.154,15.154,0,0,0,68.592,0H65.165A15.426,15.426,0,0,0,49.743,15.235v5.9a8.377,8.377,0,0,0-5.826,8.078V47.887A8.388,8.388,0,0,0,52.416,56.237ZM65.164,4.09h3.427A11.042,11.042,0,0,1,79.558,15.235v5.556h-25.7V15.235A11.336,11.336,0,0,1,65.164,4.09ZM85.727,47.785a4.361,4.361,0,0,1-4.387,4.363H52.416a4.361,4.361,0,0,1-4.387-4.363V29.243a4.361,4.361,0,0,1,4.387-4.363H81.34a4.361,4.361,0,0,1,4.387,4.363V47.785Z"
-                    transform="translate(-43.917)"
-                    fill="#222"
-                  />
-                  <Path
-                    id="패스_183"
-                    data-name="패스 183"
-                    d="M213.165,313.926a2.088,2.088,0,0,0,2.082-2.082v-6.594a2.082,2.082,0,0,0-4.165,0v6.594A2.088,2.088,0,0,0,213.165,313.926Z"
-                    transform="translate(-190.889 -266.852)"
-                    fill="#222"
-                  />
-                </G>
-              </Svg>
-              <Text
-                style={{ ...styles.wrapButtonTitle, fontSize: sizes.default }}
-              >
-                {getDic('AppLockSetting')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('AppLockSetting');
+          }}
+        >
+          <View style={styles.wrapButton}>
+            <Svg
+              id="blocked-padlock"
+              width="15"
+              height="15"
+              viewBox="0 0 45.922 56.237"
+            >
+              <G id="그룹_106" data-name="그룹 106" transform="translate(0)">
+                <Path
+                  id="패스_182"
+                  data-name="패스 182"
+                  d="M52.416,56.237H81.34a8.388,8.388,0,0,0,8.5-8.35V29.209a8.275,8.275,0,0,0-6.169-8.078v-5.9A15.154,15.154,0,0,0,68.592,0H65.165A15.426,15.426,0,0,0,49.743,15.235v5.9a8.377,8.377,0,0,0-5.826,8.078V47.887A8.388,8.388,0,0,0,52.416,56.237ZM65.164,4.09h3.427A11.042,11.042,0,0,1,79.558,15.235v5.556h-25.7V15.235A11.336,11.336,0,0,1,65.164,4.09ZM85.727,47.785a4.361,4.361,0,0,1-4.387,4.363H52.416a4.361,4.361,0,0,1-4.387-4.363V29.243a4.361,4.361,0,0,1,4.387-4.363H81.34a4.361,4.361,0,0,1,4.387,4.363V47.785Z"
+                  transform="translate(-43.917)"
+                  fill="#222"
+                />
+                <Path
+                  id="패스_183"
+                  data-name="패스 183"
+                  d="M213.165,313.926a2.088,2.088,0,0,0,2.082-2.082v-6.594a2.082,2.082,0,0,0-4.165,0v6.594A2.088,2.088,0,0,0,213.165,313.926Z"
+                  transform="translate(-190.889 -266.852)"
+                  fill="#222"
+                />
+              </G>
+            </Svg>
+            <Text
+              style={{ ...styles.wrapButtonTitle, fontSize: sizes.default }}
+            >
+              {getDic('AppLockSetting')}
+            </Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('ChatSetting');
