@@ -18,7 +18,7 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { CommonActions } from '@react-navigation/native';
 import { reqThumbnail } from '@/lib/api/api';
 import { useSelector } from 'react-redux';
-import { getDic } from '@/config';
+import { getConfig, getDic } from '@/config';
 import SummaryBack from '@C/chat/chatroom/layer/SummaryBack';
 import ImageModal from '@COMMON/layout/ImageModal';
 import NetworkError from '@/components/common/NetworkError';
@@ -173,7 +173,24 @@ const PhotoSummary = ({ route, navigation }) => {
       if (selectItems.length > 0) {
         // TODO: 차후 멀티다운로드로 수정 필요
         // 만료처리 등 처리 필요
-        if (selectItems.length <= 15) {
+
+
+        // [0] PC [1] MOBILE
+        const downloadOption = getConfig('FileAttachViewMode') || [];
+
+        // 다운로드가 금지되어 있는 경우
+        if(downloadOption.length !== 0 && downloadOption[1].Download === false) {
+          Alert.alert(
+            null,
+            getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
+            [{ text: getDic('Ok') }],
+            {
+              cancelable: true,
+            },
+          );
+        }
+        // 다운로드 가능 && 선택개수 15개 미만
+        else if (selectItems.length <= 15) {
           let downloadMsgObject = null;
           let arrDownloadList = [];
           selectItems.forEach(item => {

@@ -24,7 +24,7 @@ import StickerLayer from '@C/chat/chatroom/controls/StickerLayer';
 import ExtensionLayer from '@C/chat/chatroom/controls/ExtensionLayer';
 import { getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { getBottomPadding, resetInput } from '@/lib/device/common';
-import { getDic } from '@/config';
+import { getConfig, getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 
 import FastImage from 'react-native-fast-image';
@@ -58,6 +58,7 @@ const MessagePostBox = ({
   const [selectImage, setSelectImage] = useState({ files: [], fileInfos: [] });
 
   const dispatch = useDispatch();
+  const { MOBILE } = getConfig('FileAttachMode', {});
 
   const handleTextChange = useCallback(
     text => {
@@ -548,24 +549,25 @@ const MessagePostBox = ({
 
       <View style={styles.messageInputWrap}>
         <View style={styles.buttonBox}>
-          <TouchableOpacity
-            onPress={e => {
-              if (!disabled && !inputLock) {
-                if (extension == 'E') onExtension('');
-                else onExtension('E');
-                Keyboard.dismiss();
-                //handleStickerControl();
-                e.stopPropagation();
-              }
-            }}
-          >
-            <View style={[styles.extensionBtn, { marginRight: 5 }]}>
-              <View>
-                <Image source={ico_plus} />
+          {(typeof MOBILE === 'undefined' || MOBILE.upload !== false) && (
+            <TouchableOpacity
+              onPress={e => {
+                if (!disabled && !inputLock) {
+                  if (extension == 'E') onExtension('');
+                  else onExtension('E');
+                  Keyboard.dismiss();
+                  //handleStickerControl();
+                  e.stopPropagation();
+                }
+              }}
+            >
+              <View style={[styles.extensionBtn, { marginRight: 5 }]}>
+                <View>
+                  <Image source={ico_plus} />
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
-
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             disabled={disabled}
             onPress={e => {
@@ -784,7 +786,19 @@ const styles = StyleSheet.create({
   },
   buttonBox: {
     marginTop: 3,
-    width: 80,
+    /**
+     * 2021.04.30
+     * minWidth, maxWidth
+     * 
+     * 버튼박스에 들어가는 레이어는 1개당 width=40
+     * 1. 레이어 종류는 ExtensionLayer, EmoticonLayer 두개가 최대 (최대 width 80)
+     * 2. 두 레이어 중 ExtensionLayer만 파일업로드 설정에 의해 사라질 수 있다는 전제로 결정한 width 값임
+     * 
+     * 추후 조건이 변경될 경우 수정 필요
+     * 수정 ex) 활성화된 레이어 숫자에 맞춰서 width 자동계산
+     */
+    minWidth: 40,
+    maxWidth: 80,
     height: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
