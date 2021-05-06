@@ -123,12 +123,12 @@ export const reqThumbnail = token => {
   const MANAGE_SERVER = getServer('MANAGE');
   const catk = encodeURIComponent(LoginInfo.getLoginInfo().getToken());
   // const catk = LoginInfo.getLoginInfo().getToken();
-  return `${MANAGE_SERVER}/na/thumbnail/${token}?catk=${catk}`;
+  return `${MANAGE_SERVER}/na/nf/thumbnail/${token}?catk=${catk}`;
 };
 
 export const reqImage = token => {
   const MANAGE_SERVER = getServer('MANAGE');
-  return `${MANAGE_SERVER}/na/image/${token}?catk=${LoginInfo.getLoginInfo().getToken()}`;
+  return `${MANAGE_SERVER}/na/nf/image/${token}?catk=${LoginInfo.getLoginInfo().getToken()}`;
 };
 
 export const linkPreview = (url, callback, messageId) => {
