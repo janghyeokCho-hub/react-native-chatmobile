@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   View,
@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   Linking,
+  Alert
 } from 'react-native';
 import Svg, { G, Path } from 'react-native-svg';
 import { Plain, Link } from '@C/chat/message/types';
@@ -14,7 +15,7 @@ import { useTheme } from '@react-navigation/native';
 import ParamUtil, { encryptText } from '@/lib/util/paramUtil';
 import { getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { moveToChannelRoom } from '@/lib/channelUtil';
-import { getDic } from '@/config';
+import { getConfig, getDic } from '@/config';
 
 const getAttribute = tag => {
   const attrPattern = new RegExp(
@@ -48,6 +49,7 @@ const getAttribute = tag => {
 const Notice = ({ value, title, func, style, navigation, styleType }) => {
   const { sizes, colors } = useTheme();
   const userInfo = useSelector(({ login }) => login.userInfo);
+  const forbiddenUrls = getConfig('forbidden_url_mobile', []);
   const dispatch = useDispatch();
 
   if (isJSONStr(value)) {
@@ -167,6 +169,24 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
               url = `${url}?${paramStr}`;
             }
           }
+        }
+
+        let allowOpenUrl = true;
+        // 열기가 금지된 url인지 확인
+        forbiddenUrls.some((f_url) => {
+          if(url.includes(f_url) === true) {
+            allowOpenUrl = false;
+            return true;
+          }
+          return false;
+        });
+
+        // 금지된 url일 경우 브라우저로 열지 않음
+        if(allowOpenUrl === false) {
+          Alert.alert(null, getDic('Msg_ForbiddenUrl', 'PC에서 확인해주세요.'), [
+            { text: getDic('Ok') }
+          ]);
+          return;
         }
 
         Linking.canOpenURL(url).then(supported => {
