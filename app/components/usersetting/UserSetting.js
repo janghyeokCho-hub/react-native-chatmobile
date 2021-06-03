@@ -1,5 +1,12 @@
 import React from 'react';
-import { Text, StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Header from '@COMMON/Header';
 import { logoutRequest } from '@/modules/login';
@@ -44,7 +51,7 @@ const UserSetting = ({ navigation }) => {
         style={styles.header}
         searchEnable={false}
       />
-      <View style={styles.contents}>
+      <ScrollView style={styles.contents}>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('InfoSetting');
@@ -341,7 +348,7 @@ const UserSetting = ({ navigation }) => {
             </Text>
           </View>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 };

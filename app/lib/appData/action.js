@@ -1346,9 +1346,10 @@ export const unreadCountSync = async (param, callback) => {
             .select(['messageId', 'unreadCnt'])
             .where(`roomId = ${roomId}`)
             .orderBy('messageId', 'DESC')
-            .execute((exec, result) => {
+            .execute(async (exec, result) => {
               if (result.rows.length > 0) {
-                resolve(result.rows.row());
+                const data = await result.rows.raw();
+                resolve(data);
               } else resolve(null);
             });
         });
