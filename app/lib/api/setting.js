@@ -29,3 +29,7 @@ export const getRoomNotification = (roomId, params) => {
 export const modifyRoomNotification = (roomId, params) => {
   return managesvr('post', `/user/notification/room/${roomId}`, params);
 };
+
+export const changeNotificationBlockOption = params => {
+  return managesvr('post', '/nf/office/overtime/option', params);
+};

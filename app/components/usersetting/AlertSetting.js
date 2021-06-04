@@ -1,16 +1,27 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { StyleSheet, View } from 'react-native';
 import SlideCheckedBox from '@COMMON/SlideCheckedBox';
-import { modifyNotification, getNotification } from '@/lib/api/setting';
+import {
+  modifyNotification,
+  getNotification,
+  changeNotificationBlockOption,
+} from '@/lib/api/setting';
 import messaging from '@react-native-firebase/messaging';
 import { getDic } from '@/config';
 
 const AlertSetting = ({ navigation }) => {
+  const { myInfo } = useSelector(({ login }) => ({
+    myInfo: login.userInfo,
+  }));
+
   const [isNoti, setIsNoti] = useState(true);
   const [showNotiContent, setShowNotiContent] = useState(true);
+  const [notificationBlock, setNotificationBlock] = useState(false);
 
   useEffect(() => {
     initFn();
+    setNotificationBlock(myInfo.notificationBlock == 'Y' ? true : false);
   }, []);
 
   const initFn = useCallback(async () => {
@@ -54,6 +65,14 @@ const AlertSetting = ({ navigation }) => {
     [isNoti, showNotiContent],
   );
 
+  const setNotiBlock = option => {
+    changeNotificationBlockOption({ notificationBlock: option }).then(
+      response => {
+        setNotificationBlock(option == 'Y' ? true : false);
+      },
+    );
+  };
+
   return (
     <View style={styles.container}>
       <SlideCheckedBox
@@ -70,6 +89,13 @@ const AlertSetting = ({ navigation }) => {
         onPress={() => {
           setShowNotiContent(!showNotiContent);
           setNotification('showNotiContent');
+        }}
+      />
+      <SlideCheckedBox
+        title={getDic('SetWorkTimeNoti')}
+        checkValue={notificationBlock}
+        onPress={() => {
+          setNotiBlock(!notificationBlock ? 'Y' : 'N');
         }}
       />
     </View>
