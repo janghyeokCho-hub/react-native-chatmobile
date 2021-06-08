@@ -131,7 +131,7 @@ const ShareOrgChart = ({ selectedItems, deleteItem, appendItem }) => {
           />
         </View>
 
-        <View style={styles.profileListContainer}>
+        <View style={{...styles.profileListContainer, marginBottom: 80 }}>
           <FlatList
             data={orgpathList}
             keyExtractor={item =>
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     top: 7,
   },
   profileListContainer: {
-    paddingLeft: 15,
+    paddingLeft: 15
   },
 });
 

@@ -304,7 +304,7 @@ const channel = handleActions(
     [SET_CHANNELS]: (state, action) => {
       return produce(state, draft => {
         // login 시에만 사용
-        draft.channels = action.payload.result;
+        draft.channels = action.payload.result.filter(channel => channel.lastMessageDate);
         draft.channels.map(item => {
           item.disabled = false;
         });
