@@ -204,8 +204,12 @@ const room = handleActions(
           currRoom.unreadCnt = draft.currentRoom.unreadCnt;
           draft.currentRoom = currRoom;
         }
-
-        draft.rooms = action.payload.rooms;
+        draft.rooms = action.payload.rooms.filter(room => {
+          if(typeof room.lastMessageDate === 'string') {
+            return room.lastMessageDate.trim().length;
+          }
+          return room.lastMessageDate !== null;
+        });
       });
     },
     [GET_ROOMS_SUCCESS]: (state, action) => {
@@ -224,7 +228,7 @@ const room = handleActions(
           });
         }*/
 
-        draft.rooms = action.payload.rooms;
+        draft.rooms = action.payload.rooms.filter(room => room.lastMessageDate);;
       });
     },
     [UPDATE_ROOMS_SUCCESS]: (state, action) => {
