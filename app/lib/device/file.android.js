@@ -242,10 +242,22 @@ export const viewerByTokenAlert = item => {
         sendURL = response.config.url.substring(0, sendURL);
         Linking.openURL(`${sendURL}view/${response.data.key}`);
       })
-      .catch(response => {
+      .catch(err => {
+        let message;
+        if (!err) {
+          message = getDic('Msg_Error');
+        } else if (err.response.status === 500) {
+          // '파일이 만료되었거나 문서 변환 오류가 발생했습니다.;The file has already expired or failed to convert from the server'
+          message = getDic('Msg_SynapError', '파일이 만료되었거나 문서 변환 오류가 발생했습니다.');
+        } else if (err.response.status === 404) {
+          // '문서뷰어 서버를 찾을 수 없습니다. 관리자에게 문의해주세요.;Cannot find Viewer Server. Please contact the manager.'
+          message = getDic('Msg_SynapFailed', '문서뷰어 서버를 찾을 수 없습니다. 관리자에게 문의해주세요.');
+        } else {
+          message = "Synap Viewer failed to convert the file with errStatus " + err.response.status;
+        }
         Alert.alert(
           getDic('Eumtalk'),
-          getDic('Msg_FileExpired'),
+          message,
           [
             {
               text: getDic('Ok'),
