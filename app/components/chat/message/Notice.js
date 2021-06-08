@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Alert
+  Alert,
 } from 'react-native';
 import Svg, { G, Path } from 'react-native-svg';
 import { Plain, Link } from '@C/chat/message/types';
@@ -16,6 +16,7 @@ import ParamUtil, { encryptText } from '@/lib/util/paramUtil';
 import { getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { moveToChannelRoom } from '@/lib/channelUtil';
 import { getConfig, getDic } from '@/config';
+import axios from 'axios';
 
 const getAttribute = tag => {
   const attrPattern = new RegExp(
@@ -173,8 +174,8 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
 
         let allowOpenUrl = true;
         // 열기가 금지된 url인지 확인
-        forbiddenUrls.some((f_url) => {
-          if(url.includes(f_url) === true) {
+        forbiddenUrls.some(f_url => {
+          if (url.includes(f_url) === true) {
             allowOpenUrl = false;
             return true;
           }
@@ -182,29 +183,23 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
         });
 
         // 금지된 url일 경우 브라우저로 열지 않음
-        if(allowOpenUrl === false) {
-          Alert.alert(null, getDic('Msg_ForbiddenUrl', 'PC에서 확인해주세요.'), [
-            { text: getDic('Ok') }
-          ]);
+        if (allowOpenUrl === false) {
+          Alert.alert(
+            null,
+            getDic('Msg_ForbiddenUrl', 'PC에서 확인해주세요.'),
+            [{ text: getDic('Ok') }],
+          );
           return;
         }
 
         Linking.canOpenURL(url).then(supported => {
           if (supported) {
             Linking.openURL(url);
-          } else {
-            // Linking.canOpenURL('http://192.168.11.80' + url).then(supported => {
-            //   console.log(supported);
-            //   if (supported) {
-            //     Linking.openURL('http://192.168.11.80' + url);
-            //   }
-            // });
           }
         });
       };
     } else if (type == 'moveChannel') {
       return () => {
-        console.log(data);
         dispatch(
           openChannel({
             roomId: data,
@@ -213,6 +208,45 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
         moveToChannelRoom(navigation, 'ChannelRoom', {
           roomID: data,
         });
+      };
+    } else if (type == 'saeha') {
+      return () => {
+        const reqOptions = {
+          method: 'GET',
+          url: `${data.hostURL}/api/conf/room/${data.meetRoomId}`,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        };
+        // 1. 화상 채팅 방이 정상 적인지 확인
+        axios(reqOptions)
+          .then(response => {
+            const resData = response.data;
+            if (resData && resData.roomOpenStatusCd < 3) {
+              // 2. 정상이라면 inviteUsers에 내가 있는 지 확인
+              data.inviteUsers.map(user => {
+                if (user.inviteId == loginId) {
+                  // 3. 있으면 화상 채팅방 연동
+                  if (DEVICE_TYPE == 'd') {
+                    window.openExternalPopup(user.inviteUrl);
+                  } else {
+                    window.open(user.inviteUrl, '_blank');
+                  }
+                }
+              });
+            } else {
+              // 3. 비정상이라면 에러 문구 출력
+              Alert.alert('알림', '해당 화상 채팅 방은 종료 되었습니다.', [
+                { text: getDic('Ok') },
+              ]);
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            Alert.alert('알림', '해당 화상 채팅 방은 종료 되었습니다.', [
+              { text: getDic('Ok') },
+            ]);
+          });
       };
     }
   };

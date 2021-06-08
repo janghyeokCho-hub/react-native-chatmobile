@@ -60,7 +60,9 @@ const MessageBox = ({
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (common.eumTalkRegularExp.test(drawText)) {
-      const processMsg = common.convertEumTalkProtocol(drawText, { messageType: 'room' });
+      const processMsg = common.convertEumTalkProtocol(drawText, {
+        messageType: 'room',
+      });
       messageType = processMsg.type;
       roomId = processMsg.roomInfo.roomId;
       drawText = processMsg.message;

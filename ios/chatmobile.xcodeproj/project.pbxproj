@@ -871,13 +871,13 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobileDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010905;
+				CURRENT_PROJECT_VERSION = 010906;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.9.5;
+				MARKETING_VERSION = 1.9.6;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -899,12 +899,12 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobile.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010905;
+				CURRENT_PROJECT_VERSION = 010906;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.9.5;
+				MARKETING_VERSION = 1.9.6;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
