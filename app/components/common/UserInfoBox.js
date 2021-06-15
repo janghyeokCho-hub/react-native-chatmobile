@@ -175,50 +175,50 @@ const UserInfoBox = ({
               {isLong(getDeptName())}
             </Text>
           </View>
-          {!disableMessage && userInfo.work && userInfo.work.length > 0 ? (
-            <View
-              style={[
-                myAbsence.id
-                  ? styles.rightMessageAbsenceBox
-                  : styles.rightMessageBox,
-                { maxWidth: wp('55') - 80 },
-              ]}
-            >
-              <View
+          { myAbsence.code ? (
+            <View style={styles.rightMessageAbsenceBox}>
+              <View style={styles.absenceDot} />
+              <Text
+                adjustsFontSizeToFit={Platform.OS == 'android'}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  ...styles.rightAbsenceMessage,
+                  fontSize: 13 + sizes.inc,
                 }}
+                numberOfLines={1}
               >
-                <Text
-                  adjustsFontSizeToFit={Platform.OS == 'android'}
-                  // style={{ ...styles.rightMessage, fontSize: 13 + sizes.inc }}
-                  style={{
-                    ...styles.rightMessage,
-                    fontSize: 13 + sizes.inc,
-                  }}
-                  numberOfLines={1}
-                >
-                  {isLong(userInfo.work)}
-                  {/* {userInfo.work} */}
-                </Text>
-                {myAbsence.id && <View style={styles.absenceDot} />}
-              </View>
+                {getDic('Ab_' + myAbsence.code)}
+              </Text>
             </View>
           ) : (
-            myAbsence.code && (
-              <View style={styles.rightMessageAbsenceBox}>
-                <View style={styles.absenceDot} />
-                <Text
-                  adjustsFontSizeToFit={Platform.OS == 'android'}
+            !disableMessage && userInfo.work && userInfo.work.length > 0 && (
+              <View
+                style={[
+                  myAbsence.id
+                    ? styles.rightMessageAbsenceBox
+                    : styles.rightMessageBox,
+                  { maxWidth: wp('55') - 80 },
+                ]}
+              >
+                <View
                   style={{
-                    ...styles.rightAbsenceMessage,
-                    fontSize: 13 + sizes.inc,
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}
-                  numberOfLines={1}
                 >
-                  {getDic('Ab_' + myAbsence.code)}
-                </Text>
+                  <Text
+                    adjustsFontSizeToFit={Platform.OS == 'android'}
+                    // style={{ ...styles.rightMessage, fontSize: 13 + sizes.inc }}
+                    style={{
+                      ...styles.rightMessage,
+                      fontSize: 13 + sizes.inc,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {isLong(userInfo.work)}
+                    {/* {userInfo.work} */}
+                  </Text>
+                  {myAbsence.id && <View style={styles.absenceDot} />}
+                </View>
               </View>
             )
           )}
