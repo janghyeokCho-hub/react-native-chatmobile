@@ -190,7 +190,7 @@ const UserInfoBox = ({
               </Text>
             </View>
           ) : (
-            !disableMessage && userInfo.work && userInfo.work.length > 0 && (
+            !disableMessage && userInfo.work && userInfo.work.length > 0 ? (
               <View
                 style={[
                   myAbsence.id
@@ -220,7 +220,7 @@ const UserInfoBox = ({
                   {myAbsence.id && <View style={styles.absenceDot} />}
                 </View>
               </View>
-            )
+            ) : null
           )}
         </>
       );
