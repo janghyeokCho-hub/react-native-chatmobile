@@ -211,6 +211,8 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
       };
     } else if (type == 'saeha') {
       return () => {
+        data.hostURL = 'https://vc.eugenefn.com';
+        console.log(data);
         const reqOptions = {
           method: 'GET',
           url: `${data.hostURL}/api/conf/room/${data.meetRoomId}`,
@@ -225,13 +227,13 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
             if (resData && resData.roomOpenStatusCd < 3) {
               // 2. 정상이라면 inviteUsers에 내가 있는 지 확인
               data.inviteUsers.map(user => {
-                if (user.inviteId == loginId) {
+                if (user.inviteId == userInfo.id) {
                   // 3. 있으면 화상 채팅방 연동
-                  if (DEVICE_TYPE == 'd') {
-                    window.openExternalPopup(user.inviteUrl);
-                  } else {
-                    window.open(user.inviteUrl, '_blank');
-                  }
+                  Linking.canOpenURL(user.inviteUrl).then(supported => {
+                    if (supported) {
+                      Linking.openURL(user.inviteUrl);
+                    }
+                  });
                 }
               });
             } else {

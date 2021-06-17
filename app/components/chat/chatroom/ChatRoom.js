@@ -29,6 +29,7 @@ const ChatRoom = ({ navigation, route }) => {
   );
 
   const [searchVisible, setSearchVisible] = useState(false);
+  const [cancelToken, setCancelToken] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -46,12 +47,6 @@ const ChatRoom = ({ navigation, route }) => {
     // init
     dispatch(getRoomInfo({ roomID }));
     setSearchVisible(false);
-
-    // file control 초기화
-    /*const fileCtrl = coviFile.getInstance();
-    fileCtrl.clear();
-    dispatch(clearFiles());
-    setViewFileUpload(false);*/
   }, [roomID]);
 
   useEffect(() => {
@@ -75,6 +70,9 @@ const ChatRoom = ({ navigation, route }) => {
       roomType: room.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      onSubmitCancelToken: token => {
+        setCancelToken(token);
+      },
     };
 
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
@@ -106,37 +104,6 @@ const ChatRoom = ({ navigation, route }) => {
   return (
     <>
       {loading && <LoadingWrap />}
-      {/*!loading && roomID && (
-        <>
-          <FileDownloadLayer />
-          {(moveVisible && (
-            <>
-              <MoveView />
-            </>
-          )) ||
-            (searchVisible && (
-              <>
-                <SearchView onSearchBox={handleSearchBox} />
-              </>
-            )) || (
-              <>
-                {room &&
-                  ((room.roomType == 'A' && (
-                    <NoticeView roomInfo={room} onRead={handleReadMessage} />
-                  )) || (
-                    <MessageView
-                      roomInfo={room}
-                      onSearchBox={handleSearchBox}
-                      handleUploadBox={handleUploadBox}
-                      postAction={handleMessage}
-                      onRead={handleReadMessage}
-                      view={viewFileUpload}
-                    />
-                  ))}
-              </>
-            )}
-        </>
-      )*/}
       {!loading && roomID && (
         <>
           {(searchVisible && (
@@ -155,6 +122,7 @@ const ChatRoom = ({ navigation, route }) => {
                   postAction={handleMessage}
                   onRead={handleReadMessage}
                   navigation={navigation}
+                  cancelToken={cancelToken}
                 />
               )}
             </>

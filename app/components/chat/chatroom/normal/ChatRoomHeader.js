@@ -1,13 +1,20 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ProfileBox from '@/components/common/ProfileBox';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  BackHandler,
+  TouchableOpacity,
+} from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import Svg, { Path, G, Rect, Circle } from 'react-native-svg';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { getDic } from '@/config';
 import { getJobInfo } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
+import { Alert } from 'react-native';
 
 const makeRoomName = (room, id, isInherit, sizes) => {
   // 방 이름 생성하는 규칙 처리 필요
@@ -120,10 +127,12 @@ const ChatRoomHeader = ({
   onSearchBox,
   openSideMenu,
   navigation,
+  cancelToken,
 }) => {
   const { colors, sizes } = useTheme();
-  const { id } = useSelector(({ login }) => ({
+  const { tempMessage, id } = useSelector(({ message, login }) => ({
     id: login.id,
+    tempMessage: message.tempMessage,
   }));
 
   const roomName = useMemo(
@@ -139,13 +148,64 @@ const ChatRoomHeader = ({
     onSearchBox(true);
   };
 
+  const backButtonHandler = () => {
+    if (tempMessage && tempMessage.length > 0) {
+      tempMessage.map(item => {
+        if (item.sendFileInfo && item.sendFileInfo.files.length > 0) {
+          Alert.alert(getDic('Eumtalk'), getDic('Msg_FileSendingClose'), [
+            {
+              text: getDic('Ok'),
+              onPress: () => {
+                cancelToken.cancel();
+                navigation.dispatch(CommonActions.goBack);
+              },
+            },
+            {
+              text: getDic('Cancel'),
+            },
+          ]);
+        }
+      });
+      return true;
+    } else navigation.dispatch(CommonActions.goBack);
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
+    };
+  }, [backButtonHandler]);
+
   return (
     <>
       <View style={styles.top}>
         <TouchableOpacity
           style={styles.topBackBtn}
           onPress={() => {
-            navigation.dispatch(CommonActions.goBack);
+            if (tempMessage && tempMessage.length > 0) {
+              tempMessage.map(item => {
+                if (item.sendFileInfo && item.sendFileInfo.files.length > 0) {
+                  Alert.alert(
+                    getDic('Eumtalk'),
+                    getDic('Msg_FileSendingClose'),
+                    [
+                      {
+                        text: getDic('Ok'),
+                        onPress: () => {
+                          cancelToken.cancel();
+                          navigation.dispatch(CommonActions.goBack);
+                        },
+                      },
+                      {
+                        text: getDic('Cancel'),
+                      },
+                    ],
+                  );
+                }
+              });
+            } else navigation.dispatch(CommonActions.goBack);
           }}
         >
           <Svg width="7.131" height="12.78" viewBox="0 0 7.131 12.78">

@@ -205,7 +205,7 @@ const room = handleActions(
           draft.currentRoom = currRoom;
         }
         draft.rooms = action.payload.rooms.filter(room => {
-          if(typeof room.lastMessageDate === 'string') {
+          if (typeof room.lastMessageDate === 'string') {
             return room.lastMessageDate.trim().length;
           }
           return room.lastMessageDate !== null;
@@ -228,7 +228,10 @@ const room = handleActions(
           });
         }*/
 
-        draft.rooms = action.payload.rooms.filter(room => room.lastMessageDate);;
+        if (action.payload.rooms.length > 0)
+          draft.rooms = action.payload.rooms.filter(
+            room => room.lastMessageDate,
+          );
       });
     },
     [UPDATE_ROOMS_SUCCESS]: (state, action) => {

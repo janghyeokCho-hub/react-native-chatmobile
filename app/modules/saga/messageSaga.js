@@ -41,13 +41,6 @@ export function createSendMessageSaga(request, fileRequest, linkRequest) {
       const response = yield call(request, messageParams);
 
       if (response.data.status == 'SUCCESS') {
-        /*
-          yield put({
-            type: SUCCESS,
-            payload: action.payload,
-          });
-          */
-
         if (action.payload.linkInfo && action.payload.linkInfo.url != '') {
           const linkParams = {
             roomId: action.payload.roomID,

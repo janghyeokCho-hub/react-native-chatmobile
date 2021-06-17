@@ -50,9 +50,15 @@ export const uploadFile = params => {
     formData.append('roomObj', JSON.stringify(params));
   }
 
-  return managesvr('post', url, formData, {
-    'Content-Type': 'multipart/form-data',
-  });
+  return managesvr(
+    'post',
+    url,
+    formData,
+    {
+      'Content-Type': 'multipart/form-data',
+    },
+    params.onSubmitCancelToken,
+  );
 };
 
 export const getThumbnail = params => {

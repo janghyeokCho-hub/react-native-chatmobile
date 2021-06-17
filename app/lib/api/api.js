@@ -5,6 +5,7 @@ import VersionCheck from 'react-native-version-check';
 
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import * as dbAction from '@/lib/appData/action';
+import { cancel } from '@redux-saga/core/effects';
 
 const APP_VERSION = VersionCheck.getCurrentVersion();
 
@@ -29,10 +30,36 @@ export const chatsvr = (method, url, params, headers) => {
   });
 };
 
-export const managesvr = (method, url, params, headers) => {
+export const managesvr = (
+  method,
+  url,
+  params,
+  headers,
+  onSubmitCancelToken,
+) => {
   const MANAGE_SERVER = getServer('MANAGE');
-  // console.log(`managesvr ${method} ${MANAGE_SERVER}${url} 1'${LoginInfo.getLoginInfo().getToken()}' 2'${LoginInfo.getLoginInfo().getAccessID()}' `)
+
   if (method == 'post') {
+    if (headers && 'Content-Type' in headers) {
+      if (headers['Content-Type'] == 'multipart/form-data') {
+        let cancelTokenSource = axios.CancelToken.source();
+
+        onSubmitCancelToken(cancelTokenSource);
+
+        return axios.post(`${MANAGE_SERVER}${url}`, params, {
+          headers: {
+            responseType: 'json',
+            Accept: 'application/json',
+            'Covi-User-Access-Version': APP_VERSION,
+            'Covi-User-Access-Token': LoginInfo.getLoginInfo().getToken(),
+            'Covi-User-Access-ID': LoginInfo.getLoginInfo().getAccessID(),
+            'Covi-User-Device-Type': 'covision.mobile.app',
+            ...headers,
+          },
+          cancelToken: cancelTokenSource.token,
+        });
+      }
+    }
     return axios.post(`${MANAGE_SERVER}${url}`, params, {
       headers: {
         responseType: 'json',

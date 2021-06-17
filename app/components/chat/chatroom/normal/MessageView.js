@@ -16,6 +16,7 @@ const MessageView = ({
   onRead,
   postAction,
   navigation,
+  cancelToken,
 }) => {
   const isBackLock = useSelector(({ app }) => app.backHandler['ChatMenuBox']);
 
@@ -87,6 +88,7 @@ const MessageView = ({
             onSearchBox={onSearchBox}
             openSideMenu={openSideMenu}
             navigation={navigation}
+            cancelToken={cancelToken}
           />
           <MessageList
             onExtension={handleExtension}
