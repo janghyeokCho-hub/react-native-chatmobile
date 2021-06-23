@@ -263,7 +263,7 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
         >
           <View style={styles.funcWrapBox}>
             <Text style={{ ...styles.funcText, fontSize: sizes.large }}>
-              {func.name ? func.name : '확인하기'}
+              {func.name ? getDic(func.name) : '확인하기'}
             </Text>
           </View>
         </TouchableOpacity>
