@@ -104,7 +104,7 @@ const MessagePostBox = ({
 
         // 멘션
         if (currentChannel) {
-          let mentionArr = [];
+          var mentionArr = [];
           inputContext = inputContext.replace(
             /@([^#\s,;]+)/gm,
             (item, plainText) => {
@@ -132,6 +132,7 @@ const MessagePostBox = ({
           //files.length > 0 ? { files, fileInfos } : null,
           null,
           null,
+          mentionArr
         );
       } else {
       }

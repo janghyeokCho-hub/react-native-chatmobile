@@ -71,14 +71,16 @@ const ChannelRoom = ({ navigation, route }) => {
   //   // };
   // }, [channel]);
 
-  const handleMessage = (message, filesObj, linkObj) => {
+  const handleMessage = (message, filesObj, linkObj, mentionArr) => {
     const data = {
       roomID: roomID,
       context: message,
       roomType: channel.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      mentionInfo: mentionArr
     };
+
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
     if (channel.roomType === 'M' && channel.realMemberCnt === 1) {
       dispatch(rematchingMember(data));

@@ -30,7 +30,7 @@ const NoticeBox = ({
   const { colors, sizes } = useTheme();
   const drawMessage = useMemo(() => {
     let drawData = message.context;
-    console.log(drawData);
+
     let isJSONData = isJSONStr(drawData);
     let drawText = '';
     if (isJSONData) {
