@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { View, Text, Clipboard, TouchableOpacity } from 'react-native';
+import { View, Text, Clipboard, TouchableOpacity} from 'react-native';
 import { getDic } from '@/config';
 import * as messageApi from '@API/message';
 import * as channelApi from '@API/channel';
@@ -57,7 +57,18 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         type: 'delete',
         title: getDic('MessageDelete'),
         onPress: () => {
+          let token = [];
+          if (messageData.fileInfos) {
+            if (Array.isArray(JSON.parse(messageData.fileInfos))) {
+              token = JSON.parse(messageData.fileInfos).map(
+                f => f.token,
+              );
+            } else {
+              token.push(JSON.parse(messageData.fileInfos).token);
+            }
+          }
           messageApi.deleteChannelMessage({
+            token,
             messageId: messageData.messageID,
           });
         },
