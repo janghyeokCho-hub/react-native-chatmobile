@@ -27,7 +27,7 @@ const ChannelMessageList = React.forwardRef(
   ({ onExtension, navigation, roomInfo }, ref) => {
     const { tempMessage, messages, currentChannel } = useSelector(
       ({ message, channel }) => ({
-        tempMessage: message.tempMessage,
+        tempMessage: message.tempChannelMessage,
         messages: channel.messages,
         currentChannel: channel.currentChannel,
       }),
