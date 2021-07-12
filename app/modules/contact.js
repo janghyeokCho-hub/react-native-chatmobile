@@ -31,6 +31,30 @@ const [
   GET_ITEMGROUP_FAILURE,
 ] = createRequestActionTypes('contact/GET_ITEMGROUP');
 
+const [
+  ADD_CUSTOMGROUP,
+  ADD_CUSTOMGROUP_SUCCESS,
+  ADD_CUSTOMGROUP_FAILURE
+] = createRequestActionTypes('contact/ADD_CUSTOMGROUP');
+
+const [
+  MODIFY_CUSTOMGROUPNAME,
+  MODIFY_CUSTOMGROUPNAME_SUCCESS,
+  MODIFY_CUSTOMGROUPNAME_FAILURE
+] = createRequestActionTypes('contact/MODIFY_CUSTOMGROUPNAME');
+
+const [
+  REMOVE_CUSTOMGROUP,
+  REMOVE_CUSTOMGROUP_SUCCESS,
+  REMOVE_CUSTOMGROUP_FAILURE
+] = createRequestActionTypes('contact/REMOVE_CUSTOMGROUP');
+
+const [
+  MODIFY_GROUPMEMBER,
+  MODIFY_GROUPMEMBER_SUCCESS,
+  MODIFY_GROUPMEMBER_FAILURE
+] = createRequestActionTypes('contact/MODIFY_GROUPMEMBER');
+
 const SET_CONTACTS = 'contact/SET_CONTACTS';
 
 const MAPPING_USER_CHAT_ROOM = 'contact/MAPPING_USER_CHAT_ROOM';
@@ -43,6 +67,10 @@ export const deleteContacts = createAction(DELETE_CONTACTS);
 export const getItemGroup = createAction(GET_ITEMGROUP);
 export const mappingUserChatRoom = createAction(MAPPING_USER_CHAT_ROOM);
 export const setContacts = createAction(SET_CONTACTS);
+export const addCustomGroup = createAction(ADD_CUSTOMGROUP);
+export const removeCustomGroup = createAction(REMOVE_CUSTOMGROUP);
+export const modifyCustomGroupName = createAction(MODIFY_CUSTOMGROUPNAME);
+export const modifyGroupMember = createAction(MODIFY_GROUPMEMBER);
 export const init = createAction(INIT);
 
 const getContactsSaga = createRequestSaga(
@@ -52,6 +80,10 @@ const getContactsSaga = createRequestSaga(
 );
 
 const addContactsSaga = saga.createAddContactSaga();
+const addCustomGroupSaga = saga.createAddCustomGroupSaga(ADD_CUSTOMGROUP);
+const modifyGroupMemberSaga = saga.createModifyGroupMemberSaga(MODIFY_GROUPMEMBER);
+const removeCustomGroupSaga = saga.createRemoveCustomGroupSaga(REMOVE_CUSTOMGROUP);
+const modifyCustomGroupNameSaga = saga.createModifyCustomGroupNameSaga(MODIFY_CUSTOMGROUPNAME);
 
 const deleteContactsSaga = saga.createDelContactSaga(
   DELETE_CONTACTS,
@@ -69,6 +101,10 @@ export function* contactSaga() {
   yield takeLatest(ADD_CONTACTS, addContactsSaga);
   yield takeLatest(DELETE_CONTACTS, deleteContactsSaga);
   yield takeLatest(GET_ITEMGROUP, getItemGroupSaga);
+  yield takeLatest(ADD_CUSTOMGROUP, addCustomGroupSaga);
+  yield takeLatest(MODIFY_GROUPMEMBER, modifyGroupMemberSaga);
+  yield takeLatest(REMOVE_CUSTOMGROUP, removeCustomGroupSaga);
+  yield takeLatest(MODIFY_CUSTOMGROUPNAME, modifyCustomGroupNameSaga);
 }
 
 const initialState = {
@@ -83,9 +119,26 @@ const contact = handleActions(
       };
     },
     [GET_CONTACTS_SUCCESS]: (state, action) => {
+
+      let data = [];
+
+      const customGroups = action.payload.result.filter((contact)=>{
+        if(contact.folderType != 'R' || contact.ownerID == '')
+          data.push(contact);
+        return contact.folderType === 'R' && (contact.ownerID != '')
+      });
+      
+      data.map((contact)=>{
+        if(contact.ownerID == '' && contact.folderType === 'R'){
+          contact.sub = [];
+          contact.sub = contact.sub.concat(customGroups)
+        }
+        return contact
+      });
+
       return {
         ...state,
-        contacts: action.payload.result,
+        contacts: data,
       };
     },
     [ADD_CONTACTS_SUCCESS]: (state, action) => {
@@ -160,9 +213,25 @@ const contact = handleActions(
     },
     [SET_CONTACTS]: (state, action) => {
       // login시에만 사용
+      
+      let data = [];
+
+      const customGroups = action.payload.result.filter((contact)=>{
+        if(contact.folderType != 'R' || contact.ownerID == null)
+          data.push(contact);
+        return contact.folderType === 'R' && (contact.ownerID != null)
+      });
+      
+      data.map((contact)=>{
+        if(contact.ownerID == null && contact.folderType === 'R'){
+          contact.sub = [];
+          contact.sub = contact.sub.concat(customGroups)
+        }
+        return contact
+      });
       return {
         ...state,
-        contacts: action.payload.result,
+        contacts: data,
         //reload: false,
       };
     },
@@ -190,6 +259,63 @@ const contact = handleActions(
         }
       });
     },
+    [ADD_CUSTOMGROUP_SUCCESS]: (state, action) => {
+      return produce(state, draft =>{
+        const groupIdx = draft.contacts.findIndex((contact)=> contact.folderType == 'R')
+        const sub = action.payload.sub ? JSON.parse(action.payload.sub) : [];
+        action.payload.sub = [];
+        if(!draft.contacts[groupIdx].sub){
+          draft.contacts[groupIdx].sub = []
+          draft.contacts[groupIdx].sub.push({
+            ...action.payload,
+            sub: sub
+          });
+        }else{
+          draft.contacts[groupIdx].sub = draft.contacts[groupIdx].sub.concat({
+            ...action.payload,
+            sub: sub
+          });
+        }
+      });
+    },
+    [MODIFY_CUSTOMGROUPNAME_SUCCESS]: (state, action) => {
+      return produce(state, draft =>{
+        const folderIdx = draft.contacts.findIndex((contact)=> contact.folderType == 'R');
+        const groupIdx = draft.contacts[folderIdx].sub.findIndex((group) => Number(group.folderID) === action.payload.folderId);
+        draft.contacts[folderIdx].sub[groupIdx].folderName = action.payload.displayName;
+      });
+    },
+    [REMOVE_CUSTOMGROUP_SUCCESS]: (state, action) =>{
+      return produce(state, draft =>{
+        const data = action.payload.result;
+        const groupIdx = draft.contacts.findIndex((contact)=> contact.folderType == 'R');
+        //멤버/조직 삭제
+        if(data.contactId || data.companyCode){
+          const delInfo = data.contactId || data.companyCode
+          const delgroupIdx = draft.contacts[groupIdx].sub.findIndex((group)=> data.folderId === group.folderID);
+          draft.contacts[groupIdx].sub[delgroupIdx].sub = draft.contacts[groupIdx].sub[delgroupIdx].sub.filter((member)=>{
+            return member.id != delInfo
+          });
+        }else{
+          //그룹삭제
+          draft.contacts[groupIdx].sub = draft.contacts[groupIdx].sub.filter((group)=>{
+            return data.folderId != group.folderID
+          });
+        }
+      });
+    },
+    [MODIFY_GROUPMEMBER_SUCCESS]: (state, action) => {
+      return produce(state, draft =>{
+        const groupIdx = draft.contacts.findIndex((contact)=> contact.folderType == 'R');
+        draft.contacts[groupIdx].sub.map((group)=>{
+          if(group.folderID == action.payload.folderID){
+            group.sub = [];//그냥 overwrite
+            group.sub = action.payload.sub ? JSON.parse(action.payload.sub) : [];
+          }
+          return group;
+        });
+      });
+    }
   },
   initialState,
 );

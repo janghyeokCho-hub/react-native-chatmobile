@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Image,
+  Alert,
   Platform,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,13 +13,19 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { CommonActions } from '@react-navigation/native';
 import OrgChartList from '../orgchart/OrgChartList';
 import ProfileBox from '../common/ProfileBox';
-import { addContactList } from '@/lib/contactUtil';
+import {
+  addContactList,
+  editGroupContactList, 
+  getApplyGroupInfo
+} from '@/lib/contactUtil';
 import Svg, { Circle, Path, G } from 'react-native-svg';
 import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import TitleInputBox from '@COMMON/TitleInputBox';
+import { addCustomGroup } from "@/modules/contact";
 
-const AddContact = ({ navigation }) => {
+const AddContact = ({ navigation, route }) => {
   const { colors, sizes } = useTheme();
   const { userID, contacts } = useSelector(({ login, contact }) => ({
     userID: login.id,
@@ -27,19 +33,23 @@ const AddContact = ({ navigation }) => {
   }));
 
   const [selectors, setSelectors] = useState([]);
-
+  const [groupName, setGroupName] = useState("");
+  const useGroup = route.params.useGroup;
   const dispatch = useDispatch();
 
   let oldContactList = [{ id: userID }];
-  contacts.forEach(item => {
-    if ((item.folderType == 'F' || item.folderType == 'C') && item.sub)
-      item.sub.forEach(itemSub => {
-        oldContactList.push(itemSub);
-      });
-    else if (item.folderType == 'G' || item.folderType == 'M') {
-      oldContactList.push({ id: item.groupCode });
-    }
-  });
+
+  if(!useGroup){
+    contacts.forEach(item => {
+      if ((item.folderType == 'F' || item.folderType == 'C') && item.sub)
+        item.sub.forEach(itemSub => {
+          oldContactList.push(itemSub);
+        });
+      else if (item.folderType == 'G' || item.folderType == 'M') {
+        oldContactList.push({ id: item.groupCode });
+      }
+    });
+  }
 
   const addContact = selector => {
     setSelectors(prevState => prevState.concat(selector));
@@ -89,6 +99,26 @@ const AddContact = ({ navigation }) => {
     handleClose();
   }, [selectors]);
 
+  const handleAddGroupBtn = useCallback(()=>{
+    /* 그룹명 미 입력시 Alert Msg*/
+    if(groupName === ""){
+      Alert.alert('', getDic('Please_Input_GroupName','그룹명을 입력해주세요.'), [
+        { text: getDic('Close', '닫기'), onPress: () => {} },
+      ]);
+      return; 
+    }
+    
+    /* 그룹 생성 */
+    editGroupContactList(
+      dispatch, 
+      addCustomGroup, 
+      getApplyGroupInfo(selectors, groupName), 
+      selectors
+    );
+
+    handleClose();
+  }, [groupName, selectors]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -108,10 +138,10 @@ const AddContact = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.titleView}>
-          <Text style={styles.modaltit}>{getDic('AddContact')}</Text>
+          <Text style={styles.modaltit}>{useGroup? getDic('Create_Group', '그룹 생성'): getDic('AddContact')}</Text>
         </View>
         <View style={styles.okbtnView}>
-          <TouchableOpacity onPress={handleAddBtn}>
+          <TouchableOpacity onPress={(useGroup ? handleAddGroupBtn : handleAddBtn)}>
             <View style={styles.topBtn}>
               <Text
                 style={{
@@ -181,6 +211,18 @@ const AddContact = ({ navigation }) => {
           horizontal
         />
       </View>
+      {useGroup ?
+        <View>
+          <TitleInputBox
+            title={getDic('Group_Name', '그룹 이름')}
+            placeholder={getDic('Input_Group_Name', '그룹명을 입력하세요.')}
+            onChageTextHandler={text => {
+              setGroupName(text);
+            }}
+            value={groupName}
+          />
+        </View> 
+      : null}
       <View style={styles.tabcontent}>
         <OrgChartList
           viewType="checklist"
