@@ -614,16 +614,16 @@ export const getContacts = async () => {
       const selectFolder = db
         .tx(tx)
         .query(
-          "SELECT folderId as folderID, IFNULL(groupCode, '') as groupCode, folderName, folderType, folderSortKey, pChat " +
+          "SELECT ownerId, folderId as folderID, IFNULL(groupCode, '') as groupCode, folderName, folderType, folderSortKey, pChat " +
             'FROM contact_folder ' +
-            'ORDER BY folderId',
+            'ORDER BY folderSortKey, folderId',
         )
         .execute();
 
       const selectItem = db
         .tx(tx)
         .query(
-          "SELECT uc.folderId, uc.contactTarget as id, 'U' as type, u.name, u.isMobile, u.PN, u.LN, u.TN, u.dept, u.work, u.presence, u.photoPath, 'Y' as pChat " +
+          "SELECT uc.folderId, uc.contactTarget as id, 'U' as type, u.name, u.isMobile, u.PN, u.LN, u.TN, u.dept, u.work, u.presence, u.photoPath, 'Y' as pChat, uc.companyCode as companyCode, uc.contactType as contactType, uc.globalFolder as globalFolder " +
             'FROM contact_item as uc ' +
             'INNER JOIN users as u ON u.id = uc.contactTarget ' +
             'ORDER BY folderId, registDate, name',
@@ -634,11 +634,9 @@ export const getContacts = async () => {
         .tx(tx)
         .query(
           'SELECT id, type, name, isMobile, PN, LN, TN, dept, work, presence, photoPath, pChat, folderType AS isContact FROM (' +
-            `SELECT mm.memberCode as id, mm.type, u.name, u.isMobile, u.PN, u.LN, u.TN, '${deptName}' as dept, u.work, u.presence, u.photoPath, 1 as _order, u.sortKey, 'Y' as pChat, uf.folderType ` +
+            `SELECT mm.memberCode as id, mm.type, u.name, u.isMobile, u.PN, u.LN, u.TN, '${deptName}' as dept, u.work, u.presence, u.photoPath, 1 as _order, u.sortKey, 'Y' as pChat, '' as folderType ` +
             'FROM mydept_member as mm ' +
             'INNER JOIN users as u on mm.memberCode = u.id ' +
-            'LEFT OUTER JOIN contact_item as uc ON uc.contactTarget = mm.memberCode ' +
-            "LEFT OUTER JOIN contact_folder as uf ON uc.folderId = uf.folderId AND uf.folderType IN ('F', 'C') " +
             'UNION ALL ' +
             "SELECT  mm.memberCode as id, mm.type, mm.displayName as name, 'N' as isMobile, '' as PN, '' as LN, '' as TN, '' as dept, '' as work, '' as presence, '' as photoPath, 2 as _order, mm.sortKey, mm.pChat as pChat, '' AS folderType " +
             'FROM mydept_member as mm ' +
@@ -761,7 +759,7 @@ export const delContact = async param => {
         .query(
           'UPDATE contact_item SET ' +
             "folderID = (SELECT folderId FROM contact_folder WHERE FolderType='C') " +
-            `WHERE contactTarget='${delObj.contactId}'`,
+            `WHERE contactTarget='${delObj.contactId}' AND folderId='${delObj.folderId}' `,
         )
         .execute();
     } else {
@@ -784,6 +782,124 @@ export const delContact = async param => {
 
     db.tx(tx, 'sync_date')
       .update({ contactSyncDate: param.updateDate })
+      .execute();
+  });
+};
+
+export const addCustomGroup = async addObj => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  let sub =  addObj.sub ? JSON.parse(addObj.sub): [];
+
+  dbCon.transaction(tx => {
+    db.tx(tx, 'contact_folder')
+    .insert({
+      pChat: addObj.pChat,
+      registDate: addObj.RegistDate,
+      folderName: addObj.folderName,
+      folderSortKey: addObj.folderSortKey,
+      ownerID: addObj.ownerID,
+      folderType: addObj.folderType,
+      folderId: addObj.folderID
+    })
+    .execute();
+
+    sub.forEach(contact => {
+      db.tx(tx, 'contact_item')
+        .insert({
+            folderId: addObj.folderID,
+            contactTarget: contact.id,
+            companyCode: contact.companyCode || '',
+            contactType: contact.type,
+            globalFolder: 'N',
+            registDate: addObj.RegistDate
+        })
+        .execute();
+      });
+
+    db.tx(tx, 'sync_date')
+      .update({ contactSyncDate: addObj.RegistDate })
+      .execute();
+  });
+
+};
+
+export const modifyGroupMember = async modObj => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  let users = modObj.sub ? JSON.parse(modObj.sub) : [];
+  let userIds = users.map( user => user.id).join(",");
+
+  dbCon.transaction(tx => {
+
+    /* 해당 그룹 유저 모두 삭제 후 재등록 */
+    db.tx(tx, 'contact_item')
+        .delete()
+        .where(`folderId = ${modObj.folderID}`)
+        .execute();
+
+    users.forEach( user =>{
+      db.tx(tx, 'contact_item')
+      .insert({
+        folderId: modObj.folderID,
+        contactTarget: user.id,
+        companyCode: user.companyCode || '',
+        contactType: user.type,
+        globalFolder: 'N',
+        registDate: modObj.RegistDate
+      })
+      .execute();
+    });
+
+    db.tx(tx, 'sync_date')
+      .update({ contactSyncDate: modObj.RegistDate })
+      .execute();
+  });
+  
+};
+
+export const removeCustomGroup = async rmvObj => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  const params = rmvObj.result;
+
+  dbCon.transaction(tx => {
+    //그룹삭제
+    if(params.contactId || params.companyCode){
+      //그룹내 멤버/조직 삭제
+      const where = `folderId = ${params.folderId} ` +
+        `AND contactTarget = "${params.contactId}" ` +
+        (params.companyCode ? ` AND companyCode = "${params.companyCode}" `: ``);
+  
+      db.tx(tx, 'contact_item')
+        .delete()
+        .where(where)
+        .execute();
+    }else{
+      db.tx(tx, 'contact_folder')
+        .delete()
+        .where(`folderId = ${params.folderId}`)
+        .execute();
+      db.tx(tx, 'contact_item')
+        .delete()
+        .where(`folderId = ${params.folderId}`)
+        .execute();
+    }
+    db.tx(tx, 'sync_date')
+      .update({ contactSyncDate: rmvObj.updateDate })
+      .execute();
+  });
+
+};
+
+export const modifyCustomGroupName = async modObj => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+
+  dbCon.transaction(tx => {
+    db.tx(tx, 'contact_folder')
+      .update({ folderName: modObj.displayName })
+      .where(`folderId = ${modObj.folderId}`)
+      .execute();
+    
+    db.tx(tx, 'sync_date')
+      .update({ contactSyncDate: modObj.updateDate })
       .execute();
   });
 };

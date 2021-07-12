@@ -18,8 +18,9 @@ import NetworkError from '../common/NetworkError';
 import { getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { filterSearchGroupMember } from '@/lib/contactUtil';
 
-const OrgChartList = ({ viewType, checkObj, navigation }) => {
+const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
   const { colors, sizes } = useTheme();
   const userInfo = useSelector(({ login }) => login.userInfo);
   const userID = useSelector(({ login }) => login.id);
@@ -29,6 +30,7 @@ const OrgChartList = ({ viewType, checkObj, navigation }) => {
   const [type, setType] = useState(viewType);
   const [deptProfileList, setDeptProfileList] = useState([]);
   const [orgpathList, setOrgpathList] = useState([]);
+  const [oldGroupMember, setOldGroupMember] = useState([]);
 
   const flatlist = useRef();
 
@@ -50,6 +52,9 @@ const OrgChartList = ({ viewType, checkObj, navigation }) => {
           deptID: deptCode,
           companyCode: companyCode,
         }).then(({ data }) => {
+          //그룹데이터 제외 필터링
+          if(group)
+            data.result.sub = filterSearchGroupMember(data.result.sub, group, userID);
           setDeptProfileList([]);
           setDeptProfileList(data.result.path);
           setOrgpathList([]);
@@ -57,7 +62,7 @@ const OrgChartList = ({ viewType, checkObj, navigation }) => {
         });
       }
     },
-    [type, networkState],
+    [type, networkState, group],
   );
 
   const handleSearch = useCallback(
@@ -69,6 +74,10 @@ const OrgChartList = ({ viewType, checkObj, navigation }) => {
           value: value,
           type: 'O',
         }).then(({ data }) => {
+          //그룹데이터 제외 필터링
+          if(group)
+            data.result = filterSearchGroupMember(data.result, group, userID);
+          
           setDeptProfileList([]);
           setOrgpathList([]);
           setOrgpathList(data.result);
@@ -81,14 +90,26 @@ const OrgChartList = ({ viewType, checkObj, navigation }) => {
         }
       }
     },
-    [type],
+    [type, group],
   );
 
   useEffect(() => {
     setTimeout(() => {
-      flatlist.current.scrollToEnd({ animated: true });
+      if(flatlist.current)
+        flatlist.current.scrollToEnd({ animated: true });
     }, 200);
   }, [deptProfileList]);
+
+  useEffect(() => {
+    if(group?.sub){
+      if(oldGroupMember.length != group.sub.length){
+        setOldGroupMember(group.sub)
+        handleDept(userInfo.DeptCode, userInfo.CompanyCode);
+      }else{
+        setOldGroupMember(group.sub)
+      }
+    }
+  }, [group, oldGroupMember]);
 
   return (
     <>

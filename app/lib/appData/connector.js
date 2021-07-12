@@ -57,11 +57,11 @@ const initialize = async connection => {
                 [],
               ),
               tx.executeSql(
-                'CREATE TABLE contact_folder (folderId integer, groupCode varchar(50), folderName varchar(100), folderType CHARACTER(1), folderSortKey varchar(10), pChat CHARACTER(1), registDate bigint, primary key (folderId))',
+                'CREATE TABLE contact_folder (ownerID varchar(50), folderId integer, groupCode varchar(50), folderName varchar(100), folderType CHARACTER(1), folderSortKey varchar(10), pChat CHARACTER(1), registDate bigint, primary key (folderId))',
                 [],
               ),
               tx.executeSql(
-                'CREATE TABLE contact_item (folderId integer, contactTarget varchar(50), registDate bigint) ',
+                'CREATE TABLE contact_item (folderId integer, contactTarget varchar(50), companyCode varchar(50), contactType char(2), globalFolder char(1), registDate bigint) ',
                 [],
               ),
               tx.executeSql(

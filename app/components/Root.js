@@ -31,6 +31,7 @@ import {
   ChatSettingBox,
   InviteMember,
   ImageList,
+  EditGroup
 } from '@C/chat/chatroom/layer';
 import {
   InviteExtUser,
@@ -431,6 +432,7 @@ const Root = ({ stack, theme }) => {
                   ),
                 })}
               />
+              <Stack.Screen name="EditGroup" component={EditGroup} />
             </>
           )}
         </Stack.Navigator>

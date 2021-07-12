@@ -118,7 +118,7 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
               code: 'deleteFavorite',
               title: getDic('DelFavorite'),
               onPress: () => {
-                deleteContact(dispatch, subItem.id, null, 'F');
+                deleteContact(dispatch, subItem.id, contact.folderID, 'F');
               },
             });
           }

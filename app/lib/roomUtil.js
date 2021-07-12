@@ -1,7 +1,7 @@
 import { openRoom, setInitCurrentRoom, leaveRoom } from '@/modules/room';
 import { leaveChannel } from '@/modules/channel';
 import { mappingUserChatRoom } from '@/modules/contact';
-import { getAllUserWithGroup } from '@API/room';
+import { getAllUserWithGroup, getAllUserWithCustomGroup } from '@API/room';
 import { getDic } from '@/config';
 import { Alert } from 'react-native';
 
@@ -67,6 +67,34 @@ export const openChatRoomView = (
       members,
       navigation,
     );
+  } else if(userInfo.type == 'R') {
+    getAllUserWithCustomGroup({folderId: userInfo.id}).then(({data}) =>{
+      if(data.status == 'SUCCESS'){
+        members = members.concat(data.result);
+
+        if (members.length == 0) {
+          openPopup(
+            {
+              type: 'Alert',
+              message: covi.getDic('Msg_EmptyChatMember'),
+            },
+            dispatch,
+          );
+        } else {
+          openChatRoomViewCallback(
+            dispatch,
+            myInfo.id,
+            viewType,
+            rooms,
+            selectId,
+            userInfo.id,
+            userInfo.type,
+            members,
+            navigation
+          );
+        }
+      }
+    });
   } else {
     members.push({
       id: userInfo.id,

@@ -8,6 +8,7 @@ import { changeModal, openModal, closeModal } from '@/modules/modal';
 import { getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import GroupItem from "./GroupItem"
 
 const groupBtnUpImg = require('@C/assets/group_button_up.png');
 const groupBtnDownImg = require('@C/assets/group_button_down.png');
@@ -77,12 +78,33 @@ const ContactItem = ({
               }),
             );
             dispatch(openModal());
+          }else if(contact.folderType == 'R'){
+            dispatch(
+              changeModal({
+                modalData: {
+                  title: '그룹 생성',
+                  closeOnTouchOutside: true,
+                  type: 'normal',
+                  buttonList: [
+                    {
+                      title: getDic('Create_Group', '그룹 생성'),
+                      onPress: () => {
+                        navigation.navigate('AddContact', {
+                          useGroup: true
+                        });
+                      },
+                    },
+                  ],
+                },
+              }),
+            );
+            dispatch(openModal());
           }
         }}
       >
         <Text style={{ ...styles.header, fontSize: sizes.default }}>
           {getDictionary(contact.folderName)}{' '}
-          {(contact.folderType == 'F' || contact.folderType == 'C') &&
+          {(contact.folderType == 'F' || contact.folderType == 'C' || contact.folderType == 'R') &&
             (contact.sub ? `(${contact.sub.length})` : `(0)`)}
         </Text>
         {isopen ? (
@@ -94,7 +116,20 @@ const ContactItem = ({
       {isopen && contactSub ? (
         <View>
           {contactSub.map(sub => {
-            return (
+            return sub.folderType && sub.folderType == 'R' ? (
+              <View
+                key={contact.folderID + '_' + sub.folderID}
+              >
+                <GroupItem
+                  root={contact}
+                  contact={sub}
+                  onLongPress={onLongPress}
+                  viewType={viewType}
+                  checkObj={checkObj}
+                  navigation={navigation}
+                />
+              </View>
+            ):(
               <View
                 key={contact.folderID + '_' + sub.id}
                 style={styles.userBoxContainer}
@@ -139,7 +174,7 @@ const styles = StyleSheet.create({
   },
   userBoxContainer: {
     marginBottom: 20,
-  },
+  }
 });
 
 export default ContactItem;

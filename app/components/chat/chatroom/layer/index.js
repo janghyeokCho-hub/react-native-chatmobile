@@ -11,3 +11,4 @@ export { default as MenuBoxBack } from '@C/chat/chatroom/layer/MenuBoxBack';
 export { default as PhotoSummary } from '@C/chat/chatroom/layer/PhotoSummary';
 export { default as SummaryBack } from '@C/chat/chatroom/layer/SummaryBack';
 export { default as ImageList } from '@C/chat/chatroom/layer/ImageList';
+export { default as EditGroup} from '@/components/contact/EditGroup';
