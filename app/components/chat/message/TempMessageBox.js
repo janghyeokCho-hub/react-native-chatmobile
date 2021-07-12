@@ -1,11 +1,17 @@
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { reSendMessage, removeTempMessage } from '@/modules/message';
+import { 
+  reSendMessage, 
+  removeTempMessage,
+  reSendChannelMessage,
+  removeChannelTempMessage
+} from '@/modules/message';
 import Message from '@/components/chat/message/Message';
 import { eumTalkRegularExp, convertEumTalkProtocol } from '@/lib/common';
 import FileMessageBox from '@C/chat/message/FileMessageBox';
 import { View, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import Svg, { Path, G } from 'react-native-svg';
+import { getDic } from '@/config';
 
 const chatSendImg = require('@C/assets/ico_chat_sending.png');
 const messageResendImg = require('@C/assets/ico_message_resend.png');
@@ -22,13 +28,15 @@ const TempMessageBox = ({ message, type }) => {
         {
           text: '재발송',
           onPress: () => {
-            dispatch(reSendMessage(message));
+            // dispatch(reSendMessage(message));
+            dispatch(message.roomType === "C" ? reSendChannelMessage(message): reSendMessage(message));
           },
         },
         {
-          text: '삭제',
+          text: getDic('Delete'),
           onPress: () => {
-            dispatch(removeTempMessage(message.tempId));
+            // dispatch(removeTempMessage(message.tempId));
+            dispatch(message.roomType === 'C' ?  removeChannelTempMessage(message.tempId):removeTempMessage(message.tempId));
           },
         },
       ],

@@ -74,11 +74,11 @@ export function createSendChannelMessageSaga(
   fileRequest,
   linkRequest,
 ) {
-  const SUCCESS = `message/SEND_MESSAGE_SUCCESS`;
-  const FAILURE = `message/SEND_MESSAGE_FAILURE`;
+  const SUCCESS = `message/SEND_CHANNEL_MESSAGE_SUCCESS`;
+  const FAILURE = `message/SEND_CHANNEL_MESSAGE_FAILURE`;
 
   return function*(action) {
-    yield put(startLoading('message/SEND_MESSAGE'));
+    yield put(startLoading('message/SEND_CHANNEL_MESSAGE'));
     try {
       let messageParams = {
         context: action.payload.context,
@@ -88,7 +88,9 @@ export function createSendChannelMessageSaga(
         tempId: action.payload.tempId,
       };
       if (action.payload.sendFileInfo) {
+        console.log('================111');
         const responseFile = yield call(fileRequest, action.payload);
+        console.log('================222', responseFile);
 
         if (responseFile.data.state == 'SUCCESS') {
           messageParams.fileInfos = JSON.stringify(responseFile.data.result);
@@ -113,8 +115,9 @@ export function createSendChannelMessageSaga(
       } else {
         messageParams.targetArr = [];
       }
-
+      console.log('================1');
       const response = yield call(request, messageParams);
+      console.log('================2 ', response);
 
       if (response.data.status == 'SUCCESS') {
         /*
@@ -148,6 +151,6 @@ export function createSendChannelMessageSaga(
         error: true,
       });
     }
-    yield put(finishLoading('message/SEND_MESSAGE'));
+    yield put(finishLoading('message/SEND_CHANNEL_MESSAGE'));
   };
 }
