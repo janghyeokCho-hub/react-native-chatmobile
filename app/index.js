@@ -71,16 +71,14 @@ const checkAppConfigurations = () => {
     /* 임시 배포용 추후 옵션화기능으로 구현*/
     const localStorageInit = async () =>{
       let clearLocalData = await AsyncStorage.getItem('clearLocalData')
-      console.log(clearLocalData)
       if(!clearLocalData)
         AsyncStorage.setItem('clearLocalData', 'Y')
   
       clearLocalData  = await AsyncStorage.getItem('clearLocalData')
-
       if(clearLocalData == 'Y'){        
-        await db.getConnection(LoginInfo.getLoginInfo().getID());
-        await db.deleteDabase(LoginInfo.getLoginInfo().getID());
-        AsyncStorage.setItem('clearLocalData', 'N')
+        const id = await AsyncStorage.getItem('covi_user_access_id');
+        await db.deleteLocalDb(id);
+        AsyncStorage.setItem('clearLocalData', 'N');
         restartApp();
       }
     };

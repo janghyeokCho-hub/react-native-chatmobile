@@ -132,6 +132,21 @@ export const deleteDabase = (dbName, callBack) => {
   }
 };
 
+export const deleteLocalDb = (async (dbName) =>{
+  let domain = await AsyncStorage.getItem('EHINF');
+
+  if (typeof domain === 'string') {
+    domain = domain.replace(/http(s)?:\/\//i, '');
+  } else {
+    domain = '';
+  }
+
+  // domain.userid
+  const openName = base64.encode(`${domain}.${dbName}`);
+  SQLite.deleteDatabase({ name: `${openName}.db` });
+  dbCon = null;
+});
+
 export const getConnection = async openName => {
   if (dbCon == null) {
     dbCon = await open(openName);
