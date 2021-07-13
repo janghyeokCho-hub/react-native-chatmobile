@@ -22,6 +22,7 @@ import initQuickActions from '@/lib/quickActions';
 import Share from '@C/common/share/Share';
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import * as db from '@/lib/appData/connector';
+import { restartApp } from '@/lib/device/common';
 
 // Share를 먼저 등록하지 않으면 stack, quickAction, store 등록하면서 등록 불가
 AppRegistry.registerComponent('EumtalkShare', () => Share);
@@ -70,14 +71,17 @@ const checkAppConfigurations = () => {
     /* 임시 배포용 추후 옵션화기능으로 구현*/
     const localStorageInit = async () =>{
       let clearLocalData = await AsyncStorage.getItem('clearLocalData')
+      console.log(clearLocalData)
       if(!clearLocalData)
         AsyncStorage.setItem('clearLocalData', 'Y')
   
       clearLocalData  = await AsyncStorage.getItem('clearLocalData')
+
       if(clearLocalData == 'Y'){        
-        const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+        await db.getConnection(LoginInfo.getLoginInfo().getID());
         await db.deleteDabase(LoginInfo.getLoginInfo().getID());
         AsyncStorage.setItem('clearLocalData', 'N')
+        restartApp();
       }
     };
 

@@ -614,7 +614,7 @@ export const getContacts = async () => {
       const selectFolder = db
         .tx(tx)
         .query(
-          "SELECT ownerId, folderId as folderID, IFNULL(groupCode, '') as groupCode, folderName, folderType, folderSortKey, pChat " +
+          "SELECT ownerID, folderId as folderID, IFNULL(groupCode, '') as groupCode, folderName, folderType, folderSortKey, pChat " +
             'FROM contact_folder ' +
             'ORDER BY folderSortKey, folderId',
         )
