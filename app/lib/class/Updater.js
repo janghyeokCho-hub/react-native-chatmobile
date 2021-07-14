@@ -10,6 +10,9 @@ import { getServer } from '@/config';
 import { managesvr } from '@API/api';
 import { getDic } from '@/config';
 import VersionCheck from 'react-native-version-check';
+import * as db from '@/lib/appData/connector';
+import { restartApp } from '@/lib/device/common';
+import AsyncStorage from '@react-native-community/async-storage';
 
 let updater = null;
 
@@ -30,10 +33,11 @@ class Updater {
             downloadApkEnd: this.downloadApkEnd,
             downloadApkProgress: handleProgress,
           });
+          this.updateApp(Platform.OS);
           updateApk.checkUpdate();
           break;
         case 'ios':
-          this.updateIOS();
+          this.updateApp(Platform.OS);
           break;
       }
     }
@@ -60,26 +64,31 @@ class Updater {
     ToastAndroid.show(getDic('Msg_NewUpdateSuccess'), ToastAndroid.LONG);
   };
 
-  updateIOS = () => {
+  updateApp = (platform) => {
     managesvr(
       'get',
-      `${this.checkURL}&v=${VersionCheck.getCurrentVersion()}`,
+      `${this.checkURL}&v=${platform == 'ios' ? VersionCheck.getCurrentVersion() : NativeModules.RNUpdateAPK.versionName}`,
     ).then(({ data }) => {
       if (data.status == 'SUCCESS') {
-        if (data.forceUpdate) {
-          this.forceUpdateApp(isUpdate => {
-            if (isUpdate) {
-              this.openDownloadPage(data.url);
-            }
-          });
-        } else {
-          this.needUpdateApp(isUpdate => {
-            if (isUpdate) {
-              this.openDownloadPage(data.url);
-            }
-          });
+        if(data.deleteLocalData == 'Y')
+          this.deleteLocalData()
+        if(platform == 'ios'){            
+          if (data.forceUpdate) {
+            this.forceUpdateApp(isUpdate => {
+              if (isUpdate) {
+                this.openDownloadPage(data.url);
+              }
+            });
+          } 
+          else {
+            this.needUpdateApp(isUpdate => {
+              if (isUpdate) {
+                this.openDownloadPage(data.url);
+              }
+            });
+          }
         }
-      }
+    }
     });
   };
 
@@ -90,6 +99,14 @@ class Updater {
       }
     });
   };
+
+  /* 로컬 유저데이터 삭제 */
+  deleteLocalData = async () =>{
+    const id = await AsyncStorage.getItem('covi_user_access_id');
+    await db.deleteLocalDb(id);
+    restartApp();
+  };
+
 }
 
 export const getUpdater = () => {
