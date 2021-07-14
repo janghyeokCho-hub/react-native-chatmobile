@@ -68,7 +68,7 @@ const checkAppConfigurations = () => {
     // 20200428 covision 운영 배포용 ( 삭제 필요 ) ---- END
 
     /* 로컬 유저데이터 삭제 */
-    deleteLocalData = async () =>{
+    const deleteLocalData = async () =>{
       const clearLocalData= await AsyncStorage.getItem('clearLocalData');
       
       if(clearLocalData == 'Y'){
@@ -79,7 +79,7 @@ const checkAppConfigurations = () => {
       }
     };
 
-    await deleteLocalData;
+    await deleteLocalData();
 
     const configLoadFlag = await makeConfigData();
 
