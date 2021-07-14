@@ -20,6 +20,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoadingWrap from '@C/common/LoadingWrap';
 import initQuickActions from '@/lib/quickActions';
 import Share from '@C/common/share/Share';
+import * as db from '@/lib/appData/connector';
+import { restartApp } from '@/lib/device/common';
 
 // Share를 먼저 등록하지 않으면 stack, quickAction, store 등록하면서 등록 불가
 AppRegistry.registerComponent('EumtalkShare', () => Share);
@@ -64,6 +66,20 @@ const checkAppConfigurations = () => {
     // AsyncStorage.setItem('EHINF', 'https://otalk.ottogi.co.kr');
 
     // 20200428 covision 운영 배포용 ( 삭제 필요 ) ---- END
+
+    /* 로컬 유저데이터 삭제 */
+    deleteLocalData = async () =>{
+      const clearLocalData= await AsyncStorage.getItem('clearLocalData');
+      
+      if(clearLocalData == 'Y'){
+        const id = await AsyncStorage.getItem('covi_user_access_id');
+        await db.deleteLocalDb(id);
+        AsyncStorage.setItem('clearLocalData', 'N');
+        restartApp();
+      }
+    };
+
+    await deleteLocalData;
 
     const configLoadFlag = await makeConfigData();
 

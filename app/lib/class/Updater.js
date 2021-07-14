@@ -10,8 +10,6 @@ import { getServer } from '@/config';
 import { managesvr } from '@API/api';
 import { getDic } from '@/config';
 import VersionCheck from 'react-native-version-check';
-import * as db from '@/lib/appData/connector';
-import { restartApp } from '@/lib/device/common';
 import AsyncStorage from '@react-native-community/async-storage';
 
 let updater = null;
@@ -71,7 +69,7 @@ class Updater {
     ).then(({ data }) => {
       if (data.status == 'SUCCESS') {
         if(data.deleteLocalData == 'Y')
-          this.deleteLocalData()
+          AsyncStorage.setItem('clearLocalData', 'Y');
         if(platform == 'ios'){            
           if (data.forceUpdate) {
             this.forceUpdateApp(isUpdate => {
@@ -98,12 +96,6 @@ class Updater {
         Linking.openURL(url);
       }
     });
-  };
-
-  /* 로컬 유저데이터 삭제 */
-  deleteLocalData = async () =>{
-    const id = await AsyncStorage.getItem('covi_user_access_id');
-    await db.deleteLocalDb(id);
   };
 
 }
