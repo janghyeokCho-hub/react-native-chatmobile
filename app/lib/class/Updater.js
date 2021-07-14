@@ -104,7 +104,6 @@ class Updater {
   deleteLocalData = async () =>{
     const id = await AsyncStorage.getItem('covi_user_access_id');
     await db.deleteLocalDb(id);
-    restartApp();
   };
 
 }
