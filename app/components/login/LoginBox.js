@@ -25,6 +25,7 @@ import { getBottomPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { getServer } from '@/config';
+import MemoTextInput from '@C/common/inputs/MemoTextInput';
 
 const LoginBox = ({ route }) => {
   const { colors, sizes } = useTheme();
@@ -136,6 +137,10 @@ const LoginBox = ({ route }) => {
     }
   }, [authFail]);
 
+  const handleChangeId = userId =>{
+    setUserId(userId)
+  }
+
   return (
     <>
       {!loading && (
@@ -154,13 +159,16 @@ const LoginBox = ({ route }) => {
                   )}/chatStyle/common/image/common/logo.png`,
                 }}
               />
-              <TextInput
-                style={{ ...styles.textForm_Type1, fontSize: sizes.large }}
-                placeholder={isExtUser ? getDic('Email') : getDic('LoginID')}
-                placeholderTextColor={'#AAA'}
+              <MemoTextInput
+                memKey="id"
+                changeHandler={handleChangeId}
                 value={userId}
-                onChangeText={text => setUserId(text)}
-              />
+                placeholder={
+                  isExtUser ? getDic('Email') : getDic('LoginID')
+                }
+                disabled={loading}
+              ></MemoTextInput>
+
               <TextInput
                 style={{ ...styles.textForm_Type2, fontSize: sizes.large }}
                 placeholder={getDic('Password')}
