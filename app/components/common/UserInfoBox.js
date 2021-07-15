@@ -70,14 +70,22 @@ const UserInfoBox = ({
   }, [userInfo]);
 
   useEffect(() => {
-    if (absenceInfo.length > 0)
+    if (absenceInfo.length > 0){
       absenceInfo.forEach(targetAbsence => {
         const absenceInfo = JSON.parse(targetAbsence);
         if (absenceInfo.id === userInfo.id) {
           setMyAbsence(absenceInfo);
         }
       });
-  }, [absenceInfo]);
+    }else{
+      if (userInfo?.absenceInfo){
+        const absenceInfo = JSON.parse(userInfo.absenceInfo)
+        if (absenceInfo.id === userInfo.id) {
+          setMyAbsence(absenceInfo);
+        }
+      }
+    }
+  }, [userInfo, absenceInfo]);
 
   const dispatch = useDispatch();
 
