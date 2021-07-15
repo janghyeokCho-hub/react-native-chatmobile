@@ -3,7 +3,9 @@
  */
 
 import React from 'react';
-import { AppRegistry, View, Text } from 'react-native';
+import { AppRegistry, Platform } from 'react-native';
+import PushNotification from 'react-native-push-notification';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import AsyncStorage from '@react-native-community/async-storage';
 import { name as appName } from '../app.json';
 import { Provider } from 'react-redux';
@@ -26,6 +28,16 @@ import { restartApp } from '@/lib/device/common';
 
 // Share를 먼저 등록하지 않으면 stack, quickAction, store 등록하면서 등록 불가
 AppRegistry.registerComponent('EumtalkShare', () => Share);
+
+PushNotification.configure({
+  /* Android Push Notification Open Event Linstener(Background) */
+  onNotification(notification) {
+    // onNotification
+    if (Platform.OS === 'ios') {
+      notification.finish(PushNotificationIOS.FetchResult.NoData);
+    }
+  }
+});
 
 const checkAppConfigurations = () => {
   return new Promise(async (resolve, reject) => {
