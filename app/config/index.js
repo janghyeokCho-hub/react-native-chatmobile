@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import { logoutRequest } from '@/lib/api/login';
 import VersionCheck from 'react-native-version-check';
+import { Platform } from 'react-native';
 
 let configInstance = {};
 
@@ -95,6 +96,19 @@ export const getServerDictionary = (domain, lang) => {
   return axios({
     method: 'get',
     url: `${domain}/restful/na/nf/config?lang=${lang}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Covi-User-Access-Version': APP_VERSION,
+      'Covi-User-Device-Type': 'covision.mobile.app',
+    },
+  });
+};
+
+export const getVersionInfo = (domain) => {
+  return axios({
+    method: 'get',
+    url: `${domain}/restful/na/nf/updates/mobile/latest?p=mobile&a=${Platform.OS}`,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json; charset=utf-8',

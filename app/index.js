@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { AppRegistry, View, Text } from 'react-native';
+import { AppRegistry} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { name as appName } from '../app.json';
 import { Provider } from 'react-redux';
@@ -14,7 +14,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import App from './App';
 import InitApp from './InitApp';
-import { initConfig, getServerConfigs, initHostInfo } from '@/config';
+import { initConfig, getServerConfigs, initHostInfo, getVersionInfo } from '@/config';
 import { Notifications } from 'react-native-notifications';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoadingWrap from '@C/common/LoadingWrap';
@@ -69,7 +69,15 @@ const checkAppConfigurations = () => {
 
     /* 로컬 유저데이터 삭제 */
     const deleteLocalData = async () =>{
-      const clearLocalData= await AsyncStorage.getItem('clearLocalData');
+      const hostInfo = await AsyncStorage.getItem('EHINF');
+      let clearLocalData = await AsyncStorage.getItem('clearLocalData');
+
+      //로컬데이터 삭제 최초 패치시 옵션이 먹지않는부분 개선
+      if(!clearLocalData){
+        const versionInfo = await getVersionInfo(hostInfo);
+        AsyncStorage.setItem('clearLocalData', versionInfo?.data?.deleteLocalData);
+        clearLocalData = versionInfo?.data?.deleteLocalData;
+      }
       
       if(clearLocalData == 'Y'){
         const id = await AsyncStorage.getItem('covi_user_access_id');
