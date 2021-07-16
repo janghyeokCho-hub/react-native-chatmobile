@@ -44,7 +44,8 @@ export const managesvr = (
       if (headers['Content-Type'] == 'multipart/form-data') {
         let cancelTokenSource = axios.CancelToken.source();
 
-        onSubmitCancelToken(cancelTokenSource);
+        if(typeof onSubmitCancelToken === 'function')
+          onSubmitCancelToken(cancelTokenSource);
 
         return axios.post(`${MANAGE_SERVER}${url}`, params, {
           headers: {

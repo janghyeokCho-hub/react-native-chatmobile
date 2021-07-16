@@ -57,7 +57,7 @@ export const uploadFile = params => {
     {
       'Content-Type': 'multipart/form-data',
     },
-    params.onSubmitCancelToken,
+    params?.onSubmitCancelToken,
   );
 };
 
