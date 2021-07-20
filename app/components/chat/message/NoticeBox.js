@@ -39,11 +39,7 @@ const NoticeBox = ({
       } catch {
         drawData = drawData;
       }
-      if (typeof drawData.context == 'string') {
-        drawText = drawData.context;
-      } else {
-        drawText = drawData.context;
-      }
+      drawText = drawData.context;
     } else {
       drawText = drawData;
     }
