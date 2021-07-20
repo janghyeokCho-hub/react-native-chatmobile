@@ -58,11 +58,19 @@ const makeMessageText = lastMessage => {
       let drawText = msgObj.Message;
       if (isJSONStr(msgObj.Message)) {
         const drawData = JSON.parse(msgObj.Message);
-        drawText = drawData.context;
-        if(isJSONStr(drawText)){
-          drawText = getSysMsgFormatStr(getDic(JSON.parse(drawText).templateKey),JSON.parse(drawText).datas)
+
+        if(typeof drawData == 'object'){
+          drawText = drawData.context || JSON.stringify(drawData);
+        }else{
+          drawText = drawData.context;
         }
 
+        if(isJSONStr(drawText)){
+          const jsonText =JSON.parse(drawText);
+          if(jsonText.templateKey && jsonText.datas){
+            drawText = getSysMsgFormatStr(getDic(jsonText.templateKey),jsonText.datas)
+          }
+        }
       }
       // protocol check
       if (common.eumTalkRegularExp.test(drawText)) {
