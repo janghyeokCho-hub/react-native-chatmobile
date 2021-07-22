@@ -99,7 +99,8 @@ const checkAppConfigurations = () => {
       }
     };
 
-    await deleteLocalData();
+    if (!__DEV__)
+      await deleteLocalData();
 
     const configLoadFlag = await makeConfigData();
 
