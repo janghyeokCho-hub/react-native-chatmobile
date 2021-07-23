@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @format
  */
 
@@ -99,7 +99,7 @@ const checkAppConfigurations = () => {
       }
     };
 
-    if (!__DEV__)
+    if(!__DEV__)
       await deleteLocalData();
 
     const configLoadFlag = await makeConfigData();

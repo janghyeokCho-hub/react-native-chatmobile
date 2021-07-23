@@ -78,7 +78,6 @@ export const managesvr = (
     method: method,
     url: `${MANAGE_SERVER}${url}`,
     data: params,
-    responseType: 'json',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json; charset=utf-8',

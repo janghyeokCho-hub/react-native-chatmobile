@@ -370,3 +370,78 @@ export const openFileViewer = async item => {
     }
   });
 };
+
+export const creteContentFile = async (contents, fileName) => {
+  const directoryPath = `${RNFS.ExternalStorageDirectoryPath}/Eumtalk/`;
+  const path = directoryPath + fileName;
+  const directoryName =  [{ type: 'Plain', data: 'Eumtalk' }];
+
+  const isExist = await RNFS.exists(directoryPath);
+  
+  if(!isExist){
+    await RNFS.mkdir(directoryPath)
+  }
+
+  const granted = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    null,
+  );
+  if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+    RNFS.writeFile(path, contents, 'utf8').then(()=>{
+      Alert.alert(
+        null,
+        getSysMsgFormatStr(
+          getDic('Tmp_DownloadSuccess'),
+          directoryName,
+        ),
+        [
+          {
+            text: getDic('Open'),
+            onPress: () => {
+              RNFetchBlob.android
+                .actionViewIntent(
+                  path,
+                  getFileMimeByFileName(path),
+                )
+                .catch(() => {
+                  let ext = getFileExtensionByFileName(path);
+                  let message = '';
+                  if (ext) {
+                    message = getDic('Msg_MobileAndroidNoAvailableApp');
+                  } else {
+                    message = getDic('Msg_MobileFileOpenError');
+                  }
+                  Alert.alert(null, message, [
+                    ext != null && {
+                      text: getDic('Search'),
+                      onPress: () => {
+                        Linking.openURL(`market://search?q=${ext}`).catch(
+                          () => {
+                            Linking.openURL(
+                              `https://play.google.com/store/apps/search?q=${ext}`,
+                            ).catch(() => {});
+                          },
+                        );
+                      },
+                    },
+                    {
+                      text: getDic('Close'),
+                    },
+                  ]);
+                });
+            },
+          },
+          {
+            text: getDic('Ok'),
+          },
+        ],
+        { cancelable: true },
+      );
+    });
+  } else {
+    Alert.alert(
+      null,
+      getDic('Msg_StoragePermissionError')[{ text: getDic('Ok') }],
+    );
+  }
+};

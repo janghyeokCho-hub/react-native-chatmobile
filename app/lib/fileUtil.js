@@ -6,6 +6,10 @@ import Exif from 'react-native-exif';
 import imageExtensions from 'image-extensions';
 import videoExtensions from 'video-extensions';
 import { fi } from 'date-fns/locale';
+import { Platform } from 'react-native';
+import { creteContentFile } from '@/lib/device/file';
+import { getSysMsgFormatStr } from '@/lib/common';
+import { getDic } from '@/config';
 
 const extensionImage = new Set(imageExtensions);
 const extensionVideo = new Set(videoExtensions);
@@ -334,7 +338,7 @@ export const getInstance = () => {
 
 export const downloadMessageData = async (roomID, fileName) => {
   const response = await roomApi.getMessageDataFile(roomID);
-  //fileDownload(response.data, fileName);
+  creteContentFile(response.data, fileName);
 };
 
 export const convertFileSize = size => {

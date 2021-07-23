@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert
 } from 'react-native';
 import UserInfoBox from '@/components/common/UserInfoBox';
 import { CommonActions } from '@react-navigation/native';
@@ -18,6 +19,9 @@ import { getRoomNotification, modifyRoomNotification } from '@/lib/api/setting';
 import messaging from '@react-native-firebase/messaging';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import AsyncStorage from '@react-native-community/async-storage';
+import { downloadMessageData } from '@/lib/fileUtil';
+import { getDictionary } from '@/lib/common';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -127,6 +131,35 @@ const ChatMenuBox = ({
     });
   }, [roomInfo]);
 
+  const useMsgExport = useMemo(async () =>{
+    const config = await AsyncStorage.getItem('ESETINF');
+    return config.UseMsgExport || false;
+  }, []);
+
+  const handleSaveChat = () => {
+    Alert.alert(null, getDic('Msg_SaveChat'), [
+      {
+        text: getDic('Ok'),
+        onPress: () => {
+          let fileName = roomInfo.roomName;
+
+          if (fileName == '') {
+            if (roomInfo.roomType == 'G') {
+              fileName = `groupchat_(${roomInfo.members.length})`;
+            }
+            else if (roomInfo.roomType == 'M') {
+              const userName = roomInfo.members.find(item => item.id != id).name;
+              fileName = getDictionary(userName) || userName;
+            }
+          }
+          fileName = fileName + '_chat.txt';
+          downloadMessageData(roomInfo.roomID, fileName);
+        },
+      },
+      { text: getDic('Cancel'), onPress: () => {} },
+    ]);
+  };
+
   return (
     <>
       <View style={styles.container}>
@@ -213,6 +246,23 @@ const ChatMenuBox = ({
                     </Text>
                   </View>
                 </TouchableOpacity>
+                {useMsgExport && (
+                  <TouchableOpacity onPress={handleSaveChat}>
+                   <View style={styles.menuBox}>
+                   <Svg xmlns="http://www.w3.org/2000/svg" width="12.255" height="12.658" viewBox="0 0 12.255 12.658">
+                     <G transform="translate(0)">
+                       <Path d="M16.661,0H7.567a.485.485,0,0,0-.484.484V12.174a.485.485,0,0,0,.484.484H18.854a.485.485,0,0,0,.484-.484V3.3a.465.465,0,0,0-.1-.3L17.04.185A.494.494,0,0,0,16.661,0Zm-5.87.968h5.079V5.724H10.792Zm7.579,10.723H8.051V.968H9.824V6.216a.445.445,0,0,0,.443.476h6.111a.458.458,0,0,0,.46-.476V1.532l1.532,1.935v8.224Z" transform="translate(-7.083)" fill="#222"/>
+                       <Path d="M223.949,65.651a.485.485,0,0,0-.484-.484H222.9a.485.485,0,0,0-.484.484v1.935a.485.485,0,0,0,.484.484h.564a.485.485,0,0,0,.484-.484Z" transform="translate(-216.289 -63.313)" fill="#222"/>
+                      </G>
+                    </Svg>
+                     <Text
+                       style={{ ...styles.menuLabel, fontSize: sizes.default }}
+                     >
+                       {getDic('SaveChat')}
+                     </Text>
+                   </View>
+                 </TouchableOpacity>
+                )}
               </>
             )}
           </>

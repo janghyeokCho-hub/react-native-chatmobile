@@ -13,6 +13,7 @@ import CameraRoll from '@react-native-community/cameraroll';
 import Share from 'react-native-share';
 import RNFetchBlob from 'rn-fetch-blob';
 import { FileLogger, LogLevel } from 'react-native-file-logger';
+import { getSysMsgFormatStr } from '@/lib/common';
 
 const getHeaders = async () => {
   return {
@@ -247,5 +248,44 @@ const downloadShareFile = async (token, fileName, callback) => {
         fileDownload(optionObj, callbackFn);
       });
     }
+  });
+};
+
+export const creteContentFile = async (contents, fileName) => {
+  const directoryName = `${RNFS.DocumentDirectoryPath}/Downloads/`;
+  const path = directoryName + fileName;
+
+  RNFS.exists(directoryName)
+  .then(result => {
+    if (result) return Promise.resolve();
+    else {
+      return RNFS.mkdir(directoryName)
+    }
+  }).then(() => {
+    return RNFS.writeFile(path, contents, 'utf8')
+  }).then(() => {
+    Alert.alert(
+      null,
+      getSysMsgFormatStr(
+        getDic('Tmp_DownloadSuccess'),
+        [
+          { type: 'Plain', data: 'Downloads' }
+        ]
+      ),
+      [
+        {
+          text: getDic('Open'),
+          onPress: () => {
+            RNFetchBlob.ios.openDocument(path);
+          },
+        },
+        {
+          text: getDic('Ok'),
+        },
+      ],
+      { cancelable: true },
+    );
+  }).catch(err => {
+    console.log('Error   ', err);
   });
 };
