@@ -80,15 +80,17 @@ const checkAppConfigurations = () => {
     // 20200428 covision 운영 배포용 ( 삭제 필요 ) ---- END
 
     /* 로컬 유저데이터 삭제 */
-    const deleteLocalData = async () =>{
+    const deleteLocalData = async () => {
       const hostInfo = await AsyncStorage.getItem('EHINF');
       let clearLocalData = await AsyncStorage.getItem('clearLocalData');
 
       //로컬데이터 삭제 최초 패치시 옵션이 먹지않는부분 개선
-      if(!clearLocalData){
+      if(!clearLocalData && hostInfo){
         const versionInfo = await getVersionInfo(hostInfo);
         AsyncStorage.setItem('clearLocalData', versionInfo?.data?.deleteLocalData);
         clearLocalData = versionInfo?.data?.deleteLocalData;
+      } else if(!clearLocalData && !hostInfo) {
+        clearLocalData == 'Y';
       }
       
       if(clearLocalData == 'Y'){
