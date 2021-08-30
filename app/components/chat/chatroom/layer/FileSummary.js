@@ -293,7 +293,7 @@ const FileSummary = ({ route, navigation }) => {
           selectItems.forEach(item => {
             arrDownloadList.push(
               new Promise((resolove, reject) => {
-                downloadByToken(item.token, item.name, data => {
+                downloadByToken({ token: item.token, fileName: item.name }, data => {
                   downloadMsgObject = data;
                   resolove();
                 });

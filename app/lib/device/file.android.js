@@ -67,7 +67,6 @@ export const loggerInit = () => {
 
 const fileDownload = async (optionObj, callback) => {
   RNFS.downloadFile(optionObj).promise.then(response => {
-    console.log('#####', response);
     if (optionObj.imageOrVideo) {
       CameraRoll.save(`file://${optionObj.toFile}`, {
         album: 'eumtalk',
@@ -92,8 +91,12 @@ const fileDownload = async (optionObj, callback) => {
 };
 
 export const downloadByToken = async (
-  token,
-  fileName,
+  {
+    token,
+    fileName,
+    type = 'chat',
+    userId
+  },
   callback,
   progressCallback,
 ) => {
@@ -101,6 +104,7 @@ export const downloadByToken = async (
   let directoryName = [{ type: 'Plain', data: 'Eumtalk' }];
   let directoryPath = 'Eumtalk';
   let filePath = null;
+  let downloadPath = null;
 
   if (imageOrVideo) {
     directoryName = [
@@ -114,17 +118,21 @@ export const downloadByToken = async (
   } else {
     filePath = `${RNFS.ExternalStorageDirectoryPath}/${directoryPath}`;
   }
+  
+  if (type === 'chat') {
+    downloadPath = `${getServer('MANAGE')}/download/${token}`
+  } else if (type === 'note') {
+    downloadPath = `${getServer('MANAGE')}/na/download/CR/${userId}/${token}/NOTE`;
+  }
 
   let optionObj = {
-    fromUrl: `${getServer('MANAGE')}/download/${token}`,
+    fromUrl: downloadPath,
     toFile:
       (!imageOrVideo && (await makeFileName(filePath, fileName))) ||
       makeRandomFileName(filePath, fileName),
     headers: await getHeaders(),
     imageOrVideo: imageOrVideo,
   };
-  console.log('optionObj', optionObj);
-  console.log('optionObj.toFile', optionObj.toFile);
 
   const callbackFn = response => {
     if (response.statusCode == 204) {
@@ -159,7 +167,6 @@ export const downloadByToken = async (
       null,
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('@@@@@', result);
       if (result) fileDownload(optionObj, callbackFn);
       else {
         RNFS.mkdir(filePath).then(result => {
@@ -177,8 +184,7 @@ export const downloadByToken = async (
 
 export const downloadByTokenAlert = (item, progressCallback) => {
   downloadByToken(
-    item.token,
-    item.fileName,
+    item,
     data => {
       Alert.alert(
         null,

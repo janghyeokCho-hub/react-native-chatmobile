@@ -11,6 +11,7 @@
  import { Provider } from 'react-redux';
  import { Component } from 'react';
  import { createStore, applyMiddleware } from 'redux';
+ import { MenuProvider } from 'react-native-popup-menu';
  import rootReducer, { rootSaga } from './modules';
  import { composeWithDevTools } from 'redux-devtools-extension';
  import createSagaMiddleware from 'redux-saga';
@@ -195,9 +196,11 @@
        <>
          {(loading && <LoadingWrap key={rerenderKey} />) ||
            (configLoadFlag && (
-               <Provider store={store}>
-                 <App stack={stack} key={rerenderKey} />
-               </Provider>
+           <MenuProvider>
+             <Provider store={store}>
+               <App stack={stack} key={rerenderKey} />
+             </Provider>
+           </MenuProvider>
            )) || <InitApp key={rerenderKey} onRerender={this.handleRerender} />}
        </>
      );

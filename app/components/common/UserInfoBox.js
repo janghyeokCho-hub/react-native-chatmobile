@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -357,6 +357,18 @@ const UserInfoBox = ({
     }
   }, [contacts, rooms]);
 
+  const checkedValue = useMemo(() => {
+    if (!checkObj) {
+      return;
+    }
+
+    // userInfo[checkedKey] 값이 비어있으면 checkedSubKey 참조
+    if (typeof checkObj.checkedSubKey !== 'undefined') {
+      return userInfo[checkObj.checkedKey] || userInfo[checkObj.checkedSubKey];
+    }
+    return userInfo[checkObj.checkedKey];
+  }, [userInfo, checkObj]);
+
   return (
     <View>
       <TouchableOpacity
@@ -366,8 +378,7 @@ const UserInfoBox = ({
             userInfo.type != 'G' &&
             checkObj.onPress(
               !checkObj.checkedList.find(
-                item =>
-                  item[checkObj.checkedKey] === userInfo[checkObj.checkedKey],
+                item => (item[checkObj.checkedKey] || item[checkObj.checkedSubKey]) === checkedValue
               ),
               userInfo,
             );
@@ -386,9 +397,8 @@ const UserInfoBox = ({
               data={userInfo}
               checked={
                 checkObj.checkedList.find(
-                  item =>
-                    item[checkObj.checkedKey] === userInfo[checkObj.checkedKey],
-                ) != undefined
+                  item => (item[checkObj.checkedKey] || item[checkObj.checkedSubKey]) === checkedValue
+                ) !== undefined
               }
               onPress={checkObj.onPress}
               disabled={

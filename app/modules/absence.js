@@ -29,6 +29,7 @@ export function* absenceSaga() {
 
 const initialState = {
   absence: [],
+  jobKey: new Map()
 };
 
 const absence = handleActions(
@@ -43,6 +44,9 @@ const absence = handleActions(
         action.payload.result.forEach(folder => {
           if (folder.sub) {
             folder.sub.forEach(target => {
+              if(target.id && target?.jobKey && state.jobKey.has(target.id) === false) {
+                draft.jobKey.set(target.id, target.jobKey);
+              }
               if (target.absenceInfo) {
                 draft.absence.push(target.absenceInfo);
               }

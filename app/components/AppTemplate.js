@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import ContactList from '@C/contact/ContactList';
@@ -15,6 +15,8 @@ import AppTemplateBack from './AppTemplateBack';
 import { getServer, getConfig } from '@/config';
 import SecondAuth from '@C/auth/SecondAuth';
 import * as dbAction from '@/lib/appData/action';
+import { useNoteUnreadCount } from '@/lib/note/state';
+import Note from '@/components/note/Note';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,6 +25,10 @@ const AppTemplate = ({ navigation }) => {
   const [useChannel, setUseChannel] = useState('Y');
   const [secondAuth, setSecondAuth] = useState(false);
   const [secondAuthInfo, setSecondAuthInfo] = useState(null);
+  const useNote = useMemo(() => {
+    return getConfig('UseNote', { use: 'N' });
+  }, []);
+  const unreadNoteCnt = useNoteUnreadCount();
 
   useEffect(() => {
     const useChannelConfig = getConfig('UseChannel', 'Y');
@@ -90,6 +96,14 @@ const AppTemplate = ({ navigation }) => {
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let icon = route.name;
+            let _unreadCnt = 0;
+            if (icon === 'Chat') {
+              _unreadCnt = unreadCnt;
+            } else if (icon === 'Channel') {
+              _unreadCnt = unreadChannelCnt;
+            } else if (icon === 'Note') {
+              _unreadCnt = unreadNoteCnt;
+            }
             return (
               <View
                 style={{
@@ -100,13 +114,9 @@ const AppTemplate = ({ navigation }) => {
                 }}
               >
                 <Icon name={route.name} focus={focused} />
-                {icon == 'Chat' ? (
-                  <UnreadCntButton>{unreadCnt}</UnreadCntButton>
-                ) : icon == 'Channel' ? (
-                  <UnreadCntButton>{unreadChannelCnt}</UnreadCntButton>
-                ) : (
-                  <></>
-                )}
+                {
+                    <UnreadCntButton>{_unreadCnt}</UnreadCntButton>
+                }
               </View>
             );
           },
@@ -135,6 +145,9 @@ const AppTemplate = ({ navigation }) => {
         )}
         {useChannel === 'Y' && (
           <Tab.Screen name="Channel" component={ChannelList} />
+        )}
+        {useNote?.use === 'Y' && (
+          <Tab.Screen name="Note" component={Note} />
         )}
         <Tab.Screen name="UserSetting" component={UserSetting} />
       </Tab.Navigator>

@@ -64,14 +64,19 @@ const fileDownload = (optionObj, callback) => {
 };
 
 export const downloadByToken = async (
-  token,
-  fileName,
+  {
+    token,
+    fileName,
+    type = 'chat',
+    userId
+  },
   callback,
   progressCallback,
 ) => {
   const imageOrVideo = isImageOrVideo(fileName);
   let directoryName = 'Downloads';
   let filePath = null;
+  let downloadPath = null;
 
   if (imageOrVideo) {
     directoryName = 'eumtalkTemporaryFiles';
@@ -80,8 +85,14 @@ export const downloadByToken = async (
     filePath = `${RNFS.DocumentDirectoryPath}/${directoryName}`;
   }
 
+  if (type === 'chat') {
+    downloadPath = `${getServer('MANAGE')}/download/${token}`
+  } else if (type === 'note') {
+    downloadPath = `${getServer('MANAGE')}/na/download/CR/${userId}/${token}/NOTE`;
+  }
+
   let optionObj = {
-    fromUrl: `${getServer('MANAGE')}/download/${token}`,
+    fromUrl: downloadPath,
     toFile:
       (!imageOrVideo && (await makeFileName(filePath, fileName))) ||
       makeRandomFileName(filePath, fileName),
@@ -126,8 +137,7 @@ export const downloadByToken = async (
 
 export const downloadByTokenAlert = (item, progressCallback) => {
   downloadByToken(
-    item.token,
-    item.fileName,
+    item,
     data => {
       if (!data.imageOrVideo) {
         Alert.alert(
