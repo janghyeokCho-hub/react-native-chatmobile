@@ -36,7 +36,7 @@ class fileUpload {
 
     const checkValidation = this.checkValidationFile(files);
 
-    if (checkValidation != 'SUCCESS') {
+    if (checkValidation !== 'SUCCESS') {
       resultType = 'FAILURE';
       resultMsg = checkValidation;
     }
@@ -303,7 +303,7 @@ class fileUpload {
         ? file.name.substring(lastDot + 1, fileLen).toLowerCase()
         : file.fileName.substring(lastDot + 1, fileLen).toLowerCase();
       if (getConfig('File.limitExtension').indexOf(fileExt) == -1) {
-        return false;
+        ext = false;
       }
     });
 

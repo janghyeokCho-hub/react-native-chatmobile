@@ -15,6 +15,12 @@ import ProfilePopup from '@COMMON/ProfilePopup';
 import AddContact from '@C/contact/AddContact';
 import MakeRoom from '@C/chat/chatroom/normal/MakeRoom';
 
+/* 쪽지 */
+import NewNote from '@C/note/NewNote';
+import ReadNote from '@C/note/ReadNote';
+import AddTarget from '@C/note/AddTarget';
+/* 쪽지 */
+
 import {
   InfoSetting,
   PasswordSetting,
@@ -80,6 +86,11 @@ const Root = ({ stack, theme }) => {
               />
               <Stack.Screen name="ChatRoom" component={ChatRoom} />
               <Stack.Screen name="ChannelRoom" component={ChannelRoom} />
+
+              <Stack.Screen name="NewNote" component={NewNote} />
+              <Stack.Screen name="ReadNote" component={ReadNote} />
+              <Stack.Screen name="AddNoteTarget" component={AddTarget} />
+
               <Stack.Screen name="MakeRoom" component={MakeRoom} />
               <Stack.Screen name="MoveChat" component={MoveView} />
               <Stack.Screen name="ProfilePopup" component={ProfilePopup} />

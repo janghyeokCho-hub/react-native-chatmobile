@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import UserInfoBox from '@COMMON/UserInfoBox';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
@@ -21,12 +21,21 @@ const ContactItem = ({
   navigation,
 }) => {
   const { colors, sizes } = useTheme();
-  const contactSub = contact.sub;
+  const jobKeys = useSelector(({ absence }) => absence.jobKey);
+  const contactSub = useMemo(() => contact.sub?.map(item => {
+    if(!item.folderID && item.jobKey) {
+      return item;
+    }
+    // 쪽지 발송 대상 검색을 위한 jobKey 추가
+    return {
+      ...item,
+      jobKey: jobKeys.get(item?.id)
+    }
+  }), [contact, jobKeys]);
   const [isopen, setIsopen] = useState(true);
   const [isload, setIsload] = useState(false);
 
   const dispatch = useDispatch();
-
   useEffect(() => {
     if (contact.sub === undefined && contact.folderType == 'G') {
       setIsopen(false);

@@ -34,6 +34,7 @@ import * as dbAction from '@/lib/appData/action';
 import { Alert } from 'react-native';
 import { restartApp } from '@/lib/device/common';
 import { getDic } from '@/config';
+import produce from 'immer';
 
 // 새메시지 도착
 export const handleNewMessage = (dispatch, userInfo) => {
@@ -50,6 +51,40 @@ export const handleNewMessage = (dispatch, userInfo) => {
     dbAction.saveMessage(json_data);
   };
 };
+
+export const handleNewNoteMessage = (setNoteList) => {
+  return data => {
+    try {if (data == null || typeof data == 'undefined') return;
+      const json_data = JSON.parse(data);
+      const receivedInfo = {
+        // noteId string to number
+        noteId: +json_data.noteId,
+        senderUserId: json_data.userId,
+        senderDisplayName: json_data.multiDisplayName,
+        senderJobPositionName: json_data.multiJobPositionName,
+        senderPhotoPath: json_data.photoPath,
+        senderPresence: json_data.state,
+        fileFlag: json_data.fileFlag,
+        subject: json_data.subject,
+        sendDate: Date.now(),
+        readFlag: 'N',  //새로 발송된 쪽지는 기본적으로 읽지 않은 상태임
+        favorites: '2', //새로 발송된 쪽지는 기본적으로 즐겨찾기되어 있지 않음
+      };
+
+      setNoteList((prevState) => {
+        if (typeof prevState === 'undefined') {
+          return [receivedInfo];
+        }
+        return produce(prevState, draft => {
+          const insertPoint = prevState.findIndex(i => i.favorites === '2');
+          draft?.splice(insertPoint, 0, receivedInfo);
+        });
+      }, false);
+    } catch (err) {
+      console.log("NewNote parse error : ", err);
+    }
+  }
+}
 
 export const handleChatRoomInvite = dispatch => {
   return data => {

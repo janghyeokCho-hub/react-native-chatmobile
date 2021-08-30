@@ -33,9 +33,11 @@ const PushContainer = ({ navigator }) => {
           // 정상적인 알림이 아닐 경우 동작하지 않도록 함
           return;
         }
-        if (notification?.noteId || notification?.payload?.noteId) {
+        const noteId = notification?.noteId || notification?.payload?.noteId;
+        if (noteId) {
           // 쪽지알림 처리
-          Alert.alert('쪽지', '쪽지는 PC에서 학인해주세요.');
+          // Alert.alert('쪽지', '쪽지는 PC에서 학인해주세요.');
+          navigator.navigate('ReadNote', { noteId: +noteId, viewType: 'receive' });
           return;
         }
 

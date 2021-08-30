@@ -3,18 +3,21 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as socketConnector from '@/lib/socket/socketConnect';
 import * as socketActions from '@/lib/socket/socketActions';
 import AppStateHandler from '@C/AppStateHandler';
+import { useNoteList } from '@/lib/note/state';
 
 const SocketContainer = () => {
   const token = useSelector(({ login }) => login.token);
   const userInfo = useSelector(({ login }) => login.userInfo);
   const accessid = useSelector(({ login }) => login.id);
   const fixedUsers = useSelector(({ presence }) => presence.fixedUsers);
+  const { mutate:setNoteList } = useNoteList({ viewTyoe: 'receive' });
 
   const dispatch = useDispatch();
 
   const socketActionsObj = useMemo(() => {
     return {
       onNewMessage: socketActions.handleNewMessage(dispatch, userInfo),
+      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList),
       onChatRoomInvitation: socketActions.handleChatRoomInvite(dispatch),
       onChatRoomExit: socketActions.handleChatRoomExit(dispatch, userInfo),
       onReadCountChanged: socketActions.handleReadCountChanged(

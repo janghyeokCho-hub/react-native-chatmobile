@@ -373,9 +373,15 @@ const MessagePostBox = ({
             { cancelable: true },
           );
         } else {
+          const fileSizeLimit = getConfig('File.limitUnitFileSize');
           Alert.alert(
             null,
-            getSysMsgFormatStr(getDic('Msg_LimitFileExt'), '50MB'),
+            getSysMsgFormatStr(getDic('Msg_LimitFileSize'), [
+              {
+                type: 'Plain',
+                data: fileUtil.convertFileSize(fileSizeLimit)
+              }
+            ]),
             [
               {
                 text: getDic('Ok'),

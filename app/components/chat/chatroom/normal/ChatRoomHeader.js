@@ -44,8 +44,8 @@ const makeRoomName = (room, id, isInherit, sizes) => {
               img={target.photoPath}
               style={styles.headerProfile}
             />
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: sizes.default }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: "50%" }}>
+              <Text style={{ fontSize: sizes.default, maxWidth:'100%' }} numberOfLines={2}>
                 {getJobInfo(target)}
               </Text>
               {target.isMobile === 'Y' && (
@@ -127,7 +127,7 @@ const ChatRoomHeader = ({
   onSearchBox,
   openSideMenu,
   navigation,
-  cancelToken,
+  cancelToken
 }) => {
   const { colors, sizes } = useTheme();
   const { tempMessage, id } = useSelector(({ message, login }) => ({
@@ -218,6 +218,7 @@ const ChatRoomHeader = ({
             />
           </Svg>
         </TouchableOpacity>
+
         {roomInfo && roomName}
 
         <View style={styles.leftMenuBox}>

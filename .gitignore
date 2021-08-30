@@ -64,7 +64,5 @@ __tests__
 
 # Lock files
 package-lock.json
-yarn.lock
-ios/Podfile.lock
 android/java_pid*
 ios/chatmobile.xcodeproj/xcshareddata/xcschemes/chatmobile.xcscheme
