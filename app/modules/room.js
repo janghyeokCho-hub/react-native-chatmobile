@@ -304,8 +304,7 @@ const room = handleActions(
 
         if (room) {
           room.lastMessage = lastMessageData;
-          room.lastMessageDate =
-            action.payload.sendDate == null ? ' ' : action.payload.sendDate;
+          room.lastMessageDate = action.payload.sendDate;
 
           draft.rooms.splice(
             draft.rooms.findIndex(r => r.roomID == action.payload.roomID),
@@ -415,8 +414,7 @@ const room = handleActions(
             roomID: action.payload.roomID,
             updateDate: null,
             lastMessage: lastMessageData,
-            lastMessageDate:
-              action.payload.sendDate == null ? ' ' : action.payload.sendDate,
+            lastMessageDate: action.payload.sendDate,
             unreadCnt: action.payload.isMine != 'Y' ? 1 : 0,
           });
         }

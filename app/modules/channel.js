@@ -429,8 +429,7 @@ const channel = handleActions(
 
         if (channel) {
           channel.lastMessage = lastMessageData;
-          channel.lastMessageDate =
-            action.payload.sendDate == null ? ' ' : action.payload.sendDate;
+          channel.lastMessageDate = action.payload.sendDate;
 
           draft.channels.splice(
             draft.channels.findIndex(c => c.roomId === action.payload.roomID),
@@ -551,8 +550,7 @@ const channel = handleActions(
             roomId: action.payload.roomID,
             updateDate: null,
             lastMessage: lastMessageData,
-            lastMessageDate:
-              action.payload.sendDate == null ? ' ' : action.payload.sendDate,
+            lastMessageDate: action.payload.sendDate,
             unreadCnt: action.payload.isMine != 'Y' ? 1 : 0,
           });
         }

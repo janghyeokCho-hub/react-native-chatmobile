@@ -579,26 +579,51 @@ export const getRooms = async () => {
 
     let selectRooms = selectList[0][1].rows.raw();
     const selectMembers = selectList[1][1].rows.raw();
-
-    data.forEach(item => {
-      let room = selectRooms.find(room => room.roomID == item.roomId);
-      if (room) {
-        room.members = selectMembers.filter(
-          member => member.roomId == item.roomId,
-        );
-
-        room.lastMessage = JSON.parse(item.lastMessage);
-        room.lastMessageDate =
-          item.lastMessageDate == null ? ' ' : item.lastMessageDate;
-        room.unreadCnt = item.unreadCnt;
-
-        rooms.push(room);
-      } else {
-        //console.log(`reqGetRoom - There is no room, '${item.roomId}'`);
-      }
-    });
+    const outdatedRooms = [];
+    try {
+      for await (const item of data) {
+        let room = selectRooms.find(room => room.roomID == item.roomId);
+        if (room) {
+          room.members = selectMembers.filter(
+            member => member.roomId == item.roomId,
+          );
+          // 서버에 채팅방의 데이터가 남아있지 않은 경우 로컬데이터 참조
+          if (item.lastMessageDate === null) {
+            try {
+              await dbCon.transaction(async tx => {
+                const lastMessage = await db.tx(tx).query(
+                  `SELECT m.context, m.fileInfos, m.sendDate FROM message as m WHERE m.roomId = ${item?.roomId} ORDER BY m.sendDate DESC LIMIT 1`
+                ).execute();
+                if (lastMessage?.length > 1) {
+                  const message = lastMessage[1].rows.item(0);
+                  room.lastMessage = {
+                    Message: message?.context || '',
+                    File: message?.fileInfos || ''
+                  };
+                  room.lastMessageDate = message?.sendDate || null;
+                  room.unreadCnt = item?.unreadCnt;
+                  outdatedRooms.push(room);
+                }
+              });
+            } catch (err) {
+              console.log('Get LastMessage Error : ', err);
+            }
+          } else {
+            room.lastMessage = JSON.parse(item.lastMessage);
+            room.lastMessageDate = item.lastMessageDate;
+            room.unreadCnt = item.unreadCnt;
+            rooms.push(room);
+          }
+        } else {
+          //console.log(`reqGetRoom - There is no room, '${item.roomId}'`);
+        }
+      };
+      outdatedRooms.sort((a, b) => b.lastMessageDate - a.lastMessageDate);
+      rooms.push(...outdatedRooms);
+    } catch (err) {
+      console.log('Get Rooms Error : ', err)
+    }
   }
-
   return { rooms };
 };
 
