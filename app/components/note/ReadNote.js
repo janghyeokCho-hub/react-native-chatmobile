@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState, useEffect, useLayoutEffect, createRef, useRef } from 'react';
 import useSWR from 'swr';
-import { Text, StyleSheet, Alert, ScrollView, View, TouchableOpacity, SafeAreaView, Keyboard } from 'react-native';
+import { Text, StyleSheet, Alert, ScrollView, View, TouchableOpacity, SafeAreaView, Keyboard, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RichEditor } from 'react-native-pell-rich-editor';
 import { MenuTrigger, MenuOption, MenuOptions, Menu } from 'react-native-popup-menu';
@@ -27,6 +27,7 @@ import ReplyIcon from '@/components/common/icons/ReplyIcon';
 import ForwardIcon from '@/components/common/icons/ForwardIcon';
 import DotIcon from '@/components/common/icons/DotIcon';
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
+import RenderHtml from 'react-native-render-html';
 
 const styles = StyleSheet.create({
     contanier: {
@@ -92,7 +93,7 @@ export default function ReadNote({ route }) {
         drawer?.current?.open();
     };
     const { sizes } = useTheme();
-
+    const { width } = useWindowDimensions();
     useLayoutEffect(() => {
         // ... 
         return () => {
@@ -396,13 +397,18 @@ export default function ReadNote({ route }) {
 
                     {/* 쪽지내용 */}
                     <View style={{ width: '100%', marginHorizontal: '1%', wordBreak: "break-word" }}>
-                        { rendered && <RichEditor
+                        {/* { rendered && <RichEditor
                             initialContentHTML={data?.context}
                             editorStyle={{
                                 contentCSSText: 'word-break: break-word;'
                             }}
                             // useContainer={false}
                             disabled={true}
+                        /> } */}
+                        { rendered && <RenderHtml
+                            contentWidth={width}
+                            source={{html: data?.context}}
+                            baseStyle={{ marginRight: '2%', marginLeft: '2%' }}
                         /> }
                     </View>
 

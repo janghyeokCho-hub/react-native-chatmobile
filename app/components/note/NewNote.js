@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useCallback, useEffect, createRef, useLayoutEffect, useRef } from 'react';
-import { Text, StyleSheet, View, TextInput, SafeAreaView, TouchableOpacity, PermissionsAndroid, Platform, ScrollView, Image, Alert, FlatList } from 'react-native';
+import React, { useMemo, useState, useCallback, createRef, useLayoutEffect } from 'react';
+import { Text, StyleSheet, View, TextInput, SafeAreaView, TouchableOpacity, PermissionsAndroid, Platform, ScrollView, Image, Alert, FlatList, Keyboard } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import { actions, RichEditor } from 'react-native-pell-rich-editor';
 import { useNavigation, useTheme } from '@react-navigation/native';
@@ -10,12 +10,11 @@ import useSWR from 'swr';
 import NoteHeader from '@C/note/NoteHeader';
 import { getTopPadding } from '@/lib/device/common';
 import { getConfig, getDic } from '@/config';
-import { sendNote, getNote } from '@/lib/note/fetch';
-import { useNote, useViewType, NOTE_RECEIVER_SEPARATOR, parseSender, convertTimeFormat, translateName, emergencyMark, nonEmergencyMark } from '@/lib/note/state';
+import { sendNote } from '@/lib/note/fetch';
+import { NOTE_RECEIVER_SEPARATOR, parseSender, convertTimeFormat, translateName, emergencyMark, nonEmergencyMark } from '@/lib/note/state';
 import { getInstance, convertFileSize } from '@/lib/fileUtil';
 import { getJobInfo, getDictionary, getBackgroundColor, getSysMsgFormatStr } from '@/lib/common';
 
-import NoteViewSkeleton from '@C/note/skeleton/NoteViewSkeleton';
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
 import NoteFile from '@/components/note/NoteFile';
@@ -38,18 +37,17 @@ const styles = StyleSheet.create({
     rowContainer: {
         flexDirection: "row",
         paddingHorizontal: '4%',
-        paddingVertical: '1%',
         alignItems: "center",
         borderBottomColor: "#cecece",
         borderBottomWidth: 1,
-        paddingVertical: '3%',
+        paddingVertical: '2%'
     },
     colContainer: {
         flexDirection: "column",
         marginTop: '2%',
         paddingHorizontal: '4%',
         // 뷰 최하단의 첨부파일 잘림방지
-        paddingBottom: '25%'
+        paddingBottom: '20%'
     },
     profileBoxContainer: {
         borderColor: '#cecece',
@@ -58,7 +56,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         borderRadius: 50,
         marginHorizontal: 4,
-        marginBottom: 8,
+        marginTop: 4,
         alignItems: "center",
         flexDirection: "row"
     },
@@ -244,14 +242,13 @@ function RecipientList({ ...rest }) {
 
 const _AttachFileList = ({ style, files, handleRemove }) => {
     if (!files?.length) {
-        return <></>;
+        return <View></View>;
     }
-
     return (
         <View style={style}>
-            <Text>{getDic('AttachFile')}</Text>
+            <Text>{files?.length ? getDic('AttachFile') : ''}</Text>
             {
-                files.map((file, idx) => (
+                files?.map((file, idx) => (
                     <NoteFile
                         key={idx}
                         item={{
@@ -353,6 +350,7 @@ function NewNote({ navigation, route }) {
         setTargetList([]);
         setSubject(null);
         editorRef.current = null;
+        Keyboard.dismiss();
     };
 
     useLayoutEffect(() => {
@@ -391,13 +389,11 @@ function NewNote({ navigation, route }) {
         });
         const fileCtrl = getInstance();
         const appendResult = fileCtrl.appendFiles(results);
-        console.log('!@#!@#    ', results);
         if (appendResult.message === 'LIMIT_FILE_EXTENSION') {
             Alert.alert(null, getDic('Msg_LimitFileExt'));
             return;
         } else if (appendResult.message === 'LIMIT_FILE_SIZE') {
             const fileSizeLimit = getConfig('File.limitUnitFileSize');
-            // console.log('@#@#   ', getSysMsgFormatStr(getDic('Msg_LimitFileSize'), convertFileSize(fileSizeLimit)));
             Alert.alert(
                 null,
                 getSysMsgFormatStr(getDic('Msg_LimitFileSize'), [
@@ -517,9 +513,9 @@ function NewNote({ navigation, route }) {
             title={getDic(`Msg_Note_${route?.params?.type}`, 'Msg_Note_Send')}
             menus={customMenus}
         />
-        <View style={styles.contanier}>
+        <ScrollView style={styles.contanier} nestedScrollEnabled>
             <RecipientList style={styles.rowContainer} />
-            <View style={[styles.rowContainer, { paddingVertical: '3%' }]}>
+            <View style={[styles.rowContainer, { paddingVertical: '1%' }]}>
                 <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
                     {useEmergencyNote === 'Y' && (
                         <TouchableOpacity style={{ borderWidth: 1, borderColor: '#bababa', borderRadius: 100, marginRight: 4 }} onPress={() => setIsEmergency((prev) => !prev)}>
@@ -528,23 +524,22 @@ function NewNote({ navigation, route }) {
                     )}
                     <Text>{getDic('Title')}</Text>
                 </View>
-                <TextInput style={{ flex: 5 }} placeholder={getDic('Title')} value={subject} onChangeText={(text) => setSubject(text)} />
+                <TextInput style={{ flex: 5, paddingVertical: Platform.OS === 'ios' ? '3%' : 0 }} placeholder={getDic('Title')} value={subject} onChangeText={(text) => setSubject(text)} />
             </View>
             {/* Context */}
-            <ScrollView>
-                <View style={{ paddingBottom: tempFile?.length ? tempFile.length * 20 : '5%', marginBottom: '100%' }}>
+                <View>
                     <RichEditor
                         ref={editorRef}
                         placeholder={'Content'}
                         pasteAsPlainText={true}
                         initialContentHTML={note.context}
-                        
+                        useContainer={false}
+                        containerStyle={{ width: '100%', height: 600 }}
                     />
-                    <AttachFileList style={styles.colContainer} files={tempFile} handleRemove={handleRemove} />
                 </View>
-            </ScrollView>
-        </View>
-    </SafeAreaView>;
+                <AttachFileList style={styles.colContainer} files={tempFile} handleRemove={handleRemove} />
+        </ScrollView>
+    </SafeAreaView>
 }
 
 export default React.memo(NewNote);
