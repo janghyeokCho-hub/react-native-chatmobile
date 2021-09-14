@@ -1605,6 +1605,7 @@ export const syncUnreadCount = async (param, callback) => {
   const roomId = param.roomId;
   let unreadCnts = [];
 
+  // unreadCnt != 0인 메시지 id를 동시화 대상으로 가져옴
   let messageIds = await new Promise((resolve, reject) => {
     dbCon.transaction(tx => {
       db.tx(tx, 'message')
@@ -1612,7 +1613,7 @@ export const syncUnreadCount = async (param, callback) => {
         .where(
           `roomId = ${roomId} AND messageId BETWEEN ${param.startId} AND ${
             param.endId
-          } AND isSyncUnread IS NULL`,
+          } AND isSyncUnread IS NULL AND unreadCnt != 0`,
         )
         .execute((tx, result) => {
           resolve(result.rows.raw());
@@ -1634,12 +1635,15 @@ export const syncUnreadCount = async (param, callback) => {
       unreadCnts = response.data.result;
 
       dbCon.transaction(tx => {
+        const updatedMessageIds = [];
+
+        // 각 메시지별 unread count 최신값 업데이트
         unreadCnts.forEach(item => {
           let updateParam = {
             unreadCnt: item.unreadCnt,
           };
 
-          if (item.unreadCnt == 0) {
+          if (item.unreadCnt === 0) {
             updateParam.isSyncUnread = 'Y';
           }
 
@@ -1647,11 +1651,38 @@ export const syncUnreadCount = async (param, callback) => {
             .update(updateParam)
             .where(`messageId IN (${item.messageId})`)
             .execute();
+          
+          updatedMessageIds.push(...item.messageId.split(","));
         });
+
+        /**
+         * 2021.08.31 읽음카운트 동기화 추가개선
+         * 
+         * 동기화 대상(local unreadCnt != 0) 메시지 중에서, 서버 db에 unreadCnt가 0인 메시지는 sync response에 포함되어 있지 않음.
+         * => response 기반으로 local db를 업데이트 하므로, response에서 누락된 메시지는 unreadCnt 갱신되지 않음
+         * 
+         * unreadCnt가 누락되는 케이스
+         * 1. Websocket 일시 단절로 인해 local unreadCnt 업데이트가 일부 누락된 이후, 서버 db에 unreadCnt=0인 메시지를 동기화 시도
+         * 2. 서버에서 삭제된 메시지
+
+         * problem solve 1안
+         * - 동기화를 요청했던 메시지 중 server response에 포함되지 않은 메시지는 unreadCnt = 0으로 일괄 업데이트
+         */
+        const nonUpdatedMessageIds = messageIds.filter(m => {
+          return updatedMessageIds.includes(`${m}`) === false;
+        });
+        if(nonUpdatedMessageIds.length > 0) {
+          const _nonUpdated = nonUpdatedMessageIds.join(',');
+          db.tx(tx, 'message')
+          .update({ unreadCnt: 0 })
+          .where(`messageId IN (${_nonUpdated})`)
+          .execute();
+
+          unreadCnts.push({ messageId: _nonUpdated, unreadCnt: 0 });
+        }
       });
     }
   }
-
   return unreadCnts;
 };
 
