@@ -70,16 +70,16 @@ const UserInfoBox = ({
   }, [userInfo]);
 
   useEffect(() => {
-    if (absenceInfo.length > 0){
+    if (absenceInfo.length > 0) {
       absenceInfo.forEach(targetAbsence => {
         const absenceInfo = JSON.parse(targetAbsence);
         if (absenceInfo.id === userInfo.id) {
           setMyAbsence(absenceInfo);
         }
       });
-    }else{
-      if (userInfo?.absenceInfo){
-        const absenceInfo = JSON.parse(userInfo.absenceInfo)
+    } else {
+      if (userInfo?.absenceInfo) {
+        const absenceInfo = JSON.parse(userInfo.absenceInfo);
         if (absenceInfo.id === userInfo.id) {
           setMyAbsence(absenceInfo);
         }
@@ -183,9 +183,8 @@ const UserInfoBox = ({
               {isLong(getDeptName())}
             </Text>
           </View>
-          { myAbsence.code ? (
+          {myAbsence.code ? (
             <View style={styles.rightMessageAbsenceBox}>
-              <View style={styles.absenceDot} />
               <Text
                 adjustsFontSizeToFit={Platform.OS == 'android'}
                 style={{
@@ -197,39 +196,37 @@ const UserInfoBox = ({
                 {getDic('Ab_' + myAbsence.code)}
               </Text>
             </View>
-          ) : (
-            !disableMessage && userInfo.work && userInfo.work.length > 0 ? (
+          ) : !disableMessage && userInfo.work && userInfo.work.length > 0 ? (
+            <View
+              style={[
+                myAbsence.id
+                  ? styles.rightMessageAbsenceBox
+                  : styles.rightMessageBox,
+                { maxWidth: wp('55') - 80 },
+              ]}
+            >
               <View
-                style={[
-                  myAbsence.id
-                    ? styles.rightMessageAbsenceBox
-                    : styles.rightMessageBox,
-                  { maxWidth: wp('55') - 80 },
-                ]}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
               >
-                <View
+                <Text
+                  adjustsFontSizeToFit={Platform.OS == 'android'}
+                  // style={{ ...styles.rightMessage, fontSize: 13 + sizes.inc }}
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    ...styles.rightMessage,
+                    fontSize: 13 + sizes.inc,
                   }}
+                  numberOfLines={1}
                 >
-                  <Text
-                    adjustsFontSizeToFit={Platform.OS == 'android'}
-                    // style={{ ...styles.rightMessage, fontSize: 13 + sizes.inc }}
-                    style={{
-                      ...styles.rightMessage,
-                      fontSize: 13 + sizes.inc,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {isLong(userInfo.work)}
-                    {/* {userInfo.work} */}
-                  </Text>
-                  {myAbsence.id && <View style={styles.absenceDot} />}
-                </View>
+                  {isLong(userInfo.work)}
+                  {/* {userInfo.work} */}
+                </Text>
+                {myAbsence.id && <View style={styles.absenceDot} />}
               </View>
-            ) : null
-          )}
+            </View>
+          ) : null}
         </>
       );
     }
@@ -378,7 +375,9 @@ const UserInfoBox = ({
             userInfo.type != 'G' &&
             checkObj.onPress(
               !checkObj.checkedList.find(
-                item => (item[checkObj.checkedKey] || item[checkObj.checkedSubKey]) === checkedValue
+                item =>
+                  (item[checkObj.checkedKey] ||
+                    item[checkObj.checkedSubKey]) === checkedValue,
               ),
               userInfo,
             );
@@ -397,7 +396,9 @@ const UserInfoBox = ({
               data={userInfo}
               checked={
                 checkObj.checkedList.find(
-                  item => (item[checkObj.checkedKey] || item[checkObj.checkedSubKey]) === checkedValue
+                  item =>
+                    (item[checkObj.checkedKey] ||
+                      item[checkObj.checkedSubKey]) === checkedValue,
                 ) !== undefined
               }
               onPress={checkObj.onPress}
