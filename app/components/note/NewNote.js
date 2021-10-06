@@ -515,16 +515,18 @@ function NewNote({ navigation, route }) {
         />
         <ScrollView style={styles.contanier} nestedScrollEnabled>
             <RecipientList style={styles.rowContainer} />
-            <View style={[styles.rowContainer, { paddingVertical: '1%' }]}>
-                <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+            <View style={[styles.rowContainer, { paddingVertical: '2%', alignItems: 'center' }]}>
+                <View style={{ flex: 1, flexDirection: "row", alignItems: 'center' }}>
                     {useEmergencyNote === 'Y' && (
-                        <TouchableOpacity style={{ borderWidth: 1, borderColor: '#bababa', borderRadius: 100, marginRight: 4 }} onPress={() => setIsEmergency((prev) => !prev)}>
+                        <TouchableOpacity style={{ paddingHorizontal: 2, paddingVertical: 6 }} onPress={() => setIsEmergency((prev) => !prev)}>
                             <Text>{isEmergency ? emergencyMark : nonEmergencyMark}</Text>
                         </TouchableOpacity>
                     )}
-                    <Text>{getDic('Title')}</Text>
+                    <Text style={{ fontSize: 14 }}>{getDic('Title')}</Text>
                 </View>
-                <TextInput style={{ flex: 5, paddingVertical: Platform.OS === 'ios' ? '3%' : 0 }} placeholder={getDic('Title')} value={subject} onChangeText={(text) => setSubject(text)} />
+                <View style={{ flex: 5, justifyContent: 'center' }}>
+                    <TextInput style={{ paddingVertical: Platform.OS === 'ios' ? '3%' : 0, fontSize: 14 }} placeholder={getDic('Title')} value={subject} onChangeText={(text) => setSubject(text)} />
+                </View>
             </View>
             {/* Context */}
                 <View>

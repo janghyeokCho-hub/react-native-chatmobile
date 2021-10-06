@@ -207,7 +207,7 @@ function SortTypeSelector({ viewType }) {
     const [activeSort, setActiveSort] = useState(null);
     const [nameSort, setNameSort] = useState(SORT.DESC);
     const [dateSort, setDateSort] = useState(SORT.DESC);
-    const { mutate: setNoteList, search } = useNoteList({ viewType });
+    const { data: noteList, mutate: setNoteList, search } = useNoteList({ viewType });
     const { data: searchText } = useSWR('/note/list/searchText', null, { initialData: '' });
     const _styles = StyleSheet.create({
         sortContainer: { flexDirection: "row", justifyContent: "flex-end", marginBottom: '4%' },
@@ -228,7 +228,7 @@ function SortTypeSelector({ viewType }) {
         try {
             if (!searchText) {
                 const result = await getNoteList(`/note/list/${viewType}`, _sortName, nextSort);
-                Array.isArray(result) && setNoteList(result);
+                Array.isArray(result) && setNoteList(result, false);
             } else {
                 search(searchText, _sortName, nextSort);
             }
@@ -253,6 +253,13 @@ function SortTypeSelector({ viewType }) {
     }, [activeSort]);
 
     const deleteAllNotes = useCallback(() => {
+        if(noteList?.length === 0) {
+            Alert.alert(
+                getDic('Note'),
+                getDic('Msg_Note_DeleteEmpty', '삭제할 쪽지가 없습니다.')
+            );
+            return;
+        }
         Alert.alert(
             getDic('Note'),
             getDic('Msg_Note_DeleteConfirm'),
@@ -285,7 +292,7 @@ function SortTypeSelector({ viewType }) {
                 }
             ]
         )
-    }, [viewType]);
+    }, [viewType, noteList]);
 
     return (
         <View style={_styles.sortContainer}>
