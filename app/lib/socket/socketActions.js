@@ -66,6 +66,7 @@ export const handleNewNoteMessage = (setNoteList) => {
         senderPresence: json_data.state,
         fileFlag: json_data.fileFlag,
         subject: json_data.subject,
+        emergency: json_data.emergency,
         sendDate: Date.now(),
         readFlag: 'N',  //새로 발송된 쪽지는 기본적으로 읽지 않은 상태임
         favorites: '2', //새로 발송된 쪽지는 기본적으로 즐겨찾기되어 있지 않음

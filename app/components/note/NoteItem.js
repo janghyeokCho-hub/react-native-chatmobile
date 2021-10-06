@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import produce from 'immer';
 
 import ProfileBox from '@COMMON/ProfileBox';
-import { parseSender, translateName, useViewType, useNoteList } from '@/lib/note/state';
+import { parseSender, translateName, useViewType, useNoteList, emergencyMark } from '@/lib/note/state';
 import { archiveNote, deleteNote, setFavorite } from '@/lib/note/fetch';
 import { makeDateTime } from '@/lib/util/dateUtil';
 import { changeModal, openModal } from '@/modules/modal';
@@ -255,6 +255,7 @@ export default function NoteItem({ note, hideProfile = false }) {
                 <View style={styles.content}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                         <Text numberOfLines={1} style={styles.title}>
+                            {note?.emergency === 'Y' ? emergencyMark : ''}
                             {note?.subject}
                         </Text>
                         {note.readFlag === 'N' && (<Text style={{ marginLeft: 5, color: '#F86A60', fontWeight: 'bold', fontSize: 11, flexDirection: "column" }} >N</Text>)}

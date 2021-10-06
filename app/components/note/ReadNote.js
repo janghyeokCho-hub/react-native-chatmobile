@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RichEditor } from 'react-native-pell-rich-editor';
 import { MenuTrigger, MenuOption, MenuOptions, Menu } from 'react-native-popup-menu';
 import Collapsible from 'react-native-collapsible';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import Drawer from 'react-native-drawer';
 import produce from 'immer';
 import { useTheme } from '@react-navigation/native';
@@ -122,6 +122,14 @@ export default function ReadNote({ route }) {
         }
         return parseSender(data);
     }, [data]);
+
+    const presence = useSelector(
+        ({ presence }) =>
+            presence.fixedUsers?.[userInfo?.sender?.id]
+                ? presence.fixedUsers[userInfo?.sender?.id]
+                : presence.users[userInfo?.sender?.id],
+        shallowEqual,
+    );
 
     const _deleteNote = useCallback(({ viewType, noteId }) => {
         Alert.alert(
@@ -326,7 +334,7 @@ export default function ReadNote({ route }) {
             <ScrollView>
                 <View style={{ marginBottom: '10%', paddingBottom: 20 + (attachFiles?.length * 12 || 0), flexDirection: "column" }}>
                     <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }} >
-                        <Text style={[styles.title, { fontSize: sizes.large }]} numberOfLines={6}>{data?.subject}</Text>
+                        <Text style={[styles.title, { fontSize: sizes.large }]} numberOfLines={6}>{data?.emergency === 'Y' ? emergencyMark : ''}{data?.subject}</Text>
                         <TouchableOpacity style={{ marginLeft: "auto", margin: '3%' }} onPress={handleFavorite}>
                             <FavoriteIcon width={20} height={20} active={favorites} />
                         </TouchableOpacity>
@@ -340,7 +348,7 @@ export default function ReadNote({ route }) {
                             <ProfileBox
                                 userId={userInfo?.sender?.id}
                                 userName={userInfo?.sender?.displayName}
-                                presence={userInfo?.sender?.presence}
+                                presence={presence}
                                 isInherit={false}
                                 img={userInfo?.sender?.photoPath}
                             />
@@ -407,8 +415,44 @@ export default function ReadNote({ route }) {
                         /> } */}
                         { rendered && <RenderHtml
                             contentWidth={width}
-                            source={{html: data?.context}}
-                            baseStyle={{ marginRight: '2%', marginLeft: '2%' }}
+                            source={{html: data?.context }}
+                            tagsStyles={{
+                                table: {
+                                    maxWidth: '96%',
+                                    color: '#222',
+                                    borderWidth: 1,
+                                    borderStyle: 'solid',
+                                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                                },
+                                th: {
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    backgroundColor: '#555',
+                                    color: '#fff',
+                                    height: 32
+                                },
+                                td: {
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 32
+                                },
+                                blockquote: {
+                                    marginLeft: 14,
+                                    paddingLeft: 8,
+                                    borderStyle: 'solid',
+                                    borderLeftWidth: 4,
+                                    borderLeftColor: '#e5e5e5'
+                                },
+                                pre: {
+                                    padding: 10,
+                                    backgroundColor: '#f4f7f8'
+                                },
+                                code: {
+                                    padding: 0,
+                                    whiteSpace: 'pre'
+                                }
+                            }}
+                            baseStyle={{ marginHorizontal: '2%' }}
                         /> }
                     </View>
 
