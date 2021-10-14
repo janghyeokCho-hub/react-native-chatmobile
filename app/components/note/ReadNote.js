@@ -14,7 +14,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import NoteHeader from '@C/note/NoteHeader';
 import { getTopPadding } from '@/lib/device/common';
 import { deleteNote, archiveNote, setFavorite } from '@/lib/note/fetch';
-import { useNoteList, useNote, useViewType, parseSender, convertTimeFormat, translateName } from '@/lib/note/state';
+import { useNoteList, useNote, useViewType, parseSender, convertTimeFormat, translateName, emergencyMark } from '@/lib/note/state';
 import { getDic } from '@/config';
 import ProfileBox from '@/components/common/ProfileBox';
 import { makeDateTime } from '@/lib/util/dateUtil';
