@@ -871,13 +871,13 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobileDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 011003;
+				CURRENT_PROJECT_VERSION = 011004;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.10.3;
+				MARKETING_VERSION = 1.10.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -899,12 +899,12 @@
 				CODE_SIGN_ENTITLEMENTS = chatmobile/chatmobile.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 011003;
+				CURRENT_PROJECT_VERSION = 011004;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				INFOPLIST_FILE = chatmobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.10.3;
+				MARKETING_VERSION = 1.10.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -1042,14 +1042,14 @@
 				CODE_SIGN_ENTITLEMENTS = eumtalkShare/eumtalkShare.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 011003;
+				CURRENT_PROJECT_VERSION = 011004;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = eumtalkShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.10.3;
+				MARKETING_VERSION = 1.10.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk.eumtalkshare;
@@ -1074,14 +1074,14 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 011003;
+				CURRENT_PROJECT_VERSION = 011004;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = GKXU6QLGLZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = eumtalkShare/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.10.3;
+				MARKETING_VERSION = 1.10.4;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.covision.eumtalk.eumtalkshare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
