@@ -117,7 +117,7 @@ const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
             returnJSX.push(
               <SearchMessageWrap
                 onLayout={event => {
-                  if (offset == -1) setOffset(event.nativeEvent.layout.y);
+                  setOffset(event.nativeEvent.layout.y);
                 }}
               >
                 <ChannelMessageBox
