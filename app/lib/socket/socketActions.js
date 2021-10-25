@@ -52,7 +52,7 @@ export const handleNewMessage = (dispatch, userInfo) => {
   };
 };
 
-export const handleNewNoteMessage = (setNoteList) => {
+export const handleNewNoteMessage = (setNoteList, navigationRef) => {
   return data => {
     try {if (data == null || typeof data == 'undefined') return;
       const json_data = JSON.parse(data);
@@ -71,7 +71,6 @@ export const handleNewNoteMessage = (setNoteList) => {
         readFlag: 'N',  //새로 발송된 쪽지는 기본적으로 읽지 않은 상태임
         favorites: '2', //새로 발송된 쪽지는 기본적으로 즐겨찾기되어 있지 않음
       };
-
       setNoteList((prevState) => {
         if (typeof prevState === 'undefined') {
           return [receivedInfo];
@@ -81,6 +80,11 @@ export const handleNewNoteMessage = (setNoteList) => {
           draft?.splice(insertPoint, 0, receivedInfo);
         });
       }, false);
+
+      if (receivedInfo?.emergency === 'Y') {
+        // Open emergency note immediately
+        navigationRef?.current?.navigate('ReadNote', { noteId: receivedInfo.noteId, viewType: 'receive' });
+      }
     } catch (err) {
       console.log("NewNote parse error : ", err);
     }

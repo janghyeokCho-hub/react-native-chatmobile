@@ -4,6 +4,7 @@ import * as socketConnector from '@/lib/socket/socketConnect';
 import * as socketActions from '@/lib/socket/socketActions';
 import AppStateHandler from '@C/AppStateHandler';
 import { useNoteList } from '@/lib/note/state';
+import { navigationRef } from '@/components/RootNavigation';
 
 const SocketContainer = () => {
   const token = useSelector(({ login }) => login.token);
@@ -11,13 +12,12 @@ const SocketContainer = () => {
   const accessid = useSelector(({ login }) => login.id);
   const fixedUsers = useSelector(({ presence }) => presence.fixedUsers);
   const { mutate:setNoteList } = useNoteList({ viewTyoe: 'receive' });
-
   const dispatch = useDispatch();
 
   const socketActionsObj = useMemo(() => {
     return {
       onNewMessage: socketActions.handleNewMessage(dispatch, userInfo),
-      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList),
+      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList, navigationRef),
       onChatRoomInvitation: socketActions.handleChatRoomInvite(dispatch),
       onChatRoomExit: socketActions.handleChatRoomExit(dispatch, userInfo),
       onReadCountChanged: socketActions.handleReadCountChanged(

@@ -14,6 +14,7 @@ import MoveView from '@C/chat/chatroom/move/MoveView';
 import ProfilePopup from '@COMMON/ProfilePopup';
 import AddContact from '@C/contact/AddContact';
 import MakeRoom from '@C/chat/chatroom/normal/MakeRoom';
+import { navigationRef } from '@/components/RootNavigation';
 
 /* 쪽지 */
 import NewNote from '@C/note/NewNote';
@@ -64,7 +65,7 @@ const Root = ({ stack, theme }) => {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-      <NavigationContainer theme={theme}>
+      <NavigationContainer theme={theme} ref={navigationRef}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
