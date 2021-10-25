@@ -116,7 +116,7 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
             returnJSX.push(
               <SearchMessageWrap
                 onLayout={event => {
-                  if (offset == -1) setOffset(event.nativeEvent.layout.y);
+                  setOffset(event.nativeEvent.layout.y);
                 }}
               >
                 <MessageBox
@@ -178,7 +178,7 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
     }
   };
 
-  const renderMessage = useMemo(() => {
+  const renderMessage = useMemo(() => { 
     return drawMessage(messages, moveId);
   }, [messages, moveId, offset]);
 
