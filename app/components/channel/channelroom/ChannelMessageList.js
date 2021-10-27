@@ -120,9 +120,17 @@ const ChannelMessageList = React.forwardRef(
         const beforeMessage = index > 0 ? messageData[index - 1] : null;
         const nextMessage =
           index < messageData.length - 1 ? messageData[index + 1] : null;
-
-        // TODO: timezone 적용 시 검토 필요
-        const timeZoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
+        /**
+         * 2021.10.27
+         * 
+         * getTimezoneOffset() 메소드:
+         * - UTC 기준보다 느린 timezone은 positive value
+         * - UTC 기준보다 빠른 timezone은 negative value를 가짐.
+         * 
+         * => 실제 시각을 계산하려면 timezone 부호를 반전하여 계산해야 함
+         * Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset
+        */
+        const timeZoneOffset = -(new Date().getTimezoneOffset() * 60 * 1000);
 
         const dateCompareVal = Math.floor(
           (message.sendDate + timeZoneOffset) / 86400000,
