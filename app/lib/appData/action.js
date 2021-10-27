@@ -4,6 +4,7 @@ import * as NotReadList from '@/lib/class/NotReadList';
 import * as RoomList from '@/lib/class/RoomList';
 
 import { managesvr, chatsvr } from '@API/api';
+import { setPresenceTargetUser } from '@API/presence';
 import { setSyncDate, spliceInsert } from '@/lib/appData/util';
 
 const splitCnt = 50;
@@ -97,7 +98,7 @@ export const syncAppData = async param => {
     syncRooms(), // 채팅방 정보 불러오기
   ]);
   await syncFN;
-  return true;
+  return syncFN;
 };
 
 const syncMyDeptMember = async () => {
@@ -136,7 +137,8 @@ const syncPresence = async param => {
       const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
 
       const presenceList = response.data.result;
-      await new Promise((resolve, reject) => {
+      const updatedList = [];
+      return new Promise((resolve, reject) => {
         dbCon.transaction(
           tx => {
             presenceList.forEach(item => {
@@ -145,12 +147,30 @@ const syncPresence = async param => {
                   presence: item.state,
                 })
                 .where(`id = '${item.userId}' AND presence != '${item.state}'`)
-                .execute();
+                .execute((_, result) => {
+                  if (result?.rowsAffected !== 0) {
+                    // Actual-update가 발생한 유저 목록을 updatedList에 기록
+                    updatedList.push(item);
+                  }
+                });
             });
           },
           e => {},
           tx => {
-            resolve(true);
+            if (updatedList.length > 0) {
+              /**
+               * 2021.10.27
+               * 
+               * background > foreground 전환시 presence sync 단계에서
+               * presence update가 발생한 유저에 대해서만 presence 이벤트 구독이 끊어지는 현상 있음
+               * Problem solve: 해당 유저 목록(updatedList)을 다시 presence target으로 등록하는 요청 전송
+               */
+              setPresenceTargetUser(
+                updatedList.map(item => ({ type: 'add', userId: item.userId }))
+              );
+            }
+            // { userId, state, type: null }
+            resolve(updatedList);
           },
         );
       });
