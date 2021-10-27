@@ -157,7 +157,7 @@ const MessageBox = ({
                 nameBoxVisible ? styles.sentFirst : null,
               ]}
             >
-              {nameBoxVisible && index == 0 && (
+              {nameBoxVisible && (
                 <>
                   <TouchableOpacity
                     onPress={() => handleProfilePopup(message.sender)}
@@ -221,7 +221,7 @@ const MessageBox = ({
                   </View>
                 </>
               )}
-              {!(nameBoxVisible && index == 0) && (
+              {!nameBoxVisible && (
                 <View style={nameBoxVisible ? { marginLeft: 60 } : {}}>
                   <FileMessageBox
                     messageId={message.messageID}
