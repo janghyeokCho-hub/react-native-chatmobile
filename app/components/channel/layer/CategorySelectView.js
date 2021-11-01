@@ -122,7 +122,7 @@ const CategorySelectView = ({ navigation, route }) => {
         companyCode: userInfo.CompanyCode,
       })
       .then(({ data }) => {
-        if (data.status == 'SUCCESS') {
+        if (data?.status == 'SUCCESS') {
           setSearchList(data.result);
           setSearchLoading(false);
         }
