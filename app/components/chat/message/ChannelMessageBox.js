@@ -151,7 +151,7 @@ const ChannelMessageBox = ({
                 nameBoxVisible ? styles.sentFirst : null,
               ]}
             >
-              {nameBoxVisible && index == 0 && (
+                {nameBoxVisible && (
                 <>
                   <ProfileBox
                     userId={message.sender}
@@ -209,7 +209,7 @@ const ChannelMessageBox = ({
                   </View>
                 </>
               )}
-              {!(nameBoxVisible && index == 0) && (
+              {!nameBoxVisible && (
                 <FileMessageBox
                   messageId={message.messageID}
                   fileObj={fileInfoJSON}
