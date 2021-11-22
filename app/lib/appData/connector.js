@@ -42,7 +42,7 @@ const initialize = async connection => {
         "SELECT COUNT(*) AS CNT FROM sqlite_master WHERE type='table' AND name='access'",
         [],
         (db, result) => {
-          if (result.rows.item(0)['CNT'] === 0) {
+          if (result.rows.item(0).CNT === 0) {
             const qurey = Promise.all([
               tx.executeSql(
                 'CREATE TABLE access (id varchar(50), token varchar(255), userinfo json, registDate bigint, reserved json, primary key (id))',
@@ -69,7 +69,7 @@ const initialize = async connection => {
                 [],
               ),
               tx.executeSql(
-                'CREATE TABLE message (messageId integer, context TEXT, sender varchar(50), sendDate bigint, roomId integer, roomType CHARACTER(1), receiver varchar(255), messageType CHARACTER(1), unreadCnt integer, isSyncUnread CHARACTER(1), readYN CHARACTER(1), isMine CHARACTER(1), tempId integer, fileInfos varchar(255), linkInfo varchar(255), tagInfo varchar(255), senderInfo text, reserved json, primary key (messageId))',
+                'CREATE TABLE message (messageId integer, context TEXT, sender varchar(50), sendDate bigint, roomId integer, roomType CHARACTER(1), receiver varchar(255), messageType CHARACTER(1), unreadCnt integer, isSyncUnread CHARACTER(1), readYN CHARACTER(1), isMine CHARACTER(1), tempId integer, fileInfos varchar(255), linkInfo varchar(255), tagInfo varchar(255), senderInfo text, reserved json, botInfo json, primary key (messageId))',
                 [],
               ),
               tx.executeSql(
@@ -132,7 +132,7 @@ export const deleteDabase = (dbName, callBack) => {
   }
 };
 
-export const deleteLocalDb = (async (dbName) =>{
+export const deleteLocalDb = async dbName => {
   let domain = await AsyncStorage.getItem('EHINF');
 
   if (typeof domain === 'string') {
@@ -145,7 +145,7 @@ export const deleteLocalDb = (async (dbName) =>{
   const openName = base64.encode(`${domain}.${dbName}`);
   SQLite.deleteDatabase({ name: `${openName}.db` });
   dbCon = null;
-});
+};
 
 export const getConnection = async openName => {
   if (dbCon == null) {
@@ -193,17 +193,23 @@ class TransactionBuilder {
   }
   select = target => {
     this.txData.txSql = 'SELECT';
-    if (target != null) this.txData.txTarget = target;
+    if (target != null) {
+      this.txData.txTarget = target;
+    }
     return this;
   };
   update = values => {
     this.txData.txSql = 'UPDATE';
-    if (values != null) this.txData.txValues = values;
+    if (values != null) {
+      this.txData.txValues = values;
+    }
     return this;
   };
   insert = values => {
     this.txData.txSql = 'INSERT';
-    if (values != null) this.txData.txValues = values;
+    if (values != null) {
+      this.txData.txValues = values;
+    }
     return this;
   };
   delete = () => {
@@ -235,7 +241,7 @@ class TransactionBuilder {
   execute = (resultHandler, errorHandler) => {
     let returnPromise;
 
-    if (this.txData.isStaticQuery)
+    if (this.txData.isStaticQuery) {
       if (resultHandler) {
         this.transaction.executeSql(
           this.txData.txSql,
@@ -248,7 +254,7 @@ class TransactionBuilder {
           this.txData.txValues,
         );
       }
-    else {
+    } else {
       let query = '';
       query += this.txData.txSql;
 
@@ -256,22 +262,29 @@ class TransactionBuilder {
 
       switch (this.txData.txSql) {
         case 'SELECT':
-          if (this.txData.txTarget.length == 0) query += ' * ';
-          else {
+          if (this.txData.txTarget.length == 0) {
+            query += ' * ';
+          } else {
             this.txData.txTarget.map((data, index) => {
-              if (index + 1 < this.txData.txTarget.length) query += ` ${data},`;
-              else query += ` ${data} `;
+              if (index + 1 < this.txData.txTarget.length) {
+                query += ` ${data},`;
+              } else {
+                query += ` ${data} `;
+              }
             });
           }
 
           query += `FROM ${this.txData.tableName}`;
 
-          if (this.txData.condiction)
+          if (this.txData.condiction) {
             query += ` WHERE ${this.txData.condiction}`;
-          if (this.txData.sortKey)
+          }
+          if (this.txData.sortKey) {
             query += ` ORDER BY ${this.txData.sortKey} ${this.txData.sort}`;
-          if (this.txData.limit && this.txData.limit > 0)
+          }
+          if (this.txData.limit && this.txData.limit > 0) {
             query += ` LIMIT ${this.txData.limit}`;
+          }
 
           break;
 
@@ -316,15 +329,17 @@ class TransactionBuilder {
 
           query = query.substring(0, query.length - 2);
 
-          if (this.txData.condiction != null)
+          if (this.txData.condiction != null) {
             query += ` WHERE ${this.txData.condiction}`;
+          }
 
           break;
 
         case 'DELETE':
           query += ` FROM ${this.txData.tableName}`;
-          if (this.txData.condiction != null)
+          if (this.txData.condiction != null) {
             query += ` WHERE ${this.txData.condiction}`;
+          }
 
           break;
       }
