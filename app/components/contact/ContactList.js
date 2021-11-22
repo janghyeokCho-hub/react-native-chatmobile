@@ -49,7 +49,9 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
               type: 'C',
             })
               .then(({ data }) => {
-                setSearchList(data.result);
+                if (data?.status === 'SUCCESS') {
+                  setSearchList(data.result);
+                }
               })
               .catch(error => {
                 setSearchList([]);

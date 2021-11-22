@@ -304,7 +304,9 @@ const channel = handleActions(
     [SET_CHANNELS]: (state, action) => {
       return produce(state, draft => {
         // login 시에만 사용
-        draft.channels = action.payload.result.filter(channel => channel.lastMessageDate);
+        draft.channels = action.payload.result.filter(
+          channel => channel.lastMessageDate,
+        );
         draft.channels.map(item => {
           item.disabled = false;
         });
@@ -364,7 +366,7 @@ const channel = handleActions(
           if (draft.currentChannel.roomId == action.payload.roomID) {
             draft.messages.splice(
               draft.messages.findIndex(
-                m => m.messageID == action.payload.messageID,
+                m => m.messageID == action.payload.deleteMessage.messageID,
               ),
               1,
             );
@@ -940,12 +942,12 @@ const channel = handleActions(
       return produce(state, draft => {
         if (action.payload) {
           if (!action.payload.leave || action.payload.leave != 'Y') {
-            let roomInd = draft.channels.findIndex(c => c.roomId == action.payload.roomID);
-            if(roomInd != -1) { // findIndex에 성공할경우.              
-              draft.channels.splice(
-                roomInd,
-                1,
-              );
+            let roomInd = draft.channels.findIndex(
+              c => c.roomId == action.payload.roomID,
+            );
+            if (roomInd != -1) {
+              // findIndex에 성공할경우.
+              draft.channels.splice(roomInd, 1);
             }
             if (
               action.payload.leave == null ||
@@ -973,7 +975,7 @@ const channel = handleActions(
         if (channel) {
           action.payload.members.forEach(i => {
             const idx = channel.members.findIndex(m => m.id == i.id);
-            if (idx == -1) channel.members.push({...i,channelAuth:"N"});
+            if (idx == -1) channel.members.push({ ...i, channelAuth: 'N' });
           });
 
           // currentChannel의 member정보 update
@@ -1043,8 +1045,8 @@ const channel = handleActions(
             description: result.description,
             categoryCode,
             categoryName,
-            iconPath: action.payload.iconPath
-          }; 
+            iconPath: action.payload.iconPath,
+          };
 
           draft.channels[channelIdx] = newChannel;
 
@@ -1082,12 +1084,12 @@ const channel = handleActions(
     },
     [CHANNEL_LEAVE_OTHER_DEVICE]: (state, action) => {
       return produce(state, draft => {
-        let roomInd = draft.channels.findIndex(c => c.roomId == action.payload.roomID);
-        if(roomInd != -1) { // findIndex에 성공할경우. 
-          draft.channels.splice(
-            roomInd,
-            1,
-          );
+        let roomInd = draft.channels.findIndex(
+          c => c.roomId == action.payload.roomID,
+        );
+        if (roomInd != -1) {
+          // findIndex에 성공할경우.
+          draft.channels.splice(roomInd, 1);
         }
 
         if (
@@ -1118,7 +1120,7 @@ const channel = handleActions(
         }
       });
     },
-    [CHANNEL_AUTH_CHANGED]: (state,action) => {
+    [CHANNEL_AUTH_CHANGED]: (state, action) => {
       return produce(state, draft => {
         const channel = draft.channels.find(
           c => c.roomId == action.payload.roomId,

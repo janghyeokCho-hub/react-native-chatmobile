@@ -54,7 +54,8 @@ export const handleNewMessage = (dispatch, userInfo) => {
 
 export const handleNewNoteMessage = (setNoteList, navigationRef) => {
   return data => {
-    try {if (data == null || typeof data == 'undefined') return;
+    try {
+      if (data == null || typeof data == 'undefined') return;
       const json_data = JSON.parse(data);
       const receivedInfo = {
         // noteId string to number
@@ -68,10 +69,10 @@ export const handleNewNoteMessage = (setNoteList, navigationRef) => {
         subject: json_data.subject,
         emergency: json_data.emergency,
         sendDate: Date.now(),
-        readFlag: 'N',  //새로 발송된 쪽지는 기본적으로 읽지 않은 상태임
+        readFlag: 'N', //새로 발송된 쪽지는 기본적으로 읽지 않은 상태임
         favorites: '2', //새로 발송된 쪽지는 기본적으로 즐겨찾기되어 있지 않음
       };
-      setNoteList((prevState) => {
+      setNoteList(prevState => {
         if (typeof prevState === 'undefined') {
           return [receivedInfo];
         }
@@ -83,21 +84,21 @@ export const handleNewNoteMessage = (setNoteList, navigationRef) => {
 
       if (receivedInfo?.emergency === 'Y') {
         // Open emergency note immediately
-        navigationRef?.current?.navigate('ReadNote', { noteId: receivedInfo.noteId, viewType: 'receive' });
+        navigationRef?.current?.navigate('ReadNote', {
+          noteId: receivedInfo.noteId,
+          viewType: 'receive',
+        });
       }
     } catch (err) {
-      console.log("NewNote parse error : ", err);
+      console.log('NewNote parse error : ', err);
     }
-  }
-}
+  };
+};
 
 export const handleChatRoomInvite = dispatch => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-
-    // 차후 삭제 필요
-    // console.log(json_data);
 
     dispatch(roomInviteMessageAdd(json_data));
 
@@ -195,9 +196,6 @@ export const handleReadChannel = dispatch => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
 
-    // 차후 삭제 필요
-    //console.log(json_data);
-
     dispatch(resetUnreadCount(json_data.roomID));
   };
 };
@@ -206,9 +204,6 @@ export const handlePresenceChanged = dispatch => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-
-    // 차후 삭제 필요
-    //console.log(json_data);
 
     dispatch(setUsersPresence(json_data));
     dbAction.updatePresence([json_data]);
@@ -220,9 +215,6 @@ export const handleNewLinkThumbnail = dispatch => {
   return data => {
     const json_data = JSON.parse(data);
 
-    // 차후 삭제 필요
-    console.log(json_data);
-
     dispatch(setMessageLinkInfo(json_data));
   };
 };
@@ -232,8 +224,6 @@ export const handleForceToLogout = dispatch => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-    // 차후 삭제 필요
-    // console.log(json_data);
 
     // 연결끊기
     AsyncStorage.removeItem('covi_user_access_token');
@@ -293,9 +283,6 @@ export const handleNewChannelMessage = (dispatch, userInfo) => {
 
     json_data.isNotice = false;
 
-    // 차후 삭제 필요
-    //console.log('handleNewChannelMessage => ', json_data);
-
     dispatch(receiveChannelMessage(json_data));
   };
 };
@@ -304,11 +291,6 @@ export const handleChannelInvite = dispatch => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-
-    console.log('json_data', json_data);
-
-    // 차후 삭제 필요
-    //console.log('handleChannelInvite => ', json_data);
 
     dispatch(channelInviteMessageAdd(json_data));
 
@@ -323,10 +305,6 @@ export const handleChannelExit = (dispatch, userInfo) => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-    console.log('json_data', json_data);
-
-    // 차후 삭제 필요
-    console.log('handleChannelExit => ', json_data);
 
     if (userInfo.id == json_data.leaveMember) {
       dispatch(channelLeaveOtherDevice(json_data));
@@ -341,10 +319,6 @@ export const handleChannelReadCountChanged = dispatch => {
     if (data == null || data == undefined) return;
     // browser 버전에서는 current channel 대한 처리만 있음.
     const json_data = JSON.parse(data);
-    console.log('json_data', json_data);
-
-    // 차후 삭제 필요
-    // console.log(json_data);
 
     dispatch(messageChannelReadCountChanged(json_data));
   };
@@ -356,11 +330,6 @@ export const handleNewNotice = dispatch => {
     if (data == null || data == undefined) return;
     if (data != null) {
       const json_data = JSON.parse(data);
-
-      console.log('json_data', json_data);
-      // 차후 삭제 필요
-      // console.log('handleNewNotice => ', data);
-      // console.log(json_data);
 
       json_data.isNotice = true;
       json_data.isMine = 'N';
@@ -377,9 +346,6 @@ export const handleDelChannelMessage = dispatch => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
 
-    console.log('json_data', json_data);
-    // 차후 삭제 필요
-    console.log('handleDelChannelMessage => ', json_data);
     if (json_data.messageType === 'I') {
       dispatch(receiveDeletedChannelNotice(json_data));
     } else {
@@ -393,10 +359,6 @@ export const handleDelChannelNotice = dispatch => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-    console.log('json_data', json_data);
-
-    // 차후 삭제 필요
-    console.log('handleDelChannelNotice => ', json_data);
 
     dispatch(receiveDeletedNotice(json_data));
   };
@@ -407,10 +369,6 @@ export const handleNewChannelNotice = (dispatch, userInfo) => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-    console.log('json_data', json_data);
-
-    // 차후 삭제 필요
-    // console.log(json_data);
 
     dispatch(receiveChannelMessage(json_data));
     dispatch(receiveChannelNotice(json_data));
