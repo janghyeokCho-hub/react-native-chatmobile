@@ -8,13 +8,13 @@ import {
   changeNotificationBlockOption,
 } from '@/lib/api/setting';
 import messaging from '@react-native-firebase/messaging';
-import { getDic } from '@/config';
+import { getDic, getConfig } from '@/config';
 
 const AlertSetting = ({ navigation }) => {
   const { myInfo } = useSelector(({ login }) => ({
     myInfo: login.userInfo,
   }));
-
+  const useNotificationBlock = getConfig('NotificationBlock');
   const [isNoti, setIsNoti] = useState(true);
   const [showNotiContent, setShowNotiContent] = useState(true);
   const [notificationBlock, setNotificationBlock] = useState(false);
@@ -91,13 +91,15 @@ const AlertSetting = ({ navigation }) => {
           setNotification('showNotiContent');
         }}
       />
-      <SlideCheckedBox
-        title={getDic('SetWorkTimeNoti')}
-        checkValue={notificationBlock}
-        onPress={() => {
-          setNotiBlock(!notificationBlock ? 'Y' : 'N');
-        }}
-      />
+      {useNotificationBlock && useNotificationBlock === 'Y' && (
+        <SlideCheckedBox
+          title={getDic('SetWorkTimeNoti')}
+          checkValue={notificationBlock}
+          onPress={() => {
+            setNotiBlock(!notificationBlock ? 'Y' : 'N');
+          }}
+        />
+      )}
     </View>
   );
 };
