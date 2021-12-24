@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useState, useCallback, useEffect } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View, Text, Image } from 'react-native';
 import { useTheme } from '@react-navigation/native';
@@ -29,116 +30,38 @@ const NoteFile = ({ item, disableClick, disableRemove, handleRemove }) => {
             load: result?.bytesWritten,
             total: result?.contentLength
         });
-    }, [onDownload, progressData]);
-
-    const onDownload = useCallback(() => {
-        if (disableClick === true) {
-            return;
-        }
-        downloadByTokenAlert(
-            {
-                token: item?.fileID,
-                userId: myInfo?.id,
-                ...item,
-                type: 'note'
-            }, handleProgress
-        );
-    }, [progressData]);
-
-    const onViewer = useCallback(() => {
-
     }, []);
 
-    const showModalMenu = useCallback(() => {
-        const modalBtn = [
-            {
-                title: getDic('Download'),
-                onPress: () => {
-                    onDownload?.(item, handleProgress);
-                },
-            },
-            {
-                title: getDic('RunViewer'),
-                onPress: () => {
-                    onViewer?.(item);
-                },
-            }
-        ];
-        dispatch(
-            changeModal({
-                modalData: {
-                    closeOnTouchOutside: true,
-                    type: 'normal',
-                    buttonList: modalBtn,
-                },
-            }),
-        );
-        dispatch(openModal());
-    }, [dispatch, onDownload, onViewer, progressData]);
-
-    /**
-     * 2021.07.26
-     * 다운로드 or 뷰어 실행
-     * (임시) 쪽지 첨부파일은 뷰어 처리가 되지 않으므로 handlePress 사용 X
-     */
-    const handlePress = useCallback(() => {
-        // 서버설정이 빠져있거나 기능 비활성인 경우 동작하지 않음
+    const onDownload = useCallback(() => {
         if (!selectDownloadOrViewer || disableClick) {
             return;
         }
-        if (selectDownloadOrViewer.Download === true) {
-            if (selectDownloadOrViewer.Viewer === true) {
-                /**
-                 * Download true / Viewer true
-                 * 다운로드 or 뷰어 옵션 선택
-                 */
-                showModalMenu();
-            } else {
-                /**
-                 * Download true / Viewer false
-                 * 다운로드 시작
-                 */
-                onDownload?.();
-            }
+        if (selectDownloadOrViewer?.Download === true) {
+          downloadByTokenAlert(
+            {
+              token: item?.fileID,
+              userId: myInfo?.id,
+              ...item,
+              type: 'note',
+            },
+            handleProgress,
+          );
         } else {
-            if (selectDownloadOrViewer.Viewer === true) {
-                /**
-                 * Download false / Viewer true
-                 * 뷰어 요청
-                 */
-                onViewer?.(item);
-            }
-            else {
-                /**
-                 * Download false / Viewer false
-                 * 경고 출력
-                 */
-                Alert.alert(
-                    getDic('Eumtalk'),
-                    getDic('Msg_SettingFalse'),
-                    [
-                        {
-                            text: getDic('Ok'),
-                        },
-                    ],
-                    { cancelable: true },
-                );
-            }
+          Alert.alert(
+            null,
+            getDic(
+              'Block_FileDownload',
+              '파일 다운로드가 금지되어 있습니다.',
+            ),
+            [{ text: getDic('Ok') }],
+            {
+              cancelable: true,
+            },
+          );
         }
-    }, [selectDownloadOrViewer]);
-
-    // if (progressData !== null) {
-    //     return (
-    //         <Progress
-    //             load={progressData.load}
-    //             total={progressData.total}
-    //             handleFinish={finishProgress}
-    //         />
-    //     );
-    // }
+    }, [selectDownloadOrViewer, disableClick, handleProgress, item, myInfo]);
 
     return (
-        // <TouchableOpacity onPress={handlePress}>
         <TouchableOpacity onPress={onDownload}>
             <View style={[styles.fileMessageBox, styles.fileMessage]}>
                 {progressData !== null ? (<Progress
