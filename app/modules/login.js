@@ -198,9 +198,10 @@ const login = handleActions(
     },
     [CHANGE_MYINFO]: (state, action) => {
       return produce(state, draft => {
-        draft.userInfo.mailAddress = action.payload.mailAddress;
-        draft.userInfo.phoneNumber = action.payload.phoneNumber;
-        draft.userInfo.work = action.payload.chargeBusiness;
+        // draft.userInfo.mailAddress = action.payload.mailAddress;
+        // draft.userInfo.phoneNumber = action.payload.phoneNumber;
+        // draft.userInfo.work = action.payload.chargeBusiness;
+        draft.userInfo = Object.assign({}, draft.userInfo, action.payload);
       });
     },
     [AUTH_INIT]: (state, action) => ({
