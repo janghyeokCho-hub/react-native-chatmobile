@@ -25,10 +25,7 @@ const InfoSetting = ({ navigation }) => {
   const { userInfo } = useSelector(({ login }) => ({
     userInfo: login.userInfo,
   }));
-
-  const [profile, setProfile] = useState(
-    `${userInfo.photoPath}`,
-  );
+  const [profile, setProfile] = useState(`${userInfo.photoPath}`);
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [work, setWork] = useState('');
@@ -44,13 +41,13 @@ const InfoSetting = ({ navigation }) => {
     setEmail(userInfo.mailAddress);
     setPhoneNumber(userInfo.phoneNumber);
     setWork(userInfo.work == null ? ' ' : userInfo.work);
-  }, []);
+  }, [userInfo]);
 
   const handleInfoSettingSave = () => {
     const changeData = {
       mailAddress: email,
       phoneNumber: phoneNumber,
-      chargeBusiness: work,
+      work: work,
     };
     modifyUserInfo(changeData).then(({ data }) => {
       if (data.status === 'SUCCESS') {
