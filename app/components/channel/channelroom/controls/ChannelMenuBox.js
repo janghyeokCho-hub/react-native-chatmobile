@@ -22,15 +22,13 @@ import { getConfig, getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 
 const ico_plus = require('@C/assets/ico_plus.png');
-const SMTPConfig = getConfig('SMTPConfig', 'N');
-const enabledExtUser = getConfig('EnabledExtUser', 'N');
 
 const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
   const { sizes, colors } = useTheme();
   const { id } = useSelector(({ login }) => ({
     id: login.id,
   }));
-
+  const enabledExtUser = getConfig('EnabledExtUser', 'N');
   const [channelAuth, setChannelAuth] = useState(false);
   const [channelAdminMembers, setChannelAdminMembers] = useState(false);
 
@@ -359,7 +357,7 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
                     </Text>
                   </View>
                 </TouchableOpacity>
-                {enabledExtUser === 'Y' && SMTPConfig === 'Y' && (
+                {enabledExtUser === 'Y' && (
                   <TouchableOpacity onPress={handleExtUsrInvite}>
                     <View style={styles.addExtBox}>
                       <View style={styles.addBtn}>

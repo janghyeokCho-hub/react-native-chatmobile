@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import * as channelApi from '@API/channel';
 import {
   View,
@@ -22,44 +22,46 @@ const ico_plus = require('@C/assets/ico_plus.png');
 const InviteExtUser = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
   const { headerName, roomId } = route.params;
-
   const userInfo = useSelector(({ login }) => login.userInfo);
-
   const [emailTxt, setEmailTxt] = useState('');
   const [oldList, setOldList] = useState([]);
   const [emailList, setEmailList] = useState([]);
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     channelApi.getExternalUser(roomId).then(({ data }) => {
-      if (data.status == 'SUCCESS') {
+      if (data.status === 'SUCCESS') {
         setOldList(data.result.map(item => item.ExternalEmail));
       }
     });
-  }, []);
+  }, [roomId]);
 
   const handleClose = useCallback(() => {
     navigation.dispatch(CommonActions.goBack());
-  }, []);
+  }, [navigation]);
 
-  const addItem = useCallback(() => {
+  const addItem = useCallback(async () => {
     if (
-      emailTxt != '' &&
-      emailList.find(item => item == emailTxt) == undefined
+      emailTxt !== '' &&
+      emailList.find(item => item === emailTxt) === undefined
     ) {
-      channelApi
-        .checkExternalUser({ roomId, email: emailTxt })
-        .then(({ data }) => {
-          if (data.status == 'SUCCESS') {
-            setEmailList([emailTxt, ...emailList]);
-            setEmailTxt('');
-          } else {
-            Alert.alert(null, data.message, [{ text: getDic('Ok') }]);
-          }
+      try {
+        const { data: response } = await channelApi.checkExternalUser({
+          roomId,
+          email: emailTxt,
         });
+        if (response.status === 'SUCCESS') {
+          setEmailList([emailTxt, ...emailList]);
+          setEmailTxt('');
+        } else {
+          Alert.alert(null, getDic(response.message, response.message), [
+            { text: getDic('Ok') },
+          ]);
+        }
+      } catch (err) {
+        Alert.alert(null, getDic('Msg_Error'), [{ text: getDic('Ok') }]);
+      }
     }
-  }, [dispatch, roomId, emailTxt, emailList]);
+  }, [roomId, emailTxt, emailList]);
 
   const deleteItem = useCallback(
     email => {
@@ -99,16 +101,15 @@ const InviteExtUser = ({ route, navigation }) => {
         { cancelable: true },
       );
     },
-    [dispatch, oldList],
+    [oldList, roomId],
   );
 
-  const handleSendMail = useCallback(() => {
+  const handleSendMail = useCallback(async () => {
     if (emailList.length > 0) {
       const domainURL = getServer('HOST');
       const joinURL = `${domainURL}/client/login/join`;
-
-      channelApi
-        .sendExternalUser({
+      try {
+        const { data: response } = await channelApi.sendExternalUser({
           roomId,
           emailList: emailList.toString(),
           joinURL,
@@ -117,23 +118,24 @@ const InviteExtUser = ({ route, navigation }) => {
             name: userInfo.name,
             email: userInfo.mailAddress,
           }),
-        })
-        .then(({ data }) => {
-          let alertMsg = '';
-          if (data.status == 'SUCCESS') {
-            alertMsg = getDic('Msg_SendInviteMail');
-            setOldList([...oldList, ...emailList]);
-            setEmailList([]);
-          } else {
-            alertMsg = getDic('Msg_Error');
-          }
-
-          Alert.alert(null, alertMsg, [{ text: getDic('Ok') }]);
         });
+        console.log('Response   ', response);
+        let alertMsg = '';
+        if (response.status == 'SUCCESS') {
+          alertMsg = getDic('Msg_SendInviteMail');
+          setOldList([...oldList, ...emailList]);
+          setEmailList([]);
+        } else {
+          alertMsg = getDic('Msg_Error');
+        }
+        Alert.alert(null, alertMsg, [{ text: getDic('Ok') }]);
+      } catch (err) {
+        Alert.alert(null, getDic('Msg_Error'), [{ text: getDic('Ok') }]);
+      }
     } else {
       Alert.alert(null, getDic('Msg_NoAddMail'), [{ text: getDic('Ok') }]);
     }
-  }, [emailList]);
+  }, [oldList, roomId, emailList, userInfo]);
 
   return (
     <View style={styles.container}>
