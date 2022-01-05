@@ -24,12 +24,22 @@ export const sendChannelMessage = params => {
 };
 
 export const searchChannel = params => {
-  return managesvr(
-    'get',
-    `/channel/search/${params.type}?value=${params.value}&companyCode=${
-      params.companyCode
-    }`,
-  );
+  if (!params) {
+    return;
+  }
+  if (params.companyCode) {
+    return managesvr(
+      'get',
+      `/channel/search/${params.type}?value=${params.value}&companyCode=${
+        params.companyCode
+      }`,
+    );
+  } else {
+    return managesvr(
+      'get',
+      `/channel/search/${params.type}?value=${params.value}`,
+    );
+  }
 };
 
 export const getChannelInfo = params => {

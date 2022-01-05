@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { openModal, changeModal } from '@/modules/modal';
 import { useSelector, useDispatch } from 'react-redux';
 import { openChannel } from '@/modules/channel';
@@ -11,30 +11,66 @@ import { getScreenWidth } from '@/lib/device/common';
 import { getServer, getDic } from '@/config';
 import { getBackgroundColor } from '@/lib/common';
 
-const EnterChannelBox = ({ navigation, channelInfo }) => {
+const EnterChannelBox = ({ navigation, channelInfo, onChannelJoin }) => {
   const id = useSelector(({ login }) => login.id);
-  const userInfo = useSelector(({ login }) => login);
   const dispatch = useDispatch();
   const joinChannel = useCallback(
     params => {
       channelApi.joinChannel(params).then(({ data }) => {
         if (data.status === 'SUCCESS') {
           const { roomId } = params;
+          onChannelJoin?.(roomId);
           dispatch(openChannel({ roomId }));
           moveToChannelRoom(navigation, 'ChannelRoom', { roomID: roomId });
         }
       });
     },
-    [dispatch],
+    [dispatch, navigation, onChannelJoin],
   );
+  const handleJoinChannel = () => {
+    if (channelInfo.openType !== 'O') {
+      dispatch(
+        changeModal({
+          modalData: {
+            closeOnTouchOutside: true,
+            type: 'channelPasswordInput',
+            channel: channelInfo,
+            members: [id],
+            navigation: navigation,
+          },
+        }),
+      );
+      dispatch(openModal());
+    } else {
+      Alert.alert(
+        null,
+        getDic('Msg_AskEnterChannel'),
+        [
+          {
+            text: getDic('Cancel'),
+          },
+          {
+            text: getDic('Ok'),
+            onPress() {
+              joinChannel({
+                roomId: channelInfo.roomId,
+                openType: channelInfo.openType,
+                members: [id],
+              });
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    }
+  };
   return (
-    <View
+    <TouchableOpacity
       style={{
         flexDirection: 'row',
-        marginLeft: 21,
-        marginRight: 21,
-        marginTop: 21,
+        marginBottom: 20,
       }}
+      onPress={handleJoinChannel}
     >
       {channelInfo.iconPath ? (
         (channelInfo.openType != 'O' && (
@@ -128,40 +164,20 @@ const EnterChannelBox = ({ navigation, channelInfo }) => {
         )}
       </View>
 
-      <TouchableOpacity
+      <View
         style={{
           width: 35,
           height: 35,
           borderColor: '#e0e0e0',
           borderWidth: 0.8,
           borderRadius: 5,
+          marginTop: 12,
           marginLeft: 'auto',
-        }}
-        onPress={() => {
-          if (channelInfo.openType != 'O') {
-            dispatch(
-              changeModal({
-                modalData: {
-                  closeOnTouchOutside: true,
-                  type: 'channelPasswordInput',
-                  channel: channelInfo,
-                  members: [id],
-                  navigation: navigation,
-                },
-              }),
-            );
-            dispatch(openModal());
-          } else
-            joinChannel({
-              roomId: channelInfo.roomId,
-              openType: channelInfo.openType,
-              members: [id],
-            });
         }}
       >
         <AddChannelIcon color={'black'} width="32" height="32" />
-      </TouchableOpacity>
-    </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 

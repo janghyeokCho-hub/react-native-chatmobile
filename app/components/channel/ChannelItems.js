@@ -4,8 +4,15 @@ import Channel from './Channel';
 import { FlatList, View } from 'react-native';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
 import { getDic } from '@/config';
+import EnterChannelBox from '@/components/channel/channelroom/controls/EnterChannelBox';
 
-const ChannelItems = ({ rooms, loading, onRoomChange, navigation }) => {
+const ChannelItems = ({
+  rooms,
+  loading,
+  onRoomChange,
+  navigation,
+  onChannelJoin,
+}) => {
   const { id, selectId } = useSelector(({ login, channel }) => ({
     id: login.id,
     selectId: channel.selectId,
@@ -56,7 +63,7 @@ const ChannelItems = ({ rooms, loading, onRoomChange, navigation }) => {
       );
       dispatch(openModal());
     },
-    [dispatch, id, navigation],
+    [dispatch, onRoomChange],
   );
 
   return (
@@ -74,14 +81,24 @@ const ChannelItems = ({ rooms, loading, onRoomChange, navigation }) => {
             keyExtractor={(_, idx) => idx.toString()}
             renderItem={({ item }) => {
               const isSelect = item.roomId === selectId;
-              return (
-                <Channel
-                  room={item}
-                  onRoomChange={onRoomChange}
-                  isSelect={isSelect}
-                  showModalMenu={showModalMenu}
-                />
-              );
+              if (item?.isJoin) {
+                return (
+                  <EnterChannelBox
+                    navigation={navigation}
+                    channelInfo={item}
+                    onChannelJoin={onChannelJoin}
+                  />
+                );
+              } else {
+                return (
+                  <Channel
+                    room={item}
+                    onRoomChange={onRoomChange}
+                    isSelect={isSelect}
+                    showModalMenu={showModalMenu}
+                  />
+                );
+              }
             }}
           />
         </View>

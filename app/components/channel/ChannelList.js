@@ -5,22 +5,27 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useSelector, useDispatch } from 'react-redux';
+import { useThrottledCallback } from 'use-debounce';
+import { useTheme } from '@react-navigation/native';
 import Header from '@COMMON/Header';
 import SearchBar from '@COMMON/SearchBar';
 import { updateChannels, getChannels, openChannel } from '@/modules/channel';
 import AddChannelIcon from '@COMMON/icons/AddChannelIcon';
 import ChannelCategoryIcon from '@COMMON/icons/ChannelCategoryIcon';
 import ChannelItems from './ChannelItems';
-import { openModal, changeModal, closeModal } from '@/modules/modal';
+import { closeModal } from '@/modules/modal';
 import NetworkError from '../common/NetworkError';
 import { getDic } from '@/config';
-import { useTheme } from '@react-navigation/native';
+import * as channelApi from '@/lib/api/channel';
+import { moveToChannelRoom } from '@/lib/channelUtil';
+import { getConfig } from '@/config';
+
 const ChannelList = ({ navigation }) => {
   const { sizes } = useTheme();
-  const modalInfo = useSelector(({ modal }) => modal.modalData);
   const channelList = useSelector(({ channel }) => channel.channels);
-  const loading = useSelector(({ loading }) => loading['room/GET_ROOMS']);
-  const userId = useSelector(({ login }) => login.id);
+  const loading = useSelector(
+    ({ loading: _loading }) => _loading['room/GET_ROOMS'],
+  );
   const networkState = useSelector(({ app }) => app.networkState);
   const myInfo = useSelector(({ login }) => login.userInfo);
 
@@ -40,7 +45,7 @@ const ChannelList = ({ navigation }) => {
         }
       });
     },
-    [dispatch],
+    [dispatch, navigation],
   );
 
   const handleChannelChange = useCallback(
@@ -54,34 +59,6 @@ const ChannelList = ({ navigation }) => {
       );
       navigation.navigate('ChannelRoom', { roomID: channel.roomId });
       dispatch(closeModal());
-      // if (channel.openType === 'O' || channel.openType === 'P') {
-
-      // } else {
-      //   if (modalInfo.channel) {
-      //     dispatch(
-      //       changeModal({
-      //         modalData: {
-      //           closeOnTouchOutside: true,
-      //           type: 'channelPasswordInput',
-      //           channel: modalInfo.channel,
-      //           navigation: navigation,
-      //         },
-      //       }),
-      //     );
-      //   } else {
-      //     dispatch(
-      //       changeModal({
-      //         modalData: {
-      //           closeOnTouchOutside: true,
-      //           type: 'channelPasswordInput',
-      //           channel: channel,
-      //           navigation: navigation,
-      //         },
-      //       }),
-      //     );
-      //     dispatch(openModal());
-      //   }
-      // }
     },
     [dispatch, navigation],
   );
@@ -91,44 +68,64 @@ const ChannelList = ({ navigation }) => {
       handleSearch(searchText);
     }
   }, [handleSearch, listMode, searchText]);
+  const IsSaaSClient = getConfig('IsSaaSClient', 'N');
+
+  const searchChannel = useThrottledCallback(async changeVal => {
+    const reqData = {
+      type: 'name',
+      value: changeVal,
+      ...(IsSaaSClient && { copanyCode: myInfo.companyCode }),
+    };
+    const { data: response } = await channelApi.searchChannel(reqData);
+    if (response.status !== 'SUCCESS') {
+      return;
+    }
+    const searchResult = response.result?.map(chan => {
+      const joinedChannel = channelList.findIndex(
+        c => c.roomId === chan.roomId,
+      );
+      if (joinedChannel !== -1) {
+        // 이미 가입한 채널일 경우 검새결과 대신 lastMessage, lastMessageDate 정보가 있는 local state로 교체
+        return {
+          ...channelList[joinedChannel],
+          isJoin: false,
+        };
+      } else {
+        // 미가입채널은 검색결과 데이터를 그대로 사용
+        return {
+          ...chan,
+          isJoin: true,
+        };
+      }
+    });
+    return searchResult;
+  }, 50);
 
   const handleSearch = useCallback(
-    changeVal => {
+    async changeVal => {
       setSearchText(changeVal);
-
-      if (changeVal == '') {
+      if (changeVal === '') {
         setListMode('N');
+        return;
       } else {
-        const filterList = channelList.filter(item => {
-          let returnVal = false;
-
-          if (item.roomName && item.roomName.indexOf(changeVal) > -1) {
-            return true;
-          } else {
-            if (item.members) {
-              item.members.forEach(member => {
-                if (
-                  member.id != userId &&
-                  member.name.indexOf(changeVal) > -1
-                ) {
-                  returnVal = true;
-                  return false;
-                }
-              });
-            } else {
-              returnVal = false;
-            }
-          }
-
-          return returnVal;
-        });
-
-        setSearchList(filterList);
         setListMode('S');
+        const searchResult = await searchChannel(changeVal);
+        console.log('SearchResult   ', searchResult[0]);
+        setSearchList(searchResult);
       }
     },
-    [channelList],
+    [searchChannel],
   );
+
+  const onChannelJoin = useCallback(roomId => {
+    setSearchList(prev => {
+      const joinedChannel = prev.findIndex(chan => chan.roomId === roomId);
+      if (joinedChannel !== -1) {
+        prev[joinedChannel].isJoin = false;
+      }
+      return prev;
+    });
+  }, []);
 
   useEffect(() => {
     // channelList가 변할때 categoryCode가 null인 속성들을 찾아 요청 및 데이터 채워줌
@@ -146,11 +143,13 @@ const ChannelList = ({ navigation }) => {
         }),
       );
     }
-  }, [channelList]);
+  }, [dispatch, channelList]);
 
   useEffect(() => {
-    if (channelList == null || channelList.length == 0) dispatch(getChannels());
-  }, []);
+    if (channelList === null || channelList.length === 0) {
+      dispatch(getChannels());
+    }
+  }, [dispatch, channelList]);
 
   return (
     <View style={styles.container}>
@@ -202,7 +201,7 @@ const ChannelList = ({ navigation }) => {
             {getDic('SubscribedChannel')}
           </Text>
           <View style={styles.contents}>
-            {listMode == 'N' && (
+            {listMode === 'N' && (
               <ChannelItems
                 rooms={channelList}
                 loading={loading}
@@ -210,9 +209,10 @@ const ChannelList = ({ navigation }) => {
                 navigation={navigation}
               />
             )}
-            {listMode == 'S' && (
+            {listMode === 'S' && (
               <ChannelItems
                 rooms={searchList}
+                onChannelJoin={onChannelJoin}
                 loading={false}
                 onRoomChange={handleChannelChange}
                 navigation={navigation}

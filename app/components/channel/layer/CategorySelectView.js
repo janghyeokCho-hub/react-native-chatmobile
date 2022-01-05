@@ -251,6 +251,11 @@ const CategorySelectView = ({ navigation, route }) => {
         <FlatList
           data={searchList}
           keyExtractor={item => item.roomID}
+          style={{
+            marginTop: 8,
+            marginLeft: 20,
+            marginRight: 20,
+          }}
           renderItem={({ item }) => {
             return (
               <EnterChannelBox navigation={navigation} channelInfo={item} />
