@@ -1,14 +1,12 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { G, Circle, Path } from 'react-native-svg';
 import { useTheme } from '@react-navigation/native';
 
 const ToggleButton = ({ checked, data, onPress, disabled, style }) => {
   const { colors } = useTheme();
   return (
-    <View
-      style={styles.toggleBtn}
-    >
+    <TouchableOpacity style={styles.toggleBtn} onPress={onPress}>
       {checked ? (
         <Svg width="22" height="22" viewBox="0 0 22 22">
           <G
@@ -63,7 +61,7 @@ const ToggleButton = ({ checked, data, onPress, disabled, style }) => {
           </G>
         </Svg>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
