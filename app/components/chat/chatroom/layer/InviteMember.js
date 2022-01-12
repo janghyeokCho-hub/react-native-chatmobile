@@ -133,9 +133,23 @@ const InviteMember = ({ route, navigation }) => {
     setMembers(prevState => prevState.concat(member));
   }, []);
 
-  const delInviteMember = useCallback(memberId => {
-    setMembers(prevState => prevState.filter(item => item.id != memberId));
-  }, []);
+  const delInviteMember = useCallback(
+    memberId => {
+      setMembers(prevState =>
+        prevState.filter(item => {
+          const includesOldMembers = oldMembers.findIndex(
+            om => om.id === memberId,
+          );
+          /** 2022.01.12
+           * 기존참여자를 클릭할 경우 체크박스가 해제되지 않으면서 members에서 제외되어 로직오류 발생
+           * Problem Solve: 기존 참여자를 선택할 경우 members에서 필터되지 않도록 방어로직 추가
+           */
+          return includesOldMembers !== -1 || item.id !== memberId;
+        }),
+      );
+    },
+    [oldMembers],
+  );
 
   const handleClose = useCallback(() => {
     navigation.dispatch(CommonActions.goBack());
