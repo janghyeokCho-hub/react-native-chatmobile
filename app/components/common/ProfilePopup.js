@@ -133,7 +133,10 @@ const ProfilePopup = ({ route, navigation }) => {
               <View style={styles.profileImageInfo}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text
-                    style={{ ...styles.profileTitle, fontSize: 22 + sizes.inc }}
+                    style={{
+                      ...styles.profileTitle,
+                      fontSize: 22 + sizes.inc,
+                    }}
                     numberOfLines={1}
                   >
                     {getJobInfo(targetInfo)}
@@ -185,7 +188,10 @@ const ProfilePopup = ({ route, navigation }) => {
                           fontSize: sizes.large,
                         }}
                       >
-                        {getDic('Ab_' + targetAbsenceInfo.code)}
+                        {getDic(
+                          'Ab_' + targetAbsenceInfo.code,
+                          targetAbsenceInfo.code,
+                        )}
                       </Text>
                       <Text
                         style={{
@@ -252,7 +258,10 @@ const ProfilePopup = ({ route, navigation }) => {
               </View>
               <View style={styles.profileInfo}>
                 <Text
-                  style={{ ...styles.profileInfo_text, fontSize: sizes.large }}
+                  style={{
+                    ...styles.profileInfo_text,
+                    fontSize: sizes.large,
+                  }}
                 >
                   {targetInfo.companyNumber}
                 </Text>
@@ -271,7 +280,10 @@ const ProfilePopup = ({ route, navigation }) => {
               </View>
               <View style={styles.profileInfo}>
                 <Text
-                  style={{ ...styles.profileInfo_text, fontSize: sizes.large }}
+                  style={{
+                    ...styles.profileInfo_text,
+                    fontSize: sizes.large,
+                  }}
                 >
                   {targetInfo.mailAddress}
                 </Text>
@@ -290,7 +302,10 @@ const ProfilePopup = ({ route, navigation }) => {
               </View>
               <View style={styles.profileInfo}>
                 <Text
-                  style={{ ...styles.profileInfo_text, fontSize: sizes.large }}
+                  style={{
+                    ...styles.profileInfo_text,
+                    fontSize: sizes.large,
+                  }}
                 >
                   {targetInfo.work}
                 </Text>
@@ -317,7 +332,10 @@ const ProfilePopup = ({ route, navigation }) => {
                         </G>
                       </Svg>
                       <Text
-                        style={{ ...styles.textChat, fontSize: sizes.default }}
+                        style={{
+                          ...styles.textChat,
+                          fontSize: sizes.default,
+                        }}
                       >
                         {getDic('StartChat')}
                       </Text>
@@ -341,7 +359,10 @@ const ProfilePopup = ({ route, navigation }) => {
                         />
                       </Svg>
                       <Text
-                        style={{ ...styles.textChat, fontSize: sizes.default }}
+                        style={{
+                          ...styles.textChat,
+                          fontSize: sizes.default,
+                        }}
                       >
                         {getDic('Call')}
                       </Text>
