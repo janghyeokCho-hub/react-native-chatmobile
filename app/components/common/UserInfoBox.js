@@ -193,7 +193,7 @@ const UserInfoBox = ({
                 }}
                 numberOfLines={1}
               >
-                {getDic('Ab_' + myAbsence.code)}
+                {getDic('Ab_' + myAbsence.code, myAbsence.code)}
               </Text>
             </View>
           ) : !disableMessage && userInfo.work && userInfo.work.length > 0 ? (
