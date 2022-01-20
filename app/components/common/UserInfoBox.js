@@ -401,7 +401,17 @@ const UserInfoBox = ({
                       item[checkObj.checkedSubKey]) === checkedValue,
                 ) !== undefined
               }
-              onPress={checkObj.onPress}
+              onPress={() => {
+                if (checkObj?.onPress) {
+                  // Handle ToggleButton onPress
+                  const find = checkObj.checkedList.find(
+                    item =>
+                      (item[checkObj.checkedKey] ||
+                        item[checkObj.checkedSubKey]) === checkedValue,
+                  );
+                  checkObj.onPress(!find, userInfo);
+                }
+              }}
               disabled={
                 checkObj.disabledList.find(
                   item =>
