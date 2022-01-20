@@ -175,6 +175,7 @@ export const initHostInfo = () => {
 
       // host info 삭제
       AsyncStorage.removeItem('EHINF');
+      AsyncStorage.removeItem('covi_user_jobInfo');
     };
     try {
       removeHost();

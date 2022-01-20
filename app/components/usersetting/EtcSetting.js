@@ -24,10 +24,17 @@ const EtcSetting = () => {
               { text: getDic('Cancel'), onPress: () => {} },
               {
                 text: getDic('Ok'),
-                onPress: () => {
-                  AsyncStorage.removeItem('ESETINF').then(() => {
-                    restartApp();
-                  });
+                onPress: async () => {
+                  try {
+                    await AsyncStorage.removeItem('covi_user_jobInfo');
+                    await AsyncStorage.removeItem('ESETINF');
+                  } catch (err) {
+                    console.log(
+                      `AsyncStorage removeItem 'covi_user_jobInfo', 'ESETINF' occured an error : `,
+                      err,
+                    );
+                  }
+                  restartApp();
                 },
               },
             ],
