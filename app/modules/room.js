@@ -26,6 +26,7 @@ const [
 ] = createRequestActionTypes('room/UPDATE_ROOMS');
 
 const ROOM_MESSAGE_ADD = 'room/ROOM_MESSAGE_ADD';
+const ROOM_MESSAGE_DELETE = 'room/ROOM_MESSAGE_DELETE';
 
 const OPEN_ROOM = 'room/OPEN_ROOM';
 const CHANGE_OPEN_ROOM = 'room/CHANGE_OPEN_ROOM';
@@ -105,6 +106,7 @@ export const getRooms = createAction(GET_ROOMS);
 export const updateRooms = createAction(UPDATE_ROOMS);
 export const getRoomInfo = createAction(GET_ROOM_INFO);
 export const roomMessageAdd = createAction(ROOM_MESSAGE_ADD);
+export const roomMessageDel = createAction(ROOM_MESSAGE_DELETE);
 export const changeOpenRoom = createAction(CHANGE_OPEN_ROOM);
 export const changeViewType = createAction(CHANGE_VIEW_TYPE);
 export const makeRoomView = createAction(MAKE_ROOM_VIEW);
@@ -825,6 +827,44 @@ const room = handleActions(
             }
           }
         }
+      });
+    },
+    [ROOM_MESSAGE_DELETE]: (state, action) => {
+      /**
+       * 2022.02.04 대화방 대화삭제
+       */
+      return produce(state, draft => {
+        const { payload } = action;
+        console.log('ROOM_MESSAGE_DELETE', payload);
+        if (!payload || Array.isArray(payload?.deletedMessageIds) === false) {
+          return;
+        }
+        /* Redux store에서 message 제거 */
+        payload.deletedMessageIds.forEach(mid => {
+          const idx = draft.messages.findIndex(msg => msg.messageID === mid);
+          if (idx !== -1) {
+            draft.messages.splice(idx, 1);
+          }
+        });
+        /* lastMessage 교체 */
+        if (payload.lastMessage) {
+          console.log('Update LastMessage  ', payload.lastMessage);
+          const room = draft.rooms.find(
+            r => `${r.roomID}` === `${payload.roomID}`,
+          );
+          if (!room) {
+            return;
+          }
+          const lastMessage = {
+            Message: payload.lastMessage.context,
+            File: payload.lastMessage.fileInfos
+          };
+          if (draft.currentRoom && room.roomID === draft.currentRoom.roomID) {
+            draft.currentRoom.lastMessage = lastMessage;
+          }
+          room.lastMessage = lastMessage;
+        }
+        /* */
       });
     },
   },

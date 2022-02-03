@@ -11,13 +11,16 @@ const SocketContainer = () => {
   const userInfo = useSelector(({ login }) => login.userInfo);
   const accessid = useSelector(({ login }) => login.id);
   const fixedUsers = useSelector(({ presence }) => presence.fixedUsers);
-  const { mutate:setNoteList } = useNoteList({ viewTyoe: 'receive' });
+  const { mutate: setNoteList } = useNoteList({ viewTyoe: 'receive' });
   const dispatch = useDispatch();
 
   const socketActionsObj = useMemo(() => {
     return {
       onNewMessage: socketActions.handleNewMessage(dispatch, userInfo),
-      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList, navigationRef),
+      onNewNoteMessage: socketActions.handleNewNoteMessage(
+        setNoteList,
+        navigationRef,
+      ),
       onChatRoomInvitation: socketActions.handleChatRoomInvite(dispatch),
       onChatRoomExit: socketActions.handleChatRoomExit(dispatch, userInfo),
       onReadCountChanged: socketActions.handleReadCountChanged(
@@ -46,8 +49,9 @@ const SocketContainer = () => {
       ),
       onChannelClosure: socketActions.handleChannelClosure(dispatch),
       onAuthChanged: socketActions.handleAuthChanged(dispatch),
+      onDelMessage: socketActions.handleDelChatroomMessage(dispatch),
     };
-  }, [userInfo]);
+  }, [userInfo, dispatch, setNoteList]);
 
   useEffect(() => {
     if (token) {
