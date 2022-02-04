@@ -857,7 +857,7 @@ const room = handleActions(
           }
           const lastMessage = {
             Message: payload.lastMessage.context,
-            File: payload.lastMessage.fileInfos
+            File: payload.lastMessage.fileInfos,
           };
           if (draft.currentRoom && room.roomID === draft.currentRoom.roomID) {
             draft.currentRoom.lastMessage = lastMessage;

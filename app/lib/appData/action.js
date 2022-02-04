@@ -1541,11 +1541,9 @@ export const unreadCountSync = async (param, callback) => {
 /* 메시지 동기화 */
 export const syncMessages = async (param, callback) => {
   const roomId = param.roomID;
-
   if (RoomList.isNoRoomID(roomId)) {
     const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
-
-    let syncDate = await new Promise((resolve, reject) => {
+    const syncDate = await new Promise((resolve, reject) => {
       dbCon.transaction(tx => {
         db.tx(tx, 'room')
           .select(['syncDate'])
@@ -1556,6 +1554,33 @@ export const syncMessages = async (param, callback) => {
           });
       });
     });
+
+    managesvr('get', `/sync/room/message/${roomId}`)
+      .then(({ data }) => {
+        if (
+          !data ||
+          data.status !== 'SUCCESS' ||
+          Array.isArray(data?.result?.deletedMessageIds) === false
+        ) {
+          console.log('Sync DeletedMessages :: invalid data ', data);
+        }
+        dbCon.transaction(tx => {
+          db.tx(tx, 'message')
+            .delete()
+            .where(`roomId = ${roomId}`)
+            .whereIn('messageId', data.result.deletedMessageIds)
+            .execute()
+            .then((_, result) => {
+              console.log(
+                `Sync DeletedMessages in room ${roomId} : `,
+                data.result.deletedMessageIds,
+              );
+            });
+        });
+      })
+      .catch(err => {
+        console.log('Sync DeletedMessages occured an error ', err);
+      });
 
     const isNotice = Boolean(param.isNotice);
 
