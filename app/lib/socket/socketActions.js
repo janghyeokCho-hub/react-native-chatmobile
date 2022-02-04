@@ -386,7 +386,7 @@ export const handleAuthChanged = (dispatch, userInfo) => {
 };
 
 export const handleDelChatroomMessage = dispatch => {
-  return data => {
+  return async data => {
     if (!data) {
       console.log('An error occured on onDelMessage: no payload');
       return;
@@ -395,6 +395,10 @@ export const handleDelChatroomMessage = dispatch => {
       const json_data = JSON.parse(data);
       console.log('onDelMessage :: ', json_data);
       dispatch(roomMessageDel(json_data));
+      await dbAction.roomDeletemessage(
+        json_data?.roomID,
+        json_data?.deletedMessageIds,
+      );
       // ...
     } catch (err) {
       console.log('An error occured on onDelMessage: payload is not json');

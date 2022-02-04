@@ -1556,27 +1556,12 @@ export const syncMessages = async (param, callback) => {
     });
 
     managesvr('get', `/sync/room/message/${roomId}`)
-      .then(({ data }) => {
-        if (
-          !data ||
-          data.status !== 'SUCCESS' ||
-          Array.isArray(data?.result?.deletedMessageIds) === false
-        ) {
-          console.log('Sync DeletedMessages :: invalid data ', data);
+      .then(async ({ data }) => {
+        if (!data || data.status !== 'SUCCESS') {
+          console.log('Sync DeletedMessages :: invalid data  ', data);
+          return;
         }
-        dbCon.transaction(tx => {
-          db.tx(tx, 'message')
-            .delete()
-            .where(`roomId = ${roomId}`)
-            .whereIn('messageId', data.result.deletedMessageIds)
-            .execute()
-            .then((_, result) => {
-              console.log(
-                `Sync DeletedMessages in room ${roomId} : `,
-                data.result.deletedMessageIds,
-              );
-            });
-        });
+        roomDeletemessage(roomId, data?.result?.deletedMessageIds);
       })
       .catch(err => {
         console.log('Sync DeletedMessages occured an error ', err);
@@ -2037,4 +2022,29 @@ export const getSecondPasswordInfo = async () => {
   });
 
   return secondPasswordInfo;
+};
+
+export const roomDeletemessage = async (roomId, deletedMessageIds) => {
+  if (!roomId || Array.isArray(deletedMessageIds) === false) {
+    console.log(
+      'Room DeleteMessage :: invalid data : ',
+      roomId,
+      deletedMessageIds,
+    );
+    return;
+  }
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  dbCon.transaction(tx => {
+    db.tx(tx, 'message')
+      .delete()
+      .where(`roomId = ${roomId}`)
+      .whereIn('messageId', deletedMessageIds)
+      .execute()
+      .then((_, result) => {
+        console.log(
+          `Sync DeletedMessages in room ${roomId} : `,
+          deletedMessageIds,
+        );
+      });
+  });
 };

@@ -223,7 +223,6 @@ class TransactionBuilder {
     return this;
   };
   whereIn = (column, cond) => {
-    console.log('1234 ', column, cond);
     if (typeof column !== 'string' || !column.length || !cond) {
       return;
     }
