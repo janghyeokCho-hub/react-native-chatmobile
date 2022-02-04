@@ -1543,7 +1543,7 @@ export const syncMessages = async (param, callback) => {
   const roomId = param.roomID;
   if (RoomList.isNoRoomID(roomId)) {
     const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
-    const syncDate = await new Promise((resolve, reject) => {
+    let syncDate = await new Promise((resolve, reject) => {
       dbCon.transaction(tx => {
         db.tx(tx, 'room')
           .select(['syncDate'])
@@ -2041,10 +2041,7 @@ export const roomDeletemessage = async (roomId, deletedMessageIds) => {
       .whereIn('messageId', deletedMessageIds)
       .execute()
       .then((_, result) => {
-        console.log(
-          `Sync DeletedMessages in room ${roomId} : `,
-          deletedMessageIds,
-        );
+        console.log(`Sync DeletedMessages in room ${roomId} : `);
       });
   });
 };

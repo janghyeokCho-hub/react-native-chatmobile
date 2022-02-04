@@ -231,7 +231,6 @@ class TransactionBuilder {
       this.txData.whereInCondition = cond;
     } else if (Array.isArray(cond) === true) {
       const processedCond = cond.join(',');
-      console.log(processedCond);
       this.txData.whereInCondition = processedCond;
     }
     return this;
