@@ -8,7 +8,7 @@ import { getPlainText } from '@/lib/common';
 import Share from 'react-native-share';
 
 const MessageExtension = ({ messageData, onClose, btnStyle }) => {
-  const isRoom = useSelector(({ room }) => !!room.currentRoom);
+  const currentRoom = useSelector(({ room }) => room.currentRoom);
   const isChannel = useSelector(({ channel }) => !!channel.currentChannel);
 
   const buttons = useMemo(() => {
@@ -51,8 +51,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       });
 
     // delete
-    isChannel &&
-      messageData.isMine === 'Y' &&
+    messageData.isMine === 'Y' &&
       modalBtn.push({
         type: 'delete',
         title: getDic('MessageDelete'),
@@ -60,22 +59,33 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
           let token = [];
           if (messageData.fileInfos) {
             if (Array.isArray(JSON.parse(messageData.fileInfos))) {
-              token = JSON.parse(messageData.fileInfos).map(
-                f => f.token,
-              );
+              token = JSON.parse(messageData.fileInfos).map(f => f.token);
             } else {
               token.push(JSON.parse(messageData.fileInfos).token);
             }
           }
-          messageApi.deleteChannelMessage({
-            token,
-            messageId: messageData.messageID,
-          });
+          if (isChannel) {
+            // 채널 대화삭제
+            messageApi.deleteChannelMessage({
+              token,
+              messageId: messageData.messageID,
+            });
+          } else {
+            // 대화방 대화삭제
+            if (!currentRoom.roomID || !messageData.messageID) {
+              return;
+            }
+            messageApi.delChatroomMessage({
+              token,
+              roomID: currentRoom.roomID,
+              messageIds: [messageData.messageID],
+            });
+          }
         },
       });
 
     return modalBtn;
-  }, [isRoom, isChannel]);
+  }, [currentRoom, isChannel, messageData]);
 
   return (
     <View>
