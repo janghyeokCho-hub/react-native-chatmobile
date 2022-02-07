@@ -851,7 +851,7 @@ const room = handleActions(
         });
 
         /* Update unreadCnt */
-        if (room?.unreadCnt > 0) {
+        if (Number(room?.unreadCnt) > 0) {
           room.unreadCnt -= 1;
         }
         /* */
