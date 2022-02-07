@@ -851,9 +851,9 @@ const room = handleActions(
         });
 
         /* Update unreadCnt */
-        if (Number(room?.unreadCnt) > 0) {
-          room.unreadCnt -= 1;
-        }
+        // if (Number(room?.unreadCnt) > 0) {
+        //   room.unreadCnt -= 1;
+        // }
         /* */
 
         /* lastMessage 교체 */
