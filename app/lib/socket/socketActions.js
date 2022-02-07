@@ -401,7 +401,7 @@ export const handleDelChatroomMessage = dispatch => {
       );
       // ...
     } catch (err) {
-      console.log('An error occured on onDelMessage: payload is not json');
+      console.log('An error occured on onDelMessage : ', err);
       return;
     }
   };

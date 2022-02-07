@@ -839,6 +839,9 @@ const room = handleActions(
         if (!payload || Array.isArray(payload?.deletedMessageIds) === false) {
           return;
         }
+        const room = draft.rooms.find(
+          r => `${r.roomID}` === `${payload.roomID}`,
+        );
         /* Redux store에서 message 제거 */
         payload.deletedMessageIds.forEach(mid => {
           const idx = draft.messages.findIndex(msg => msg.messageID === mid);
@@ -846,12 +849,16 @@ const room = handleActions(
             draft.messages.splice(idx, 1);
           }
         });
+
+        /* Update unreadCnt */
+        if (room?.unreadCnt > 0) {
+          room.unreadCnt -= 1;
+        }
+        /* */
+
         /* lastMessage 교체 */
         if (payload.lastMessage) {
           console.log('Update LastMessage  ', payload.lastMessage);
-          const room = draft.rooms.find(
-            r => `${r.roomID}` === `${payload.roomID}`,
-          );
           if (!room) {
             return;
           }
