@@ -116,3 +116,22 @@ export default class ParamUtil {
 export const encryptText = plainText => {
   return managesvr('get', `/netaes?pt=${encodeURIComponent(plainText)}`, null);
 };
+
+export function makePhotoPath(img) {
+  let photoSrc = img;
+  const urlParts = photoSrc?.split('?');
+  /**
+   * 2021.10.22
+   * query string '?' identifier 중복 제거
+   *
+   * 그룹웨어에서 사진의 물리경로를 querystring 파라미터로 정의하는 케이스에서
+   * '?'를 추가로 붙이면 사진 경로값이 바뀌어  사진을 불러오지 못하는 오류발생
+   */
+  if (Array.isArray(urlParts) && urlParts.length >= 2) {
+    const urlBase = urlParts.shift();
+    photoSrc = urlBase + '?' + urlParts.join('&');
+  } else {
+    photoSrc = img;
+  }
+  return photoSrc;
+}

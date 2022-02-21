@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Image, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { getServer, getDic } from '@/config';
+import React, { useState, useMemo } from 'react';
+import { Image, StyleSheet, View, Text } from 'react-native';
 import PresenceButton from '@COMMON/buttons/PresenceButton';
 import { getBackgroundColor, getDictionary } from '@/lib/common';
+import { makePhotoPath } from '@/lib/util/paramUtil';
 
 const ProfileBox = ({ userId, img, userName, presence, isInherit, style }) => {
   const [imgVisible, setImgVisible] = useState(true);
@@ -10,24 +10,7 @@ const ProfileBox = ({ userId, img, userName, presence, isInherit, style }) => {
   const nameCode = useMemo(() => {
     return getBackgroundColor(getDictionary(userName));
   }, [userName]);
-  const photoPath = useMemo(() => {
-    let photoSrc = img;
-    const urlParts = photoSrc?.split('?');
-    /**
-     * 2021.10.22
-     * query string '?' identifier 중복 제거
-     * 
-     * 그룹웨어에서 사진의 물리경로를 querystring 파라미터로 정의하는 케이스에서
-     * '?'를 추가로 붙이면 사진 경로값이 바뀌어  사진을 불러오지 못하는 오류발생
-     */
-    if (Array.isArray(urlParts) && urlParts.length >= 2) {
-      const urlBase = urlParts.shift();
-      photoSrc = urlBase + '?' + urlParts.join('&');
-    } else {
-      photoSrc = img;
-    }
-    return photoSrc;
-  }, [img]);
+  const photoPath = useMemo(() => makePhotoPath(img), [img]);
 
   return (
     <View style={style ? style : styles.profileBox}>
