@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { View, Text, Clipboard, TouchableOpacity} from 'react-native';
-import { getDic } from '@/config';
+import { getDic, getConfig } from '@/config';
 import * as messageApi from '@API/message';
 import * as channelApi from '@API/channel';
 import { getPlainText } from '@/lib/common';
@@ -10,7 +10,7 @@ import Share from 'react-native-share';
 const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const currentRoom = useSelector(({ room }) => room.currentRoom);
   const isChannel = useSelector(({ channel }) => !!channel.currentChannel);
-
+  const useMessageDelete = getConfig('UseChatroomDeleteMessage', false) === true;
   const buttons = useMemo(() => {
     let modalBtn = [];
 
@@ -51,7 +51,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       });
 
     // delete
-    messageData.isMine === 'Y' &&
+    useMessageDelete && messageData.isMine === 'Y' &&
       modalBtn.push({
         type: 'delete',
         title: getDic('MessageDelete'),
@@ -85,7 +85,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       });
 
     return modalBtn;
-  }, [currentRoom, isChannel, messageData]);
+  }, [currentRoom, isChannel, messageData, useMessageDelete]);
 
   return (
     <View>
