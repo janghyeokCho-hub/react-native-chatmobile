@@ -171,6 +171,11 @@ export const deleteChannelMessage = params => {
   return chatsvr('delete', `/channel/message/${params.messageId}`, params);
 };
 
+// 대화방 메시지 삭제
+export const delChatroomMessage = params => {
+  return chatsvr('delete', `/message`, params);
+};
+
 // 공지 내리기
 export const removeNotice = params => {
   return chatsvr('put', `/channel/notice/message/${params.messageId}`, params);

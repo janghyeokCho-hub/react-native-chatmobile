@@ -176,7 +176,9 @@ class TxData {
     this.txSql = '';
     this.txTarget = '';
     this.txValues = '';
-    this.condiction = null;
+    this.condition = null;
+    this.whereIn = null;
+    this.whereInCondition = null;
     this.sortKey = null;
     this.sort = '';
     this.isStaticQuery = false;
@@ -217,7 +219,20 @@ class TransactionBuilder {
     return this;
   };
   where = cond => {
-    this.txData.condiction = cond;
+    this.txData.condition = cond;
+    return this;
+  };
+  whereIn = (column, cond) => {
+    if (typeof column !== 'string' || !column.length || !cond) {
+      return;
+    }
+    this.txData.whereIn = column;
+    if (typeof cond === 'string') {
+      this.txData.whereInCondition = cond;
+    } else if (Array.isArray(cond) === true) {
+      const processedCond = cond.join(',');
+      this.txData.whereInCondition = processedCond;
+    }
     return this;
   };
   orderBy = (sortKey, sort) => {
@@ -276,8 +291,13 @@ class TransactionBuilder {
 
           query += `FROM ${this.txData.tableName}`;
 
-          if (this.txData.condiction) {
-            query += ` WHERE ${this.txData.condiction}`;
+          if (this.txData.condition) {
+            query += ` WHERE ${this.txData.condition}`;
+          }
+          if (this.txData.whereIn && this.txData.whereInCondition) {
+            query += ` ${this.txData.condition ? 'AND' : 'WHERE'} ${
+              this.txData.whereIn
+            } IN (${this.txData.whereInCondition})`;
           }
           if (this.txData.sortKey) {
             query += ` ORDER BY ${this.txData.sortKey} ${this.txData.sort}`;
@@ -329,18 +349,26 @@ class TransactionBuilder {
 
           query = query.substring(0, query.length - 2);
 
-          if (this.txData.condiction != null) {
-            query += ` WHERE ${this.txData.condiction}`;
+          if (this.txData.condition != null) {
+            query += ` WHERE ${this.txData.condition}`;
           }
-
+          if (this.txData.whereIn && this.txData.whereInCondition) {
+            query += ` ${this.txData.condition ? 'AND' : 'WHERE'} ${
+              this.txData.whereIn
+            } IN (${this.txData.whereInCondition})`;
+          }
           break;
 
         case 'DELETE':
           query += ` FROM ${this.txData.tableName}`;
-          if (this.txData.condiction != null) {
-            query += ` WHERE ${this.txData.condiction}`;
+          if (this.txData.condition != null) {
+            query += ` WHERE ${this.txData.condition}`;
           }
-
+          if (this.txData.whereIn && this.txData.whereInCondition) {
+            query += ` ${this.txData.condition ? 'AND' : 'WHERE'} ${
+              this.txData.whereIn
+            } IN (${this.txData.whereInCondition})`;
+          }
           break;
       }
 

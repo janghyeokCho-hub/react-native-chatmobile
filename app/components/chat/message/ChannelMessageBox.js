@@ -469,7 +469,7 @@ const ChannelMessageBox = ({
         </>
       );
     }
-  }, [message, marking, linkData]);
+  }, [message, marking, linkData, timeBox, nameBox]);
 
   return (
     <>
@@ -561,5 +561,9 @@ const styles = StyleSheet.create({
 });
 
 export default React.memo(ChannelMessageBox, (currProps, nextProps) => {
-  return currProps.message === nextProps.message;
+  return (
+    currProps.message === nextProps.message &&
+    currProps.nameBox === nextProps.nameBox &&
+    currProps.timeBox === nextProps.timeBox
+  );
 });

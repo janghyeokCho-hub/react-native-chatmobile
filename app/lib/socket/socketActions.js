@@ -7,6 +7,7 @@ import {
   roomLeaveOtherDevice,
   roomLeaveTargetUser,
   messageReadOtherDevice,
+  roomMessageDel,
 } from '@/modules/room';
 
 import {
@@ -381,5 +382,27 @@ export const handleAuthChanged = (dispatch, userInfo) => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
     dispatch(changeChannelAuth(json_data));
+  };
+};
+
+export const handleDelChatroomMessage = dispatch => {
+  return async data => {
+    if (!data) {
+      console.log('An error occured on onDelMessage: no payload');
+      return;
+    }
+    try {
+      const json_data = JSON.parse(data);
+      console.log('onDelMessage :: ', json_data);
+      dispatch(roomMessageDel(json_data));
+      await dbAction.roomDeletemessage(
+        json_data?.roomID,
+        json_data?.deletedMessageIds,
+      );
+      // ...
+    } catch (err) {
+      console.log('An error occured on onDelMessage : ', err);
+      return;
+    }
   };
 };
