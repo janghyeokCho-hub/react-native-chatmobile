@@ -17,10 +17,8 @@ const SocketContainer = () => {
   const socketActionsObj = useMemo(() => {
     return {
       onNewMessage: socketActions.handleNewMessage(dispatch, userInfo),
-      onNewNoteMessage: socketActions.handleNewNoteMessage(
-        setNoteList,
-        navigationRef,
-      ),
+      onAppUpdateConfig: socketActions.handleAppUpdateConfig(dispatch),
+      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList, navigationRef),
       onChatRoomInvitation: socketActions.handleChatRoomInvite(dispatch),
       onChatRoomExit: socketActions.handleChatRoomExit(dispatch, userInfo),
       onReadCountChanged: socketActions.handleReadCountChanged(
