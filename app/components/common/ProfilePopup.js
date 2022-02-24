@@ -1,13 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  Text,
-  Platform,
-  Linking,
-} from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, Text } from 'react-native';
 import { format } from 'date-fns';
 import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
@@ -17,16 +9,15 @@ import ProfileBox from '@COMMON/ProfileBox';
 import { openChatRoomView } from '@/lib/roomUtil';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { getServer, getDic } from '@/config';
+import { getDic } from '@/config';
 import ImageModal from '@COMMON/layout/ImageModal';
 import NetworkError from './NetworkError';
 import Svg, { G, Path, Rect, Circle } from 'react-native-svg';
 import { linkCall } from '@/lib/device/common';
-import { getProfileInfo } from '@API/profile';
 import { getJobInfo, getDictionary } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
+import { makePhotoPath } from '@/lib/util/paramUtil';
 
-//const linkChatImg = require('@C/assets/ico_link-btn-chat.png');
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
 const ProfilePopup = ({ route, navigation }) => {
@@ -41,6 +32,9 @@ const ProfilePopup = ({ route, navigation }) => {
   const [targetInfo, setTargetInfo] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [targetAbsenceInfo, setTargetAbsenceInfo] = useState({});
+  const photoPath = useMemo(() => makePhotoPath(targetInfo?.photoPath), [
+    targetInfo,
+  ]);
 
   const dispatch = useDispatch();
 
@@ -114,7 +108,7 @@ const ProfilePopup = ({ route, navigation }) => {
               >
                 <ProfileBox
                   userId={targetID}
-                  img={targetInfo.photoPath}
+                  img={photoPath}
                   userName={targetInfo.name}
                   presence={targetInfo.presence}
                   isInherit={false}
@@ -124,7 +118,7 @@ const ProfilePopup = ({ route, navigation }) => {
                   <ImageModal
                     type="NORMAL"
                     show={showModal}
-                    image={`${targetInfo.photoPath}`}
+                    image={photoPath}
                     hasDownload={false}
                     onClose={handleHiddenPhotoPreview}
                   />
