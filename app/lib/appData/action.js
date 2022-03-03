@@ -2033,6 +2033,10 @@ export const roomDeletemessage = async (roomId, deletedMessageIds) => {
     );
     return;
   }
+  // 삭제된 메시지가 없는경우 (deletedMessageIds = []) delete 생략
+  if (!deletedMessageIds?.length) {
+    return;
+  }
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
   dbCon.transaction(tx => {
     db.tx(tx, 'message')
@@ -2041,7 +2045,7 @@ export const roomDeletemessage = async (roomId, deletedMessageIds) => {
       .whereIn('messageId', deletedMessageIds)
       .execute()
       .then((_, result) => {
-        console.log(`Sync DeletedMessages in room ${roomId} : `);
+        console.log(`Sync DeletedMessages in room ${roomId} with ${deletedMessageIds?.length} data`);
       });
   });
 };
