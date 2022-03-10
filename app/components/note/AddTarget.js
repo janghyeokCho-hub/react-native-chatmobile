@@ -93,6 +93,7 @@ export default function AddTarget({ navigation, route }) {
         navigation.canGoBack() && navigation.goBack();
     }, [oldTargetList, newTargetList]);
 
+
     const addUser = useCallback((member) => {
         setNewTargetList(prevState => {
             // jobKey 누락시 보완 (components/contact/Contactitem에서 1차적으로 jobKey 추가함)

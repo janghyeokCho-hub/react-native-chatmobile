@@ -5,6 +5,8 @@ import ChatSetting from '@/components/usersetting/ChatSetting';
 import AlertSetting from '@C/usersetting/AlertSetting';
 import VersionInfo from '@C/usersetting/VersionInfo';
 import EtcSetting from '@C/usersetting/EtcSetting';
+import NoticeTalk from '@C/usersetting/NoticeTalk';
+import AddChannel from './AddChannel';
 
 export {
   InfoSetting,
@@ -14,4 +16,9 @@ export {
   AlertSetting,
   VersionInfo,
   EtcSetting,
+  NoticeTalk,
+  AddChannel,
+  
+  
+
 };
