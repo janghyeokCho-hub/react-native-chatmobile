@@ -28,6 +28,8 @@ import {
   AppLockSetting,
   ChatSetting,
   AlertSetting,
+  NoticeTalk,
+  AddChannel,
   VersionInfo,
   EtcSetting,
 } from '@C/usersetting';
@@ -89,6 +91,11 @@ const Root = ({ stack, theme }) => {
               <Stack.Screen name="ChannelRoom" component={ChannelRoom} />
 
               <Stack.Screen name="NewNote" component={NewNote} />
+              <Stack.Screen name="NoticeTalk" component={NoticeTalk} />
+              <Stack.Screen name ='AddChannel' component={AddChannel}/>
+
+
+
               <Stack.Screen name="ReadNote" component={ReadNote} />
               <Stack.Screen name="AddNoteTarget" component={AddTarget} />
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Text,
   StyleSheet,
@@ -14,9 +14,9 @@ import Svg, { G, Path, Circle, Rect } from 'react-native-svg';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 
-const UserSetting = ({ navigation }) => {
+const UserSetting = ({ navigation, props }) => {
   const { sizes } = useTheme();
-  const { id, token, userInfo } = useSelector(({ login }) => ({
+  const { id, token, userInfo, noticeTalkAuth } = useSelector(({ login }) => ({
     id: login.id,
     token: login.token,
     userInfo: login.userInfo,
@@ -44,6 +44,10 @@ const UserSetting = ({ navigation }) => {
       { cancelable: true },
     );
   };
+
+  useEffect(() => {
+    console.log(userInfo, 'noticeTalkAuth');
+  }, [userInfo]);
   return (
     <View style={styles.container}>
       <Header
@@ -191,6 +195,38 @@ const UserSetting = ({ navigation }) => {
             </Text>
           </View>
         </TouchableOpacity>
+        {userInfo && userInfo.noticeTalkAuth == 'Y' && (
+          <>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('NoticeTalk');
+              }}
+            >
+              <View style={styles.wrapButton}>
+                <Svg
+                  width="17px"
+                  height="17px"
+                  viewBox="0 0 23 23"
+                  xmlns="http://www.w3.org/2000/svg"
+                  {...props}
+                >
+                  <Path
+                    fillRule="evenodd"
+                    id="패스_179"
+                    data-name="패스 179"
+                    fill="#222"
+                    d="M22 1.75a.75.75 0 00-1.161-.627c-.047.03-.094.057-.142.085a9.15 9.15 0 01-.49.262c-.441.22-1.11.519-2.002.82-1.78.6-4.45 1.21-7.955 1.21H6.5A5.5 5.5 0 005 14.293v.457c0 3.061.684 5.505 1.061 6.621.24.709.904 1.129 1.6 1.129h2.013c1.294 0 2.1-1.322 1.732-2.453-.412-1.268-.906-3.268-.906-5.547 0-.03-.002-.06-.005-.088 3.382.028 5.965.644 7.703 1.251.89.312 1.559.62 2 .849.084.043.171.096.261.15.357.214.757.455 1.142.25A.75.75 0 0022 16.25V1.75zM10.5 12.912c3.564.029 6.313.678 8.193 1.335.737.258 1.34.517 1.807.74V2.993c-.467.216-1.073.467-1.815.718-1.878.634-4.624 1.26-8.185 1.288v7.913zm-4 1.838v-.25H9c0 2.486.537 4.648.98 6.01a.398.398 0 01-.057.343c-.07.104-.162.147-.249.147H7.661c-.105 0-.161-.058-.179-.109-.344-1.018-.982-3.294-.982-6.141zM6.5 5H9v8H6.5a4 4 0 010-8z"
+                  />
+                </Svg>
+                <Text
+                  style={{ ...styles.wrapButtonTitle, fontSize: sizes.default }}
+                >
+                  {getDic('NoticeTalk', '알림톡')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </>
+        )}
         <>
           <TouchableOpacity
             onPress={() => {
