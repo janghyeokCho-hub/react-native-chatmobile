@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useLayoutEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet,  Image } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet,  Image, VirtualizedList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getDic } from '@/config';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
@@ -11,7 +11,7 @@ import {
 } from 'react-native-popup-menu';
 
 
-const ChannelList = ({ route, channelName,channelId,channelPhoto, ...rest }) => {
+const ChannelList = ({ route, channelName,channelId,channelPhoto }) => {
   const navigation = useNavigation();
   const [chName, setChName] = useState('');
 
@@ -30,13 +30,13 @@ const ChannelList = ({ route, channelName,channelId,channelPhoto, ...rest }) => 
   }, [channelName]);
 
   return (
-    <View {...rest}>
-      <Text style={{ flex: 1 }}>
+    <View style={styles.channelList}>
+      <View  style={{ flex: 1, alignItems:'center' }}>
+      <Text>
         {getDic('Notification_Channel', '알림채널')}
       </Text>
+      </View>
         <View style={styles.channelBox}>
-        
-        
         {channelName && (
           <Menu style={styles.selectedChannel}>
               {channelPhoto &&(
@@ -66,7 +66,7 @@ const ChannelList = ({ route, channelName,channelId,channelPhoto, ...rest }) => 
 
       <View style={styles.plusBtn}>
         <TouchableOpacity
-          style={{ marginHorizontal: 20 }}
+          style={{ flex: 1 }}
           onPress={handleAddTarget}
         >
           <AddChannelIcon
@@ -85,9 +85,19 @@ export default ChannelList;
 
 
 const styles = StyleSheet.create({
+
+  channelList:{
+    flex: 1,
+    flexDirection: 'row',
+    padding: '2%',
+    justifyContent: 'center',
+    borderBottomColor: '#cecece',
+    borderBottomWidth: 1,
+    justifyContent: 'center',
+
+  },
   channelBox: {
-    flex: 3,
-    flexDirection:'row',
+    flex: 4,
   },
 
   selectedChannel:{
@@ -95,11 +105,9 @@ const styles = StyleSheet.create({
     borderColor: '#cecece',
     borderWidth: 1,
     padding: 4,
-    alignSelf: 'center',
+    alignSelf: 'baseline',
     borderRadius: 50,
-    marginTop: 4,
     alignItems: 'center',
-    marginLeft:-7
   },
 
   channelImgBox:{
