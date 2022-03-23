@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Modal,
   Text,
@@ -20,7 +20,6 @@ import { downloadByTokenAlert, downloadAndShare } from '@/lib/device/file';
 
 const loadingImg = require('@C/assets/loading.gif');
 const cancelBtnImg = require('@C/assets/ico_message_delete.png');
-const downloadImg = require('@C/assets/back-up.png');
 
 const _imagePreviewLoadSize = 15;
 
@@ -31,10 +30,12 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
   const [virtualIndex, setVirtualIndex] = useState(0);
   const [allSize, setAllSize] = useState(0);
   const [loading, setLoading] = useState(false);
-  let selectDownloadOrViewer = getConfig('FileAttachViewMode');
-  if(selectDownloadOrViewer){
-    selectDownloadOrViewer = selectDownloadOrViewer[1];
-  }
+  const selectDownloadOrViewer = useMemo(
+    // 다운로드 금지 설정이 없는 경우 기본값: 다운로드 허용
+    () => getConfig('FileAttachViewMode')?.[1] || { Download: true },
+    [],
+  );
+
   useEffect(() => {
     if (type == 'ROOM' && show) {
       getFileInfo({
@@ -176,6 +177,9 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
                   enableSwipeDown={true}
                   index={index}
                   enablePreload={true}
+                  saveToLocalByLongPress={
+                    selectDownloadOrViewer.Download === true
+                  }
                   onChange={handleChange}
                 />
                 <View style={styles.bottomMenu}>
