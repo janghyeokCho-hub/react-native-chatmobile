@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import ProfileBox from '@/components/common/ProfileBox';
 import {
@@ -6,6 +6,7 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
+    Switch
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -16,7 +17,11 @@ import { useTheme } from '@react-navigation/native';
 import Icon from '@COMMON/icons';
 
 function HeaderTitle({ title, userInfo, loading }) {
-    const { sizes } = useTheme();
+
+
+
+
+    const { sizes, colors } = useTheme();
     let _title = '';
 
     if (loading) {
@@ -69,8 +74,18 @@ function GoBackIcon() {
     );
 }
 
-export default function NoteHeader({ title, userInfo, menus, loading }) {
+export default function NoteHeader({ title, userInfo, menus, loading, setAllCheck }) {
+    const { sizes, colors } = useTheme();
+
     const navigation = useNavigation();
+    const [isEnabled, setIsEnabled] = useState(false);
+    const toggleSwitch = () => {
+        setIsEnabled(previousState => !previousState);
+        setAllCheck(previousState => !previousState)
+    }
+
+     
+
     return <>
         <View style={styles.top}>
             <TouchableOpacity
@@ -86,6 +101,23 @@ export default function NoteHeader({ title, userInfo, menus, loading }) {
                     return <TouchableOpacity onPress={menu?.onPress} key={idx}>
                         <View style={styles.menuBtn}>
                             {menu?.icon && <Icon name={menu.icon} focus={true} style={menu?.iconStyle} />}
+                            {
+                                menu?.switch &&      
+                                <>
+                                <View style={{flexDirection:'row'}}> 
+                                <Text style={{ fontSize: sizes.default, marginTop:3 }}>{menu.switch}</Text>
+                                <Switch
+                                trackColor={{ false: "#767577", true: colors.primary }}
+                                thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                                ios_backgroundColor="#3e3e3e"
+                                onValueChange={toggleSwitch}
+                                value={isEnabled}
+                                nativeID={menu.switch}
+                              />
+                              </View>
+                              </>
+                            }
+
                         </View>
                     </TouchableOpacity>
                 })}
