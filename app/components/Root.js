@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import AsyncStorage from '@react-native-community/async-storage';
 import { StatusBar, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { CommonActions } from '@react-navigation/native';
@@ -40,7 +41,7 @@ import {
   ChatSettingBox,
   InviteMember,
   ImageList,
-  EditGroup
+  EditGroup,
 } from '@C/chat/chatroom/layer';
 import {
   InviteExtUser,
@@ -53,8 +54,7 @@ import {
 } from '@C/channel/layer';
 import SecondAuth from '@C/auth/SecondAuth';
 import ModalContainer from './ModalContainer';
-
-import { getDic } from '@/config';
+import { getDic, getServerConfigs } from '@/config';
 
 const Root = ({ stack, theme }) => {
   const Stack = stack;
@@ -63,6 +63,22 @@ const Root = ({ stack, theme }) => {
     token: login.token,
     authCheck: login.authCheck,
   }));
+
+  useEffect(() => {
+    // Re-sync server config on first render
+    AsyncStorage.getItem('EHINF').then(domain => {
+      if (!domain) {
+        return;
+      }
+      getServerConfigs(domain).then(async ({ data }) => {
+        const config = data?.result;
+        if (data?.status !== 'SUCCESS' || !config) {
+          return;
+        }
+        await AsyncStorage.setItem('ESETINF', JSON.stringify(config));
+      });
+    });
+  }, []);
 
   return (
     <>
@@ -92,9 +108,7 @@ const Root = ({ stack, theme }) => {
 
               <Stack.Screen name="NewNote" component={NewNote} />
               <Stack.Screen name="NoticeTalk" component={NoticeTalk} />
-              <Stack.Screen name ='AddChannel' component={AddChannel}/>
-
-
+              <Stack.Screen name="AddChannel" component={AddChannel} />
 
               <Stack.Screen name="ReadNote" component={ReadNote} />
               <Stack.Screen name="AddNoteTarget" component={AddTarget} />
