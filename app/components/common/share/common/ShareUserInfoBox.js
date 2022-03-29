@@ -1,18 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  Text,
-  StyleSheet,
-  Platform,
-  Alert,
-} from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { getJobInfo, getDictionary } from '@/lib/common';
-
 import ShareProfileBox from '@COMMON/share/common/ShareProfileBox';
 import ToggleButton from '@COMMON/buttons/ToggleButton';
-import * as api from '@COMMON/share/lib/api';
 
 const ShareUserInfoBox = ({
   userInfo,
@@ -67,7 +57,7 @@ const ShareUserInfoBox = ({
                 <ToggleButton
                   data={userInfo}
                   checked={checked}
-                  onPress={onCheck}
+                  onPress={onPress}
                 />
               )}
               {userInfo.type === 'G' && userInfo.pChat === 'Y' && (
