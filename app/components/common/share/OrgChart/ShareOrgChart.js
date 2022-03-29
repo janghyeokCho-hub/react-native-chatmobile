@@ -157,7 +157,9 @@ const ShareOrgChart = ({ selectedItems, deleteItem, appendItem }) => {
                         handleDept(item.id);
                       }}
                       isCheckComponent={true}
-                      onCheck={handleCheck}
+                      onCheck={() => {
+                        handleCheck(!isSelected, item);
+                      }}
                       checked={isSelected}
                     />
                   </View>

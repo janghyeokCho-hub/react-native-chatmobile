@@ -151,15 +151,15 @@ const ShareRoom = ({ room, checked, onCheck }) => {
             <ToggleButton
               data={room}
               checked={checked}
-              onPress={(chk, obj) => {
+              onPress={() => {
                 const sendObj = {
-                  ...obj,
+                  ...room,
                   type: 'R',
-                  id: obj.roomID,
+                  id: room.roomID,
                   name: makeRoomNamePlain(filterMember),
                   filterMember: filterMember,
                 };
-                onCheck(chk, sendObj);
+                onCheck(!checked, sendObj);
               }}
             />
           )}
