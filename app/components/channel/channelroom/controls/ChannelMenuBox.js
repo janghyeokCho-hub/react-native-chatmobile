@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import UserInfoBox from '@/components/common/UserInfoBox';
 import { CommonActions } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -17,9 +18,10 @@ import MenuIcon from '@C/common/icons/MenuIcon';
 import { openModal, changeModal } from '@/modules/modal';
 import { modifyChannelMemberAuth, leaveChannel } from '@/modules/channel';
 import MenuBoxBack from './MenuBoxBack';
-import Svg, { G, Path } from 'react-native-svg';
+import Svg, { G, Path, Rect } from 'react-native-svg';
 import { getConfig, getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { getRoomNotification, modifyRoomNotification } from '@/lib/api/setting';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -31,20 +33,33 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
   const enabledExtUser = getConfig('EnabledExtUser', 'N');
   const [channelAuth, setChannelAuth] = useState(false);
   const [channelAdminMembers, setChannelAdminMembers] = useState(false);
+  const [notification, setNotification] = useState(true);
+
+  const initRoomNoti = async () => {
+    try {
+      const params = { pushID: await messaging().getToken() };
+      const result = await getRoomNotification(roomInfo.roomID, params);
+      if (result?.data?.status === 'SUCCESS') {
+        setNotification(result?.data?.result);
+      }
+    } catch (err) {
+      console.error('initRoomNoti Error: '.err);
+    }
+  };
 
   useEffect(() => {
     if (roomInfo && roomInfo.members) {
+      // Get notification flag
+      initRoomNoti();
       const tempAdmin = [];
       roomInfo.members.forEach(item => {
         if (item.channelAuth == 'Y') {
           tempAdmin.push(item);
-
           if (item.id == id) {
             setChannelAuth(true);
           }
         }
       });
-
       setChannelAdminMembers(tempAdmin);
     }
   }, [roomInfo, id]);
@@ -233,6 +248,22 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
       isChannel: true,
     });
   }, [roomInfo]);
+
+  const handleNotification = useCallback(async () => {
+    const tempValue = !notification;
+    setNotification(tempValue);
+    try {
+      const params = {
+        pushID: await messaging().getToken(),
+        value: tempValue,
+      };
+      await modifyRoomNotification(roomInfo.roomID, params);
+    } catch (err) {
+      // revoke state on error
+      setNotification(notification);
+      console.error('Handle Notification Err: ', err);
+    }
+  }, [roomInfo, notification]);
 
   return (
     <>
@@ -472,17 +503,54 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
             </TouchableOpacity>
           </View>
           <View style={styles.funcRight}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleNotification}>
               <View style={styles.funcIcoWrap_right}>
-                <Svg width="18.883" height="18.163" viewBox="0 0 12.883 14.163">
-                  <G transform="translate(0)">
-                    <Path
-                      d="M21.446,11.919a.508.508,0,0,0,.466.313h3.693a2.26,2.26,0,0,0,4.473,0h3.7a.235.235,0,0,0,.076-.008.516.516,0,0,0,.407-.322.5.5,0,0,0-.127-.534l-.025-.025a2.376,2.376,0,0,1-.449-.762,7.566,7.566,0,0,1-.474-2.872c0-2.829-1.067-4.32-1.957-5.074a4.494,4.494,0,0,0-1.576-.864,2,2,0,0,0-.424-1.2A1.7,1.7,0,0,0,27.859,0a1.718,1.718,0,0,0-1.364.568A1.976,1.976,0,0,0,26.063,1.8a4.541,4.541,0,0,0-1.576.847,6.4,6.4,0,0,0-1.974,5.049,7.447,7.447,0,0,1-.483,2.846,3.112,3.112,0,0,1-.466.822h0A.509.509,0,0,0,21.446,11.919Zm6.4,1.228a1.263,1.263,0,0,1-1.2-.915h2.406A1.263,1.263,0,0,1,27.85,13.147ZM23.53,7.692c0-4.557,2.982-4.989,3.1-5.006a.518.518,0,0,0,.347-.195.526.526,0,0,0,.1-.39,1.254,1.254,0,0,1,.186-.9.686.686,0,0,1,.593-.212.726.726,0,0,1,.6.212,1.239,1.239,0,0,1,.178.864.5.5,0,0,0,.093.39.51.51,0,0,0,.347.2,3.308,3.308,0,0,1,1.516.745,5.341,5.341,0,0,1,1.593,4.3,7.987,7.987,0,0,0,.661,3.515h-10A8.366,8.366,0,0,0,23.53,7.692Z"
-                      transform="translate(-21.409)"
-                      fill="#222"
-                    />
-                  </G>
-                </Svg>
+                {notification && (
+                  <Svg width="20" height="22.12" viewBox="0 0 20 22.12">
+                    <G transform="translate(9432 -494)">
+                      <G
+                        id="alarm-bell"
+                        transform="translate(-9385.373 85.463)"
+                      >
+                        <G>
+                          <G>
+                            <Path
+                              d="M-45.573,425.121a.707.707,0,0,0,.648.436h5.138a3.144,3.144,0,0,0,3.565,2.657,3.145,3.145,0,0,0,2.657-2.657h5.15a.343.343,0,0,0,.105-.016.718.718,0,0,0,.566-.448.693.693,0,0,0-.177-.742l-.035-.035a3.261,3.261,0,0,1-.625-1.061,10.507,10.507,0,0,1-.66-3.995c0-3.936-1.485-6.01-2.722-7.059a6.257,6.257,0,0,0-2.192-1.2,2.794,2.794,0,0,0-.589-1.67,2.364,2.364,0,0,0-1.909-.79,2.388,2.388,0,0,0-1.9.79,2.745,2.745,0,0,0-.6,1.709,6.3,6.3,0,0,0-2.192,1.178c-2.274,1.862-2.746,4.855-2.746,7.023a10.367,10.367,0,0,1-.672,3.959,4.365,4.365,0,0,1-.648,1.143h0A.706.706,0,0,0-45.573,425.121Zm8.909,1.709a1.756,1.756,0,0,1-1.67-1.273h3.347a1.758,1.758,0,0,1-1.678,1.273Z"
+                              fill="#222"
+                            />
+                          </G>
+                        </G>
+                      </G>
+                      <Rect
+                        width="3"
+                        height="4.12"
+                        transform="translate(-9425 512)"
+                        fill="none"
+                      />
+                      <Rect
+                        width="20"
+                        height="4.12"
+                        transform="translate(-9432 511)"
+                        fill="none"
+                      />
+                    </G>
+                  </Svg>
+                )}
+                {!notification && (
+                  <Svg
+                    width="18.883"
+                    height="18.163"
+                    viewBox="0 0 12.883 14.163"
+                  >
+                    <G transform="translate(0)">
+                      <Path
+                        d="M21.446,11.919a.508.508,0,0,0,.466.313h3.693a2.26,2.26,0,0,0,4.473,0h3.7a.235.235,0,0,0,.076-.008.516.516,0,0,0,.407-.322.5.5,0,0,0-.127-.534l-.025-.025a2.376,2.376,0,0,1-.449-.762,7.566,7.566,0,0,1-.474-2.872c0-2.829-1.067-4.32-1.957-5.074a4.494,4.494,0,0,0-1.576-.864,2,2,0,0,0-.424-1.2A1.7,1.7,0,0,0,27.859,0a1.718,1.718,0,0,0-1.364.568A1.976,1.976,0,0,0,26.063,1.8a4.541,4.541,0,0,0-1.576.847,6.4,6.4,0,0,0-1.974,5.049,7.447,7.447,0,0,1-.483,2.846,3.112,3.112,0,0,1-.466.822h0A.509.509,0,0,0,21.446,11.919Zm6.4,1.228a1.263,1.263,0,0,1-1.2-.915h2.406A1.263,1.263,0,0,1,27.85,13.147ZM23.53,7.692c0-4.557,2.982-4.989,3.1-5.006a.518.518,0,0,0,.347-.195.526.526,0,0,0,.1-.39,1.254,1.254,0,0,1,.186-.9.686.686,0,0,1,.593-.212.726.726,0,0,1,.6.212,1.239,1.239,0,0,1,.178.864.5.5,0,0,0,.093.39.51.51,0,0,0,.347.2,3.308,3.308,0,0,1,1.516.745,5.341,5.341,0,0,1,1.593,4.3,7.987,7.987,0,0,0,.661,3.515h-10A8.366,8.366,0,0,0,23.53,7.692Z"
+                        transform="translate(-21.409)"
+                        fill="#222"
+                      />
+                    </G>
+                  </Svg>
+                )}
               </View>
             </TouchableOpacity>
 
