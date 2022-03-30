@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Text,
   StyleSheet,
@@ -16,7 +16,7 @@ import { useTheme } from '@react-navigation/native';
 
 const UserSetting = ({ navigation, props }) => {
   const { sizes } = useTheme();
-  const { id, token, userInfo, noticeTalkAuth } = useSelector(({ login }) => ({
+  const { id, token, userInfo } = useSelector(({ login }) => ({
     id: login.id,
     token: login.token,
     userInfo: login.userInfo,
@@ -45,9 +45,7 @@ const UserSetting = ({ navigation, props }) => {
     );
   };
 
-  useEffect(() => {
-    console.log(userInfo, 'noticeTalkAuth');
-  }, [userInfo]);
+
   return (
     <View style={styles.container}>
       <Header

@@ -56,8 +56,8 @@ const AddChannel = ({ navigation, route }) => {
     navigation.navigate('NoticeTalk', {
       channelName: channel.subjectName,
       channelId: channel.subjectId,
-      channelPhoto :  channel.subjectPhoto
-    })
+      channelPhoto: channel.subjectPhoto,
+    });
   };
 
   const { data: channelList } = useSWR(
@@ -117,7 +117,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-
     paddingTop: getTopPadding(),
     paddingBottom: getBottomPadding(),
   },
@@ -171,10 +170,5 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: '600',
     textAlign: 'center',
-  },
-  bottomLine: {
-    height: 15,
-    backgroundColor: '#f5f5f5',
-    width: '100%',
   },
 });

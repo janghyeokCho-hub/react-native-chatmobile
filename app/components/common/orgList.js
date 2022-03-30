@@ -14,16 +14,13 @@ import {
   MenuOptions,
   Menu,
 } from 'react-native-popup-menu';
-
 import { useNavigation, useTheme } from '@react-navigation/native';
 import { getInstance } from '@/lib/fileUtil';
 import { getDic } from '@/config';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import { getJobInfo, getBackgroundColor } from '@/lib/common';
-
 import useSWR from 'swr';
-import { absoluteFillObject } from 'react-native-extended-stylesheet';
 
 function _smallProfileBox({ name, photoPath }) {
   const [imgVisible, setImgVisible] = useState(true);
@@ -61,9 +58,6 @@ function RecipientItem({ user, onDelete, allCheck }) {
   const userName = useMemo(() => getJobInfo(user));
   const navigation = useNavigation();
   const { sizes } = useTheme();
-  useLayoutEffect(() => {
-    console.log('dd', allCheck);
-  }, [allCheck]);
 
   const optionSelected = useCallback(
     value => {
@@ -99,12 +93,19 @@ function RecipientItem({ user, onDelete, allCheck }) {
     },
     {
       value: 'Delete',
-      text: getDic('Delete'),
+      children: (
+        <View style={{ flexDirection: 'column' }}>
+          <Text style={{ color: 'red' }}>{getDic('Delete')}</Text>
+        </View>
+      ),
     },
   ];
 
   return (
-    <Menu onSelect={optionSelected}>
+    <Menu
+      onSelect={optionSelected}
+      style={{ marginHorizontal: 4, marginBottom: 4 }}
+    >
       <MenuTrigger style={styles.profileBoxContainer}>
         <Text
           numberOfLines={1}
@@ -113,7 +114,6 @@ function RecipientItem({ user, onDelete, allCheck }) {
           {userName}
         </Text>
       </MenuTrigger>
-
       <MenuOptions>
         {!allCheck && (
           <>
@@ -127,14 +127,12 @@ function RecipientItem({ user, onDelete, allCheck }) {
   );
 }
 
-const OrgList = ({ route, setRecipient, allCheck }) => {
+const OrgList = ({ setRecipient, allCheck }) => {
   const navigation = useNavigation();
-
   const { data: targetList, mutate: setTargetList } = useSWR(
     '/note/send/target',
     null,
   );
-
   const [collapsed, setCollapsed] = useState(true);
   const collapseThreshold = 4;
 
@@ -148,7 +146,10 @@ const OrgList = ({ route, setRecipient, allCheck }) => {
   );
 
   const disableAddTarget = () => {
-    Alert.alert(getDic('NoticeTalk', '알림톡'), getDic('Msg_DisableButton', '전체공지를 해제해주세요'));
+    Alert.alert(
+      getDic('NoticeTalk', '알림톡'),
+      getDic('Msg_DisableButton', '전체공지를 해제해주세요'),
+    );
   };
 
   const onDelete = useCallback(
@@ -182,6 +183,19 @@ const OrgList = ({ route, setRecipient, allCheck }) => {
     return Math.max(targetList?.length - collapseThreshold, 0);
   }, [targetList, collapsed]);
 
+  const collapsedFooter = (
+    <TouchableOpacity
+      style={[styles.profileBoxContainer, { alignSelf: 'baseline' }]}
+      onPress={() => setCollapsed(prev => !prev)}
+      disabled={allCheck}
+    >
+      <Text style={{ color: '#3f51b5' }}>
+        {'+'}
+        {collapseCount}
+      </Text>
+    </TouchableOpacity>
+  );
+
   useLayoutEffect(() => {
     const fileCtrl = getInstance();
     fileCtrl.clear();
@@ -195,24 +209,12 @@ const OrgList = ({ route, setRecipient, allCheck }) => {
     setRecipient(targetList);
   }, [targetList]);
 
-  const collapsedFooter = (
-    <TouchableOpacity
-      style={[styles.profileBoxContainer, { alignSelf: 'baseline' }]}
-      onPress={() => setCollapsed(prev => !prev)}
-    >
-      <Text style={{ color: '#3f51b5' }}>
-        {'+'}
-        {collapseCount}
-      </Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={allCheck ? styles.orgList_disable : styles.orgList}>
-      <View style={{ flex: 1, alignItems: 'center' }}>
-        <Text style={styles.Recipient}>{getDic('Note_Recipient')}</Text>
+      <View style={styles.Recipient}>
+        <Text>{getDic('Note_Recipient')}</Text>
       </View>
-      <View style={{ flex: 4 }}>
+      <View style={styles.flatListStyle}>
         <FlatList
           data={_targetList}
           renderItem={renderItem}
@@ -230,9 +232,10 @@ const OrgList = ({ route, setRecipient, allCheck }) => {
           }}
         />
       </View>
-      <View style={{ flex: 1, flexDirection: 'row' }}>
+      <View style={styles.rightMenu}>
         <TouchableOpacity
           onPress={allCheck ? disableAddTarget : handleAddTarget}
+          style={styles.plusIcon}
         >
           <AddChannelIcon
             width={20}
@@ -241,13 +244,17 @@ const OrgList = ({ route, setRecipient, allCheck }) => {
             color="#666"
           />
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.directionIcon}  onPress={() => setCollapsed(prev => !prev)}>
+        <TouchableOpacity
+          style={styles.directionIcon}
+          onPress={() => setCollapsed(prev => !prev)}
+          disabled={allCheck}
+        >
           <DirectionIcon
             width={12}
             height={12}
             direction={collapsed ? 'down' : 'up'}
           />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -264,6 +271,9 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  flatListStyle: {
+    flex: 4,
   },
   profileBox: {
     marginLeft: '2%',
@@ -298,8 +308,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     justifyContent: 'center',
   },
-  directionIcon:{
-    marginLeft:10,
-    justifyContent:'center',
-  }
+  rightMenu: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  directionIcon: {
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  Recipient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusIcon: {
+    justifyContent: 'center',
+  },
 });
