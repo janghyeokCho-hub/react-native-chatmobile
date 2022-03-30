@@ -1,8 +1,9 @@
 import React, { useCallback, useState, useLayoutEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet,  Image, VirtualizedList } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getDic } from '@/config';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
+import AddChangeIcon from '@/components/common/icons/AddChangeIcon';
 import {
   MenuTrigger,
   MenuOption,
@@ -10,8 +11,7 @@ import {
   Menu,
 } from 'react-native-popup-menu';
 
-
-const ChannelList = ({ route, channelName,channelId,channelPhoto }) => {
+const ChannelList = ({ channelName, channelPhoto }) => {
   const navigation = useNavigation();
   const [chName, setChName] = useState('');
 
@@ -22,7 +22,7 @@ const ChannelList = ({ route, channelName,channelId,channelPhoto }) => {
   }, [navigation]);
 
   const deleteChannel = () => {
-    navigation.setParams({ channelName : null, channelId : null })
+    navigation.setParams({ channelName: null, channelId: null });
   };
 
   useLayoutEffect(() => {
@@ -31,50 +31,52 @@ const ChannelList = ({ route, channelName,channelId,channelPhoto }) => {
 
   return (
     <View style={styles.channelList}>
-      <View  style={{ flex: 1, alignItems:'center' }}>
-      <Text>
-        {getDic('Notification_Channel', '알림채널')}
-      </Text>
+      <View style={styles.channelTitle}>
+        <Text>{getDic('Notification_Channel', '알림채널')}</Text>
       </View>
-        <View style={styles.channelBox}>
+      <View style={styles.channelBox}>
         {channelName && (
           <Menu style={styles.selectedChannel}>
-              {channelPhoto &&(
-            <View style={styles.channelImgBox}>
-            <Image
-              style={styles.channelImg}
-              source={{
-                uri: channelPhoto,
-              }}
-            />
-          </View>
-
-          )}
+            {channelPhoto && (
+              <View style={styles.channelImgBox}>
+                <Image
+                  style={styles.channelImg}
+                  source={{
+                    uri: channelPhoto,
+                  }}
+                />
+              </View>
+            )}
             <MenuTrigger style={styles.channelTxt} text={chName} />
             <MenuOptions>
               <MenuOption text={chName} />
               <MenuOption onSelect={deleteChannel}>
-                <Text style={{ color: 'red' }}> {getDic('Delete')}</Text>
+                <Text style={styles.deleteBtn}>
+                  {' '}
+                  {getDic('Delete', '삭제')}
+                </Text>
               </MenuOption>
             </MenuOptions>
           </Menu>
-             )}
-
-          </View>
-
-   
+        )}
+      </View>
 
       <View style={styles.plusBtn}>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={handleAddTarget}
-        >
-          <AddChannelIcon
-            width={20}
-            height={20}
-            style={{ borderRadius: 10, borderWidth: 1, borderColor: '#ababab' }}
-            color="#666"
-          />
+        <TouchableOpacity onPress={handleAddTarget}>
+          {channelName ? (
+            <AddChangeIcon width={20} height={20} />
+          ) : (
+            <AddChannelIcon
+              width={20}
+              height={20}
+              style={{
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#ababab',
+              }}
+              color="#666"
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -83,10 +85,8 @@ const ChannelList = ({ route, channelName,channelId,channelPhoto }) => {
 
 export default ChannelList;
 
-
 const styles = StyleSheet.create({
-
-  channelList:{
+  channelList: {
     flex: 1,
     flexDirection: 'row',
     padding: '2%',
@@ -94,14 +94,17 @@ const styles = StyleSheet.create({
     borderBottomColor: '#cecece',
     borderBottomWidth: 1,
     justifyContent: 'center',
-
   },
   channelBox: {
     flex: 4,
   },
-
-  selectedChannel:{
-    flexDirection:'row',
+  channelTitle: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedChannel: {
+    flexDirection: 'row',
     borderColor: '#cecece',
     borderWidth: 1,
     padding: 4,
@@ -109,28 +112,29 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
   },
-
-  channelImgBox:{
-    width:25,
-    height:25, 
+  deleteBtn: {
+    color: 'red',
+  },
+  channelImgBox: {
+    width: 25,
+    height: 25,
   },
 
-  channelImg:{
-    width:'100%',
-    height:'100%',
-    borderRadius:50,
+  channelImg: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
     resizeMode: 'stretch',
   },
 
   channelTxt: {
     fontSize: 16,
-    marginTop:2,
-    marginLeft:2
+    marginTop: 2,
+    marginLeft: 2,
   },
-
-
 
   plusBtn: {
     flex: 1,
+    justifyContent: 'center',
   },
 });
