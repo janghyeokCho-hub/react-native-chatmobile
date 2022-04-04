@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Text } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Text,
+  ScrollView,
+} from 'react-native';
 import { format } from 'date-fns';
 import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
@@ -88,224 +95,227 @@ const ProfilePopup = ({ route, navigation }) => {
     <View style={styles.container}>
       {networkState && (
         <>
-          <TouchableOpacity style={styles.cancelBtnWrap} onPress={goBack}>
-            <View style={styles.cancelBtn}>
-              <Image source={cancelBtnImg} />
-            </View>
-          </TouchableOpacity>
-          <View
-            style={{
-              ...styles.backgroundContainer,
-              backgroundColor: colors.primary,
-            }}
-          >
-            <View style={styles.profileImageContainer}>
-              <TouchableOpacity
-                style={styles.profileImageWrap}
-                onPress={() => {
-                  handlePhotoPreview();
-                }}
-              >
-                <ProfileBox
-                  userId={targetID}
-                  img={photoPath}
-                  userName={targetInfo.name}
-                  presence={targetInfo.presence}
-                  isInherit={false}
-                  style={styles.profileImage}
-                />
-                {showModal && (
-                  <ImageModal
-                    type="NORMAL"
-                    show={showModal}
-                    image={photoPath}
-                    hasDownload={false}
-                    onClose={handleHiddenPhotoPreview}
-                  />
-                )}
-              </TouchableOpacity>
-              <View style={styles.profileImageInfo}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text
-                    style={{
-                      ...styles.profileTitle,
-                      fontSize: 22 + sizes.inc,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {getJobInfo(targetInfo)}
-                  </Text>
-                  {targetInfo.isMobile === 'Y' && (
-                    <View style={{ paddingLeft: 5 }}>
-                      <Svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="15"
-                        viewBox="0 0 7 10"
-                      >
-                        <G transform="translate(-185 -231)">
-                          <Rect
-                            width="7"
-                            height="10"
-                            transform="translate(185 231)"
-                            fill="#4f5050"
-                          />
-                          <Rect
-                            width="5"
-                            height="6"
-                            transform="translate(186 232)"
-                            fill="#fff"
-                          />
-                          <Circle
-                            cx="0.5"
-                            cy="0.5"
-                            r="0.5"
-                            transform="translate(188 239)"
-                            fill="#fff"
-                          />
-                        </G>
-                      </Svg>
-                    </View>
-                  )}
-                </View>
-                <Text
-                  style={{ ...styles.profileDeptInfo, fontSize: sizes.large }}
+          <View style={styles.simpleInfo}>
+            <TouchableOpacity style={styles.cancelBtnWrap} onPress={goBack}>
+              <View style={styles.cancelBtn}>
+                <Image source={cancelBtnImg} />
+              </View>
+            </TouchableOpacity>
+            <View
+              style={{
+                ...styles.backgroundContainer,
+                backgroundColor: colors.primary,
+              }}
+            >
+              <View style={styles.profileImageContainer}>
+                <TouchableOpacity
+                  style={styles.profileImageWrap}
+                  onPress={() => {
+                    handlePhotoPreview();
+                  }}
                 >
-                  {getDictionary(targetInfo.dept)}
-                </Text>
-                {targetAbsenceInfo &&
-                  Object.keys(targetAbsenceInfo).length > 0 && (
-                    <View style={{ marginTop: 10 }}>
-                      <Text
-                        style={{
-                          ...styles.profileDeptInfo,
-                          fontSize: sizes.large,
-                        }}
-                      >
-                        {getDic(
-                          'Ab_' + targetAbsenceInfo.code,
-                          targetAbsenceInfo.code,
-                        )}
-                      </Text>
-                      <Text
-                        style={{
-                          ...styles.profileDeptInfo,
-                          marginTop: 7,
-                          fontSize: sizes.medium,
-                        }}
-                      >
-                        {format(
-                          new Date(targetAbsenceInfo.startDate),
-                          'yyyy.MM.dd',
-                        ) +
-                          ' ~ ' +
-                          format(
-                            new Date(targetAbsenceInfo.endDate),
-                            'yyyy.MM.dd',
-                          )}
-                      </Text>
-                    </View>
+                  <ProfileBox
+                    userId={targetID}
+                    img={photoPath}
+                    userName={targetInfo.name}
+                    presence={targetInfo.presence}
+                    isInherit={false}
+                    style={styles.profileImage}
+                  />
+                  {showModal && (
+                    <ImageModal
+                      type="NORMAL"
+                      show={showModal}
+                      image={photoPath}
+                      hasDownload={false}
+                      onClose={handleHiddenPhotoPreview}
+                    />
                   )}
+                </TouchableOpacity>
+                <View style={styles.profileImageInfo}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text
+                      style={{
+                        ...styles.profileTitle,
+                        fontSize: 22 + sizes.inc,
+                      }}
+                      numberOfLines={1}
+                    >
+                      {getJobInfo(targetInfo)}
+                    </Text>
+                    {targetInfo.isMobile === 'Y' && (
+                      <View style={{ paddingLeft: 5 }}>
+                        <Svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="12"
+                          height="15"
+                          viewBox="0 0 7 10"
+                        >
+                          <G transform="translate(-185 -231)">
+                            <Rect
+                              width="7"
+                              height="10"
+                              transform="translate(185 231)"
+                              fill="#4f5050"
+                            />
+                            <Rect
+                              width="5"
+                              height="6"
+                              transform="translate(186 232)"
+                              fill="#fff"
+                            />
+                            <Circle
+                              cx="0.5"
+                              cy="0.5"
+                              r="0.5"
+                              transform="translate(188 239)"
+                              fill="#fff"
+                            />
+                          </G>
+                        </Svg>
+                      </View>
+                    )}
+                  </View>
+                  <Text
+                    style={{ ...styles.profileDeptInfo, fontSize: sizes.large }}
+                  >
+                    {getDictionary(targetInfo.dept)}
+                  </Text>
+                  {targetAbsenceInfo &&
+                    Object.keys(targetAbsenceInfo).length > 0 && (
+                      <View style={{ marginTop: 10 }}>
+                        <Text
+                          style={{
+                            ...styles.profileDeptInfo,
+                            fontSize: sizes.large,
+                          }}
+                        >
+                          {getDic(
+                            'Ab_' + targetAbsenceInfo.code,
+                            targetAbsenceInfo.code,
+                          )}
+                        </Text>
+                        <Text
+                          style={{
+                            ...styles.profileDeptInfo,
+                            marginTop: 7,
+                            fontSize: sizes.medium,
+                          }}
+                        >
+                          {format(
+                            new Date(targetAbsenceInfo.startDate),
+                            'yyyy.MM.dd',
+                          ) +
+                            ' ~ ' +
+                            format(
+                              new Date(targetAbsenceInfo.endDate),
+                              'yyyy.MM.dd',
+                            )}
+                        </Text>
+                      </View>
+                    )}
+                </View>
               </View>
             </View>
           </View>
-
-          <View style={styles.profileContainer}>
-            <View style={styles.profileInfoWrap}>
-              <View style={styles.profileSubTitle}>
-                <Text
-                  style={{
-                    ...styles.profileSubTitle_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {getDic('Mobile')}
-                </Text>
+          <ScrollView>
+            <View style={styles.profileContainer}>
+              <View style={styles.profileInfoWrap}>
+                <View style={styles.profileSubTitle}>
+                  <Text
+                    style={{
+                      ...styles.profileSubTitle_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {getDic('Mobile')}
+                  </Text>
+                </View>
+                <View style={styles.profileInfo}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      linkCall(targetInfo.phoneNumber);
+                    }}
+                  >
+                    <Text
+                      style={{
+                        ...styles.profileInfo_text,
+                        fontSize: sizes.large,
+                      }}
+                    >
+                      {targetInfo.phoneNumber}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.profileInfo}>
-                <TouchableOpacity
-                  onPress={() => {
-                    linkCall(targetInfo.phoneNumber);
-                  }}
-                >
+              <View style={styles.profileInfoWrap}>
+                <View style={styles.profileSubTitle}>
+                  <Text
+                    style={{
+                      ...styles.profileSubTitle_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {getDic('Phone')}
+                  </Text>
+                </View>
+                <View style={styles.profileInfo}>
                   <Text
                     style={{
                       ...styles.profileInfo_text,
                       fontSize: sizes.large,
                     }}
                   >
-                    {targetInfo.phoneNumber}
+                    {targetInfo.companyNumber}
                   </Text>
-                </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.profileInfoWrap}>
+                <View style={styles.profileSubTitle}>
+                  <Text
+                    style={{
+                      ...styles.profileSubTitle_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {getDic('Email')}
+                  </Text>
+                </View>
+                <View style={styles.profileInfo}>
+                  <Text
+                    style={{
+                      ...styles.profileInfo_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {targetInfo.mailAddress}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.profileInfoWrap_work}>
+                <View style={styles.profileSubTitle}>
+                  <Text
+                    style={{
+                      ...styles.profileSubTitle_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {getDic('Work')}
+                  </Text>
+                </View>
+                <View style={styles.profileInfo}>
+                  <Text
+                    style={{
+                      ...styles.profileInfo_text,
+                      fontSize: sizes.large,
+                    }}
+                  >
+                    {targetInfo.work}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View style={styles.profileInfoWrap}>
-              <View style={styles.profileSubTitle}>
-                <Text
-                  style={{
-                    ...styles.profileSubTitle_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {getDic('Phone')}
-                </Text>
-              </View>
-              <View style={styles.profileInfo}>
-                <Text
-                  style={{
-                    ...styles.profileInfo_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {targetInfo.companyNumber}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.profileInfoWrap}>
-              <View style={styles.profileSubTitle}>
-                <Text
-                  style={{
-                    ...styles.profileSubTitle_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {getDic('Email')}
-                </Text>
-              </View>
-              <View style={styles.profileInfo}>
-                <Text
-                  style={{
-                    ...styles.profileInfo_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {targetInfo.mailAddress}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.profileInfoWrap}>
-              <View style={styles.profileSubTitle}>
-                <Text
-                  style={{
-                    ...styles.profileSubTitle_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {getDic('Work')}
-                </Text>
-              </View>
-              <View style={styles.profileInfo}>
-                <Text
-                  style={{
-                    ...styles.profileInfo_text,
-                    fontSize: sizes.large,
-                  }}
-                >
-                  {targetInfo.work}
-                </Text>
-              </View>
-            </View>
-          </View>
+          </ScrollView>
           <View style={styles.startChat}>
             <View style={styles.bottomBtn}>
               {(myInfo.id != targetID && (
@@ -413,11 +423,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     textAlign: 'center',
   },
+  simpleInfo: {
+    height: '35%',
+  },
   closeButton: {
     margin: 15,
   },
   backgroundContainer: {
-    flex: 2,
     paddingTop: getTopPadding(),
     justifyContent: 'center',
   },
@@ -444,7 +456,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   profileContainer: {
-    flex: 3,
     alignItems: 'center',
     paddingBottom: getBottomPadding(),
     paddingLeft: 30,
@@ -456,6 +467,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     alignItems: 'center',
+  },
+  profileInfoWrap_work: {
+    flexDirection: 'row',
   },
   profileImage: {
     flex: 1,
