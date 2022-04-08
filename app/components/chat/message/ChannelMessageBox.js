@@ -65,7 +65,9 @@ const ChannelMessageBox = ({
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (common.eumTalkRegularExp.test(drawText)) {
-      const processMsg = common.convertEumTalkProtocol(drawText, { messageType: 'channel' });
+      const processMsg = common.convertEumTalkProtocol(drawText, {
+        messageType: 'channel',
+      });
       messageType = processMsg.type;
       drawText = processMsg.message;
     }
@@ -78,7 +80,7 @@ const ChannelMessageBox = ({
       }
     }
 
-    if (messageType == 'message') {
+    if (messageType === 'message') {
       let index = 0;
 
       if (drawText) {
@@ -90,7 +92,7 @@ const ChannelMessageBox = ({
         let linkInfoObj = null;
         let link = '';
         if (message.linkInfo != null) {
-          if (typeof message.linkInfo == 'object') {
+          if (typeof message.linkInfo === 'object') {
             linkInfoObj = message.linkInfo.thumbNailInfo;
             link = message.linkInfo.link;
           } else {
@@ -128,11 +130,7 @@ const ChannelMessageBox = ({
         const checkURLResult = common.checkURL(drawText);
         // 링크 썸네일 처리
         if (checkURLResult.isURL) {
-          linkPreview(
-            checkURLResult.url,
-            setLinkData,
-            message.messageID,
-          );
+          linkPreview(checkURLResult.url, setLinkData, message.messageID);
         }
       }
 
@@ -147,11 +145,11 @@ const ChannelMessageBox = ({
               style={[
                 styles.textOnly,
                 styles.sent,
-                nameBoxVisible && index == 0 ? styles.firstText : null,
+                nameBoxVisible && index === 0 ? styles.firstText : null,
                 nameBoxVisible ? styles.sentFirst : null,
               ]}
             >
-                {nameBoxVisible && (
+              {nameBoxVisible && (
                 <>
                   <ProfileBox
                     userId={message.sender}
@@ -205,6 +203,7 @@ const ChannelMessageBox = ({
                       messageId={message.messageID}
                       fileObj={fileInfoJSON}
                       id={!drawText && id}
+                      longPressEvt={msgUtilBox}
                     />
                   </View>
                 </>
@@ -214,6 +213,7 @@ const ChannelMessageBox = ({
                   messageId={message.messageID}
                   fileObj={fileInfoJSON}
                   id={!drawText && id}
+                  longPressEvt={msgUtilBox}
                 />
               )}
               <View style={styles.chatInfoSent}>
@@ -234,7 +234,7 @@ const ChannelMessageBox = ({
               style={[
                 styles.textOnly,
                 styles.replies,
-                nameBoxVisible && index == 0 ? styles.firstText : null,
+                nameBoxVisible && index === 0 ? styles.firstText : null,
               ]}
             >
               <View style={styles.chatInfo}>
@@ -251,6 +251,7 @@ const ChannelMessageBox = ({
                 messageId={message.messageID}
                 fileObj={fileInfoJSON}
                 id={!drawText && id}
+                longPressEvt={msgUtilBox}
               />
             </View>
           );
@@ -274,7 +275,9 @@ const ChannelMessageBox = ({
     //   else console.log('멘션 처리(검색x) =====>', drawText);
     // }
 
-    if (drawText == '') drawText = null;
+    if (drawText === '') {
+      drawText = null;
+    }
 
     if (!isMine) {
       return (
@@ -350,7 +353,7 @@ const ChannelMessageBox = ({
                                 ? styles.message
                                 : styles.sentFirstMessage,
                               styles.sentText,
-                              messageType != 'message' && styles[messageType],
+                              messageType !== 'message' && styles[messageType],
                             ]}
                             roomInfo={roomInfo}
                             navigation={navigation}
@@ -386,7 +389,7 @@ const ChannelMessageBox = ({
                         style={[
                           styles.message,
                           styles.sentText,
-                          messageType != 'message' && styles[messageType],
+                          messageType !== 'message' && styles[messageType],
                         ]}
                         styleType={'sentText'}
                         longPressEvt={msgUtilBox}
@@ -449,7 +452,7 @@ const ChannelMessageBox = ({
                     style={[
                       styles.message,
                       styles.repliseText,
-                      messageType != 'message' && styles[messageType],
+                      messageType !== 'message' && styles[messageType],
                     ]}
                     eleId={id}
                     marking={marking}

@@ -9,10 +9,9 @@ import { View, StyleSheet } from 'react-native';
 import File from '@C/chat/message/types/File';
 import FileThumbList from './types/FileThumbList';
 
-const FileMessageBox = ({ fileObj, id, isTemp }) => {
+const FileMessageBox = ({ fileObj, id, isTemp, longPressEvt }) => {
   const handleFileList = fileObj => {
     let isAllimg = isAllImage(fileObj);
-
     if (isAllimg) {
       return (
         <View style={[styles.fileThumbListMessageBox]} id={id || ''}>
@@ -27,6 +26,7 @@ const FileMessageBox = ({ fileObj, id, isTemp }) => {
                 preview={handlePreview}
                 id={id}
                 isTemp={isTemp}
+                longPressEvt={longPressEvt}
               />
             );
           })}
@@ -47,6 +47,7 @@ const FileMessageBox = ({ fileObj, id, isTemp }) => {
                 preview={handlePreview}
                 id={id}
                 isTemp={isTemp}
+                longPressEvt={longPressEvt}
               />
             );
           })}
@@ -83,6 +84,7 @@ const FileMessageBox = ({ fileObj, id, isTemp }) => {
         preview={handlePreview}
         id={id}
         isTemp={isTemp}
+        longPressEvt={longPressEvt}
       />
     );
   }
@@ -149,4 +151,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(FileMessageBox);
+export default React.memo(FileMessageBox, (prevProps, nextProps) => {
+  // true : rerender
+  // false : skip
+  return (
+    prevProps.marking !== nextProps.marking ||
+    prevProps.children === nextProps.children
+  );
+});

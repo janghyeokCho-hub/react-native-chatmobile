@@ -30,7 +30,7 @@ const MessageBox = ({
   const isOldMember = useMemo(() => {
     return (
       currMember &&
-      currMember.find(item => item.id == message.sender) == undefined
+      currMember.find(item => item.id === message.sender) === undefined
     );
   }, [currMember]);
 
@@ -46,16 +46,10 @@ const MessageBox = ({
 
   const drawMessage = useMemo(() => {
     let drawText = message.context;
-
     let nameBoxVisible = nameBox;
-
     let senderInfo = null;
-
     let urlInfoJSX = null;
     let fileInfoJSX = null;
-
-    let roomId = null;
-
     let messageType = 'message';
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
@@ -64,7 +58,6 @@ const MessageBox = ({
         messageType: 'room',
       });
       messageType = processMsg.type;
-      roomId = processMsg.roomInfo.roomId;
       drawText = processMsg.message;
     }
 
@@ -76,7 +69,7 @@ const MessageBox = ({
       }
     }
 
-    if (messageType == 'message') {
+    if (messageType === 'message') {
       let index = 0;
 
       if (drawText) {
@@ -88,7 +81,7 @@ const MessageBox = ({
         let linkInfoObj = null;
         let link = '';
         if (message.linkInfo != null) {
-          if (typeof message.linkInfo == 'object') {
+          if (typeof message.linkInfo === 'object') {
             linkInfoObj = message.linkInfo.thumbNailInfo;
             link = message.linkInfo.link;
           } else {
@@ -153,7 +146,7 @@ const MessageBox = ({
               style={[
                 styles.textOnly,
                 styles.sent,
-                nameBoxVisible && index == 0 ? styles.firstText : null,
+                nameBoxVisible && index === 0 ? styles.firstText : null,
                 nameBoxVisible ? styles.sentFirst : null,
               ]}
             >
@@ -216,6 +209,7 @@ const MessageBox = ({
                         messageId={message.messageID}
                         fileObj={fileInfoJSON}
                         id={!drawText && id}
+                        longPressEvt={msgUtilBox}
                       />
                     </View>
                   </View>
@@ -227,6 +221,7 @@ const MessageBox = ({
                     messageId={message.messageID}
                     fileObj={fileInfoJSON}
                     id={!drawText && id}
+                    longPressEvt={msgUtilBox}
                   />
                 </View>
               )}
@@ -250,7 +245,7 @@ const MessageBox = ({
               style={[
                 styles.textOnly,
                 styles.replies,
-                nameBoxVisible && index == 0 ? styles.firstText : null,
+                nameBoxVisible && index === 0 ? styles.firstText : null,
               ]}
             >
               <View style={styles.chatInfo}>
@@ -269,6 +264,7 @@ const MessageBox = ({
                 messageId={message.messageID}
                 fileObj={fileInfoJSON}
                 id={!drawText && id}
+                longPressEvt={msgUtilBox}
               />
             </View>
           );
@@ -277,13 +273,15 @@ const MessageBox = ({
 
       // Tag 처리
       const tagPattern = new RegExp(/(#)([a-z가-힣0-9ㄱ-ㅎ]+)/, 'gmi');
-      drawText = drawText.replace(tagPattern, `<TAG text="$1$2" value="$2" />`);
+      drawText = drawText.replace(tagPattern, '<TAG text="$1$2" value="$2" />');
 
       // NEW LINE 처리
       drawText = drawText.replace(/(\r\n|\n|\r)/gi, '<NEWLINE />');
     }
 
-    if (drawText == '') drawText = null;
+    if (drawText === '') {
+      drawText = null;
+    }
 
     if (!isMine) {
       return (
@@ -360,7 +358,8 @@ const MessageBox = ({
                                   ? styles.message
                                   : styles.sentFirstMessage,
                                 styles.sentText,
-                                messageType != 'message' && styles[messageType],
+                                messageType !== 'message' &&
+                                  styles[messageType],
                               ]}
                               navigation={navigation}
                               styleType={'sentText'}
@@ -402,7 +401,7 @@ const MessageBox = ({
                         style={[
                           styles.message,
                           styles.sentText,
-                          messageType != 'message' && styles[messageType],
+                          messageType !== 'message' && styles[messageType],
                         ]}
                         navigation={navigation}
                         styleType={'sentText'}
@@ -477,7 +476,7 @@ const MessageBox = ({
                     style={[
                       styles.message,
                       styles.repliseText,
-                      messageType != 'message' && styles[messageType],
+                      messageType !== 'message' && styles[messageType],
                     ]}
                     eleId={id}
                     navigation={navigation}

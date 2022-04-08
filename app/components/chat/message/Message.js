@@ -45,8 +45,8 @@ const Message = ({
   longPressEvt,
 }) => {
   const { colors, sizes } = useTheme();
-  const [ drawText, setDrawText ] = useState(<View />);
-  
+  const [drawText, setDrawText] = useState(<View />);
+
   useEffect(() => {
     const pattern = new RegExp(
       /[<](LINK|NEWLINE|TAG|STICKER|MENTION|MOVE)[^>]*[/>]/,
@@ -140,8 +140,7 @@ const Message = ({
             longPressEvt={longPressEvt}
           />,
         );
-      }
-      else {
+      } else {
       }
       beforeLastIndex = match.index + match[0].length;
     }
@@ -241,7 +240,7 @@ export default React.memo(Message, (prevProps, nextProps) => {
   // true : rerender
   // false : skip
   return (
-    prevProps.marking != nextProps.marking ||
-    prevProps.children == nextProps.children
+    prevProps.marking !== nextProps.marking ||
+    prevProps.children === nextProps.children
   );
 });

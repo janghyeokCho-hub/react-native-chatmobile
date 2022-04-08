@@ -55,6 +55,7 @@ import {
 import SecondAuth from '@C/auth/SecondAuth';
 import ModalContainer from './ModalContainer';
 import { getDic, getServerConfigs } from '@/config';
+import ShareContainer from '@/components/ShareContainer';
 
 const Root = ({ stack, theme }) => {
   const Stack = stack;
@@ -466,6 +467,7 @@ const Root = ({ stack, theme }) => {
                 })}
               />
               <Stack.Screen name="EditGroup" component={EditGroup} />
+              <Stack.Screen name="Share" component={ShareContainer} />
             </>
           )}
         </Stack.Navigator>
