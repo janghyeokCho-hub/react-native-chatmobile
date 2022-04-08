@@ -1,10 +1,33 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Channel from './Channel';
-import { FlatList, View } from 'react-native';
-import { openModal, changeModal, closeModal } from '@/modules/modal';
-import { getDic } from '@/config';
+import { FlatList, View, Alert } from 'react-native';
+import { openModal, changeModal } from '@/modules/modal';
+import { getDic, getConfig } from '@/config';
 import EnterChannelBox from '@/components/channel/channelroom/controls/EnterChannelBox';
+import { isJSONStr } from '@/lib/common';
+import { modifyChannelSetting } from '@/modules/channel';
+
+const isEmptyObj = obj => {
+  if (obj.constructor === Object && Object.keys(obj).length === 0) {
+    return true;
+  }
+
+  return false;
+};
+
+const getRoomSettings = room => {
+  let setting = null;
+
+  if (room.settingJSON === null) {
+    setting = {};
+  } else if (typeof room.settingJSON === 'object') {
+    setting = { ...room.settingJSON };
+  } else if (isJSONStr(room.settingJSON)) {
+    setting = JSON.parse(room.settingJSON);
+  }
+  return setting;
+};
 
 const ChannelItems = ({
   rooms,
@@ -21,9 +44,39 @@ const ChannelItems = ({
   const pageSize = 13;
   const [pageNum, setPageNum] = useState(1);
   const [pageEnd, setPageEnd] = useState(false);
-  const [isNotis, setIsNotis] = useState({});
+  const [pinnedRooms, setPinnedRooms] = useState([]);
+  const pinToTopLimit = useMemo(
+    () => getConfig('PinToTop_Limit_Channel', -1),
+    [],
+  );
 
   const dispatch = useDispatch();
+
+  const sortedChannels = useMemo(() => {
+    const pinned = [];
+    const unpinned = [];
+
+    rooms.forEach(r => {
+      const setting = getRoomSettings(r);
+      if (isEmptyObj(setting)) {
+        unpinned.push(r);
+      } else {
+        if (!!setting.pinTop) {
+          pinned.push(r);
+        } else {
+          unpinned.push(r);
+        }
+      }
+    });
+    setPinnedRooms(pinned);
+
+    pinned.sort((a, b) => {
+      const aSetting = getRoomSettings(a);
+      const bSetting = getRoomSettings(b);
+      return bSetting.pinTop - aSetting.pinTop;
+    });
+    return [...pinned, ...unpinned];
+  }, [rooms]);
 
   const handleUpdate = useCallback(
     value => {
@@ -32,19 +85,82 @@ const ChannelItems = ({
         (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y) /
         nativeEvent.contentSize.height;
 
-      if (top > 0.8 && !pageEnd && pageNum * pageSize < rooms.length) {
+      if (top > 0.8 && !pageEnd && pageNum * pageSize < sortedChannels.length) {
         setPageEnd(true);
         setPageNum(prevState => prevState + 1);
       } else {
         setPageEnd(false);
       }
     },
-    [rooms, pageNum, pageEnd, pageSize],
+    [sortedChannels, pageNum, pageEnd, pageSize],
+  );
+
+  const handleChangeSetting = useCallback(
+    ({ room, key, type }) => {
+      let setting = null;
+      let value = '';
+      if (type === 'ADD') {
+        if (
+          pinToTopLimit > -1 &&
+          pinToTopLimit !== 0 &&
+          pinnedRooms?.length >= pinToTopLimit
+        ) {
+          Alert.alert(
+            null,
+            getDic('Msg_PinToTop_LimitExceeded', '더 이상 고정할 수 없습니다.'),
+          );
+          return;
+        }
+
+        setting = getRoomSettings(room);
+
+        const today = new Date();
+        value = `${today.getTime()}`;
+        setting[key] = value;
+      } else {
+        if (room.settingJSON === null) {
+          setting = {};
+        } else {
+          setting = JSON.parse(room.settingJSON);
+          delete setting[key];
+        }
+      }
+
+      dispatch(
+        modifyChannelSetting({
+          roomID: room.roomId,
+          key: key,
+          value: value,
+          setting: JSON.stringify(setting),
+        }),
+      );
+    },
+    [pinnedRooms, dispatch, pinToTopLimit],
   );
 
   const showModalMenu = useCallback(
     room => {
+      const pinToTop = {
+        title: getDic('PinToTop', '상단고정'),
+        onPress: () => {
+          handleChangeSetting({ room, key: 'pinTop', type: 'ADD' });
+        },
+      };
+      const unpinToTop = {
+        title: getDic('UnpinToTop', '상단고정 해제'),
+        onPress: () => {
+          handleChangeSetting({ room, key: 'pinTop', type: 'DEL' });
+        },
+      };
+
+      const setting = getRoomSettings(room);
+      let isPinTop = false;
+      if (!isEmptyObj(setting) && !!setting.pinTop) {
+        isPinTop = true;
+      }
+
       const modalBtn = [
+        pinToTopLimit >= 0 && (isPinTop ? unpinToTop : pinToTop),
         {
           title: getDic('OpenChannel'),
           onPress: () => {
@@ -63,24 +179,31 @@ const ChannelItems = ({
       );
       dispatch(openModal());
     },
-    [dispatch, onRoomChange],
+    [dispatch, onRoomChange, pinToTopLimit, handleChangeSetting],
   );
 
   return (
     <>
-      {rooms && (
+      {sortedChannels && (
         <View>
           <FlatList
             onScroll={handleUpdate}
-            data={rooms.slice(
+            data={sortedChannels.slice(
               0,
-              pageSize * pageNum < rooms.length
+              pageSize * pageNum < sortedChannels.length
                 ? pageSize * pageNum - 1
-                : rooms.length,
+                : sortedChannels.length,
             )}
             keyExtractor={(_, idx) => idx.toString()}
             renderItem={({ item }) => {
               const isSelect = item.roomId === selectId;
+              const setting = getRoomSettings(item);
+
+              let isPinTop = false;
+              if (!isEmptyObj(setting) && !!setting.pinTop) {
+                isPinTop = true;
+              }
+
               if (item?.isJoin) {
                 return (
                   <EnterChannelBox
@@ -96,6 +219,7 @@ const ChannelItems = ({
                     onRoomChange={onRoomChange}
                     isSelect={isSelect}
                     showModalMenu={showModalMenu}
+                    pinnedTop={isPinTop}
                   />
                 );
               }

@@ -818,7 +818,10 @@ const room = handleActions(
           );
           room.setting = action.payload.setting;
 
-          if (draft.currentRoom.roomID === action.payload.roomID) {
+          if (
+            !!draft.currentRoom &&
+            draft.currentRoom.roomID === action.payload.roomID
+          ) {
             // currentRoom 의 경우 setting 정보가 object로 변환되도록 작업
             try {
               draft.currentRoom.setting = JSON.parse(action.payload.setting);

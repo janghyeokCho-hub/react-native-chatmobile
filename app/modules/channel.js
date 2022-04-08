@@ -1107,14 +1107,18 @@ const channel = handleActions(
           const channel = draft.channels.find(
             item => item.roomId === action.payload.roomID,
           );
-          channel.setting = action.payload.setting;
-
-          if (draft.currentChannel.roomId === action.payload.roomID) {
+          channel.settingJSON = action.payload.setting;
+          if (
+            draft.currentChannel &&
+            draft.currentChannel.roomId === action.payload.roomID
+          ) {
             // currentRoom 의 경우 setting 정보가 object로 변환되도록 작업
             try {
-              draft.currentChannel.setting = JSON.parse(action.payload.setting);
+              draft.currentChannel.settingJSON = JSON.parse(
+                action.payload.setting,
+              );
             } catch (e) {
-              draft.currentChannel.setting = null;
+              draft.currentChannel.settingJSON = null;
             }
           }
         }

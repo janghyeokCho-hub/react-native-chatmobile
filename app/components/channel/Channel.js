@@ -55,9 +55,9 @@ const makeDateTime = timestamp => {
   }
 };
 
-const Channel = ({ room, onRoomChange, showModalMenu }) => {
+const Channel = ({ room, onRoomChange, showModalMenu, pinnedTop }) => {
   const dispatch = useDispatch();
-  const { colors, sizes } = useTheme();
+  const { sizes } = useTheme();
   const { loading, channel } = useSelector(({ channel, loading }) => ({
     channel: channel.currentChannel,
     loading: loading['channel/GET_CHANNEL_INFO'],
@@ -245,6 +245,7 @@ const Channel = ({ room, onRoomChange, showModalMenu }) => {
                 {room.roomName}
               </Text>
             )}
+            <Text>{pinnedTop && '📌'}</Text>
           </View>
           <Text
             numberOfLines={1}

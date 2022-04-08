@@ -376,6 +376,7 @@ export const createModifyRoomSettingSaga = () => {
           key: action.payload.key,
           value: action.payload.value,
         });
+        console.log(response);
 
         if (response.data.status == 'SUCCESS') {
           yield put({
