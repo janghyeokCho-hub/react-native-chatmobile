@@ -4,7 +4,7 @@ import { FlatList, View } from 'react-native';
 import { isJSONStr } from '@/lib/common'
 
 const isEmptyObj = obj => {
-  if (obj.constructor === Object && Object.keys(obj).length === 0) {
+  if (obj && obj.constructor === Object && Object.keys(obj).length === 0) {
     return true;
   }
   return false;
@@ -34,13 +34,16 @@ const ChannelItems = ({ channelList, checkObj }) => {
 
     channelList.forEach(r => {
       const setting = getChannelSettings(r);
-      if (isEmptyObj(setting)) {
-        unpinned.push(r);
-      } else {
-        if (!!setting.pinTop) {
-          pinned.push(r);
-        } else {
+      if(setting){
+
+        if (isEmptyObj(setting)) {
           unpinned.push(r);
+        } else {
+          if (!!setting.pinTop) {
+            pinned.push(r);
+          } else {
+            unpinned.push(r);
+          }
         }
       }
     });
@@ -86,7 +89,7 @@ const ChannelItems = ({ channelList, checkObj }) => {
             renderItem={({ item }) => {
               const setting = getChannelSettings(item);
               let isPinTop = false;
-              if (!isEmptyObj(setting) && !!setting.pinTop) {
+              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
                 isPinTop = true;
               }
               return <ChannelItem channel={item} checkObj={checkObj} pinnedTop={isPinTop} />;

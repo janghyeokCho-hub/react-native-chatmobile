@@ -12,7 +12,7 @@ import { getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { modifyRoomSetting } from '@/modules/room';
 
 const isEmptyObj = obj => {
-  if (obj.constructor === Object && Object.keys(obj).length === 0) {
+  if (obj && obj.constructor === Object && Object.keys(obj).length === 0) {
     return true;
   }
 
@@ -52,14 +52,16 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
 
     rooms.forEach(r => {
       const setting = getRoomSettings(r);
-      if (isEmptyObj(setting)) {
-        unpinned.push(r);
-      } else {
-        if (!!setting.pinTop) {
-          console.log(r);
-          pinned.push(r);
-        } else {
+      if (setting) {
+        if (isEmptyObj(setting)) {
           unpinned.push(r);
+        } else {
+          if (!!setting.pinTop) {
+            console.log(r);
+            pinned.push(r);
+          } else {
+            unpinned.push(r);
+          }
         }
       }
     });
@@ -167,7 +169,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
 
       const setting = getRoomSettings(room);
       let isPinTop = false;
-      if (!isEmptyObj(setting) && !!setting.pinTop) {
+      if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
         isPinTop = true;
       }
 
@@ -244,7 +246,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
               const setting = getRoomSettings(item);
 
               let isPinTop = false;
-              if (!isEmptyObj(setting) && !!setting.pinTop) {
+              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
                 isPinTop = true;
               }
               return (
