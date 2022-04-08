@@ -5,7 +5,16 @@ import { reqThumbnail } from '@API/api';
 import ScaledImage from '@C/chat/message/types/ScaledImage';
 import ImageModal from '@COMMON/layout/ImageModal';
 
-const PrevImage = ({ id, type, item, isTemp, children, index, len }) => {
+const PrevImage = ({
+  id,
+  type,
+  item,
+  isTemp,
+  children,
+  index,
+  len,
+  longPressEvt,
+}) => {
   const [thumbnailURL, setThumbnailURL] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -15,7 +24,7 @@ const PrevImage = ({ id, type, item, isTemp, children, index, len }) => {
     } else if (item.image && isTemp) {
       setThumbnailURL({ uri: item.thumbDataURL });
     }
-  }, []);
+  }, [isTemp, item.image, item.thumbDataURL, item.thumbnail, item.token]);
 
   const handlePreview = useCallback(() => {
     setShowModal(true);
@@ -27,24 +36,30 @@ const PrevImage = ({ id, type, item, isTemp, children, index, len }) => {
 
   return (
     <>
-      {(type == 'list' && (
+      {(type === 'list' && (
         <TouchableOpacity
           onPress={() => {
             if (!isTemp) {
               handlePreview();
             }
           }}
+          onLongPress={() => {
+            longPressEvt && longPressEvt();
+          }}
         >
           {children}
         </TouchableOpacity>
       )) ||
-        (type == 'thumblist' && (
+        (type === 'thumblist' && (
           <TouchableOpacity
             style={{ borderWidth: 1, borderColor: 'rgba(0,0,0,0)' }}
             onPress={() => {
               if (!isTemp) {
                 handlePreview();
               }
+            }}
+            onLongPress={() => {
+              longPressEvt && longPressEvt();
             }}
           >
             <ScaledImage
@@ -63,6 +78,9 @@ const PrevImage = ({ id, type, item, isTemp, children, index, len }) => {
                   if (!isTemp) {
                     handlePreview();
                   }
+                }}
+                onLongPress={() => {
+                  longPressEvt && longPressEvt();
                 }}
               >
                 <ScaledImage

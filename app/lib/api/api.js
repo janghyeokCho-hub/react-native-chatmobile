@@ -109,13 +109,19 @@ export const managersvr = (method, url, params, headers) => {
   });
 };
 
-export const filesvr = (method, url, params, headers) => {
+export const filesvr = (
+  method,
+  url,
+  params,
+  headers,
+  responseType = 'blob',
+) => {
   const MANAGE_SERVER = getServer('MANAGE');
   return axios({
     method: method,
     url: `${MANAGE_SERVER}${url}`,
     data: params,
-    responseType: 'blob',
+    responseType,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Covi-User-Access-Version': APP_VERSION,

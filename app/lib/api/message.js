@@ -188,3 +188,13 @@ export const getChannelMentionList = params => {
     `/channel/mention/${params.roomId}?name=${params.name}`,
   );
 };
+
+// 파일 전달
+export const shareFile = formData => {
+  return filesvr('post', '/shareFiles', formData, {}, 'json');
+};
+
+// 파일 토큰 유효성 체크
+export const checkFileTokenValidation = async ({ token, serviceType }) => {
+  return await filesvr('get', `/check/${serviceType}/${token}`);
+};

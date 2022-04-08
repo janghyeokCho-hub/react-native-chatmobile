@@ -25,7 +25,7 @@ import { useTheme } from '@react-navigation/native';
 
 // const useForceUpdate = () => useState()[1];
 
-const File = ({ type, item, preview, id, isTemp }) => {
+const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
   const { sizes } = useTheme();
   const extension = getFileExtension(item.ext);
   const [progressData, setProgressData] = useState(null);
@@ -90,7 +90,12 @@ const File = ({ type, item, preview, id, isTemp }) => {
         {progressData == null && (
           <>
             {(extension == 'img' && (
-              <PrevImage type="list" item={item} isTemp={isTemp}>
+              <PrevImage
+                type="list"
+                item={item}
+                isTemp={isTemp}
+                longPressEvt={longPressEvt}
+              >
                 <View style={styles.fileListItem}>
                   <Image
                     style={styles.sFileIco}
@@ -144,6 +149,9 @@ const File = ({ type, item, preview, id, isTemp }) => {
                     );
                   }
                 }}
+                onLongPress={() => {
+                  longPressEvt && longPressEvt();
+                }}
               >
                 <View style={styles.fileListItem}>
                   <Image
@@ -177,7 +185,13 @@ const File = ({ type, item, preview, id, isTemp }) => {
     if (item.image || item.thumbnail) {
       return (
         <>
-          <PrevImage type="thumbnail" item={item} id={id} isTemp={isTemp} />
+          <PrevImage
+            type="thumbnail"
+            item={item}
+            id={id}
+            isTemp={isTemp}
+            longPressEvt={longPressEvt}
+          />
         </>
       );
     } else {
@@ -220,6 +234,9 @@ const File = ({ type, item, preview, id, isTemp }) => {
                     { cancelable: true },
                   );
                 }
+              }}
+              onLongPress={() => {
+                longPressEvt && longPressEvt();
               }}
             >
               <View style={[styles.fileMessageBox, styles.fileMessage]}>

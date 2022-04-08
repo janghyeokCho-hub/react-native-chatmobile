@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { closeModal, changeModal } from '@/modules/modal';
+import { closeModal } from '@/modules/modal';
 import { getAesUtil } from '@/lib/AesUtil';
 import { joinChannel } from '@/lib/api/channel';
 import { getServer } from '@/config';
@@ -31,7 +31,6 @@ const ModalContainer = () => {
   const [channelName, setChannelName] = useState('');
   const [channelDescription, setChannelDescription] = useState('');
   const [channelCategory, setChannelCategory] = useState('');
-
   const { loading } = useSelector(({ loading }) => ({
     loading: loading['channel/MODIFY_CHANNELINFO'],
   }));
@@ -96,7 +95,7 @@ const ModalContainer = () => {
     >
       <View>
         {!loading &&
-          modalType == 'channelChangeInfo' &&
+          modalType === 'channelChangeInfo' &&
           modalData.channelMenuInfo && (
             <View
               style={{
@@ -177,14 +176,16 @@ const ModalContainer = () => {
                 style={{ marginLeft: 'auto' }}
                 onPress={() => {
                   handleModifyChannelInfo();
-                  if (!loading) dispatch(closeModal());
+                  if (!loading) {
+                    dispatch(closeModal());
+                  }
                 }}
               >
                 <Text style={{ fontSize: 18 }}>{getDic('Ok')}</Text>
               </TouchableOpacity>
             </View>
           )}
-        {modalType == 'channelInfo' && modalData.channelMenuInfo && (
+        {modalType === 'channelInfo' && modalData.channelMenuInfo && (
           <View
             style={{
               justifyContent: 'center',
@@ -303,15 +304,15 @@ const ModalContainer = () => {
                   {modalData.channel.roomName}
                 </Text>
                 <TextInput
-                  style={styles.modalContents}
-                  placeholder={getDic('Msg_InputPassword')}
-                  placeholderTextColor="#AAA"
-                  value={password}
                   style={{
+                    ...styles.modalContents,
                     color: '#000',
                     fontSize: 18,
                     marginTop: 5,
                   }}
+                  placeholder={getDic('Msg_InputPassword')}
+                  placeholderTextColor="#AAA"
+                  value={password}
                   onChangeText={text => {
                     setPassword(text);
                   }}
@@ -335,8 +336,8 @@ const ModalContainer = () => {
                         dispatch(closeModal());
                         setPassword('');
                       } else {
-                        let data = data.result.split(' ');
-                        if (data[0] == '[EE-CSCHC4]') {
+                        const result = data.result.split(' ');
+                        if (result[0] === '[EE-CSCHC4]') {
                           Alert.alert(
                             getDic('Eumtalk'),
                             getDic('Msg_WrongPasswordInput'),
