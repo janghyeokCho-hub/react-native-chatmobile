@@ -6,7 +6,8 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Switch
+    Switch,
+    Platform
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -105,7 +106,12 @@ export default function NoteHeader({ title, userInfo, menus, loading, setAllChec
                                 menu?.switch &&      
                                 <>
                                 <View style={{flexDirection:'row'}}> 
-                                <Text style={{ fontSize: sizes.default, marginTop:3 }}>{menu.switch}</Text>
+                                {
+                                    Platform.OS == 'ios'?
+                                    <Text style={{ fontSize: sizes.default, marginTop:7, marginRight:3 }}>{menu.switch}</Text>
+                                    :
+                                    <Text style={{ fontSize: sizes.default, marginTop:3 }}>{menu.switch}</Text>
+                                }
                                 <Switch
                                 trackColor={{ false: "#767577", true: colors.primary }}
                                 thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
