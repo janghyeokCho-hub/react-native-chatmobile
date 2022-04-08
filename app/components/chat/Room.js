@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import RoomMemberBox from '@C/chat/RoomMemberBox';
 import {
   format,
@@ -17,7 +17,7 @@ import { useTheme } from '@react-navigation/native';
 
 const isJSONStr = str => {
   try {
-    return typeof JSON.parse(str) == 'object';
+    return typeof JSON.parse(str) === 'object';
   } catch (e) {
     return false;
   }
@@ -26,7 +26,9 @@ const isJSONStr = str => {
 const getFilterMember = (members, id, roomType) => {
   if (members && roomType !== 'O') {
     const filterMember = members.filter(item => {
-      if (item.id === id) return false;
+      if (item.id === id) {
+        return false;
+      }
 
       return true;
     });
@@ -46,37 +48,45 @@ const makeMessageText = lastMessage => {
   try {
     let msgObj = null;
 
-    if (typeof lastMessage == 'string') {
+    if (typeof lastMessage === 'string') {
       msgObj = JSON.parse(lastMessage);
-    } else if (typeof lastMessage == 'object') {
+    } else if (typeof lastMessage === 'object') {
       msgObj = lastMessage;
     }
 
-    if (!msgObj) return returnText;
+    if (!msgObj) {
+      return returnText;
+    }
 
-    if (msgObj.Message != '') {
+    if (msgObj.Message !== '') {
       let drawText = msgObj.Message;
       if (isJSONStr(msgObj.Message)) {
         const drawData = JSON.parse(msgObj.Message);
 
-        if(typeof drawData == 'object'){
+        if (typeof drawData === 'object') {
           drawText = drawData.context || JSON.stringify(drawData);
-        }else{
+        } else {
           drawText = drawData.context;
         }
 
-        if(isJSONStr(drawText)){
-          const jsonText =JSON.parse(drawText);
-          if(jsonText.templateKey && jsonText.datas){
-            drawText = getSysMsgFormatStr(getDic(jsonText.templateKey),jsonText.datas)
+        if (isJSONStr(drawText)) {
+          const jsonText = JSON.parse(drawText);
+          if (jsonText.templateKey && jsonText.datas) {
+            drawText = getSysMsgFormatStr(
+              getDic(jsonText.templateKey),
+              jsonText.datas,
+            );
           }
         }
       }
       // protocol check
       if (common.eumTalkRegularExp.test(drawText)) {
         const messageObj = common.convertEumTalkProtocolPreview(drawText);
-        if (messageObj.type == 'emoticon') returnText = getDic('Emoticon');
-        else returnText = messageObj.message.split('\n')[0];
+        if (messageObj.type === 'emoticon') {
+          returnText = getDic('Emoticon');
+        } else {
+          returnText = messageObj.message.split('\n')[0];
+        }
       } else {
         // 첫줄만 노출
         returnText = drawText.split('\n')[0];
@@ -84,9 +94,9 @@ const makeMessageText = lastMessage => {
     } else if (msgObj.File) {
       let fileObj = null;
 
-      if (typeof msgObj.File == 'string') {
+      if (typeof msgObj.File === 'string') {
         fileObj = JSON.parse(msgObj.File);
-      } else if (typeof msgObj.File == 'object') {
+      } else if (typeof msgObj.File === 'object') {
         fileObj = msgObj.File;
       }
 
@@ -96,31 +106,25 @@ const makeMessageText = lastMessage => {
       if (fileObj.length !== undefined && fileObj.length > 1) {
         const firstObj = fileObj[0];
         if (
-          firstObj.ext == 'png' ||
-          firstObj.ext == 'jpg' ||
-          firstObj.ext == 'jpeg' ||
-          firstObj.ext == 'bmp'
+          firstObj.ext === 'png' ||
+          firstObj.ext === 'jpg' ||
+          firstObj.ext === 'jpeg' ||
+          firstObj.ext === 'bmp'
         ) {
-          returnText = getSysMsgFormatStr(
-            getDic('Tmp_imgExCnt'),
-            [
-              { type: 'Plain', data: `${fileObj.length - 1}`}
-            ]
-          );
+          returnText = getSysMsgFormatStr(getDic('Tmp_imgExCnt'), [
+            { type: 'Plain', data: `${fileObj.length - 1}` },
+          ]);
         } else {
-          returnText = getSysMsgFormatStr(
-            getDic('Tmp_fileExCnt'),
-            [
-              { type: 'Plain', data: `${fileObj.length - 1}`}
-            ]
-          );
+          returnText = getSysMsgFormatStr(getDic('Tmp_fileExCnt'), [
+            { type: 'Plain', data: `${fileObj.length - 1}` },
+          ]);
         }
       } else {
         if (
-          fileObj.ext == 'png' ||
-          fileObj.ext == 'jpg' ||
-          fileObj.ext == 'jpeg' ||
-          fileObj.ext == 'bmp'
+          fileObj.ext === 'png' ||
+          fileObj.ext === 'jpg' ||
+          fileObj.ext === 'jpeg' ||
+          fileObj.ext === 'bmp'
         ) {
           returnText = getDic('Image');
         } else {
@@ -157,19 +161,19 @@ const makeDateTime = timestamp => {
   }
 };
 
-const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
-  const { colors, sizes } = useTheme();
+const Room = ({ room, onRoomChange, isSelect, showModalMenu, pinnedTop }) => {
+  const { sizes } = useTheme();
   const id = useSelector(({ login }) => login.id);
   const filterMember = useMemo(
     () => getFilterMember(room.members, id, room.roomType),
-    [room.members, id],
+    [room.members, id, room.roomType],
   );
 
   const makeRoomName = useCallback(
-    filterMember => {
+    member => {
       if (room.roomType === 'M' || room.roomType === 'O') {
         // M의 경우 남은 값이 1개
-        const target = filterMember[0];
+        const target = member[0];
 
         return (
           <Text
@@ -190,7 +194,7 @@ const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
           );
         }
 
-        if (filterMember.length == 0)
+        if (!member.length) {
           return (
             <Text
               style={{ ...styles.titleTxt, fontSize: 15 + sizes.inc }}
@@ -199,6 +203,7 @@ const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
               {getDic('NoChatMembers')}
             </Text>
           );
+        }
 
         return (
           <>
@@ -207,14 +212,16 @@ const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
                 numberOfLines={1}
                 style={{ ...styles.titleTxt, fontSize: 15 + sizes.inc }}
               >
-                {filterMember.map((item, index) => {
-                  if (index == filterMember.length - 1)
+                {member.map((item, index) => {
+                  if (index === member.length - 1) {
                     return common.getJobInfo(item);
-                  else return common.getJobInfo(item) + ',';
+                  } else {
+                    return common.getJobInfo(item) + ',';
+                  }
                 })}
               </Text>
             </View>
-            {room.roomType != 'A' && room.members && (
+            {room.roomType !== 'A' && room.members && (
               <View style={{ marginLeft: 5 }}>
                 <Text style={{ ...styles.titleTxt, fontSize: 15 + sizes.inc }}>
                   ({room.members.length})
@@ -225,7 +232,7 @@ const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
         );
       }
     },
-    [room],
+    [room, sizes.inc],
   );
 
   const handleClick = useCallback(() => {
@@ -267,7 +274,10 @@ const Room = ({ room, onRoomChange, isSelect, showModalMenu }) => {
           )}
         </View>
         <View style={styles.content}>
-          <View style={styles.title}>{makeRoomName(filterMember)}</View>
+          <View style={styles.title}>
+            {makeRoomName(filterMember)}
+            <Text>{pinnedTop && '📌'}</Text>
+          </View>
           <Text
             numberOfLines={2}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}

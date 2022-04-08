@@ -1,14 +1,36 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Room from '@C/chat/Room';
-import { FlatList, View } from 'react-native';
+import { FlatList, View, Alert } from 'react-native';
 import { openRoom } from '@/modules/room';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
 import { leaveRoomUtil, moveToRoom } from '@/lib/roomUtil';
 import messaging from '@react-native-firebase/messaging';
 import { getRoomNotification, modifyRoomNotification } from '@/lib/api/setting';
-import { getDic } from '@/config';
-import { getSysMsgFormatStr } from '@/lib/common';
+import { getDic, getConfig } from '@/config';
+import { getSysMsgFormatStr, isJSONStr } from '@/lib/common';
+import { modifyRoomSetting } from '@/modules/room';
+
+const isEmptyObj = obj => {
+  if (obj.constructor === Object && Object.keys(obj).length === 0) {
+    return true;
+  }
+
+  return false;
+};
+
+const getRoomSettings = room => {
+  let setting = null;
+
+  if (room.setting === null) {
+    setting = {};
+  } else if (typeof room.setting === 'object') {
+    setting = { ...room.setting };
+  } else if (isJSONStr(room.setting)) {
+    setting = JSON.parse(room.setting);
+  }
+  return setting;
+};
 
 const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
   const { id, selectId } = useSelector(({ login, room }) => ({
@@ -19,25 +41,37 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
   const pageSize = 13;
   const [pageNum, setPageNum] = useState(1);
   const [pageEnd, setPageEnd] = useState(false);
-  const [isNotis, setIsNotis] = useState({});
+  const [pinnedRooms, setPinnedRooms] = useState([]);
+  const pinToTopLimit = useMemo(() => getConfig('PinToTop_Limit_Chat', -1), []);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    /* TODO:
-    if (DEVICE_TYPE == 'd') {
-      const userConfig = evalConnector({
-        method: 'getGlobal',
-        name: 'USER_SETTING',
-      });
+  const sortedRooms = useMemo(() => {
+    const pinned = [];
+    const unpinned = [];
 
-      // notiExRooms에 없거나 등록된경우에도 false로 등록됨으로 not 연산자 처리
-      if (userConfig && userConfig.config) {
-        const notiExRooms = userConfig.config.notiExRooms;
-        setIsNotis(notiExRooms);
+    rooms.forEach(r => {
+      const setting = getRoomSettings(r);
+      if (isEmptyObj(setting)) {
+        unpinned.push(r);
+      } else {
+        if (!!setting.pinTop) {
+          console.log(r);
+          pinned.push(r);
+        } else {
+          unpinned.push(r);
+        }
       }
-    }*/
-  }, []);
+    });
+    setPinnedRooms(pinned);
+
+    pinned.sort((a, b) => {
+      const aSetting = getRoomSettings(a);
+      const bSetting = getRoomSettings(b);
+      return bSetting.pinTop - aSetting.pinTop;
+    });
+    return [...pinned, ...unpinned];
+  }, [rooms]);
 
   const handleUpdate = useCallback(
     value => {
@@ -46,14 +80,57 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
         (nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y) /
         nativeEvent.contentSize.height;
 
-      if (top > 0.8 && !pageEnd && pageNum * pageSize < rooms.length) {
+      if (top > 0.8 && !pageEnd && pageNum * pageSize < sortedRooms.length) {
         setPageEnd(true);
         setPageNum(prevState => prevState + 1);
       } else {
         setPageEnd(false);
       }
     },
-    [rooms, pageNum, pageEnd, pageSize],
+    [sortedRooms, pageNum, pageEnd, pageSize],
+  );
+
+  const handleChangeSetting = useCallback(
+    ({ room, key, type }) => {
+      let setting = null;
+      let value = '';
+      if (type === 'ADD') {
+        if (
+          pinToTopLimit > -1 &&
+          pinToTopLimit !== 0 &&
+          pinnedRooms?.length >= pinToTopLimit
+        ) {
+          Alert.alert(
+            null,
+            getDic('Msg_PinToTop_LimitExceeded', '더 이상 고정할 수 없습니다.'),
+          );
+          return;
+        }
+
+        setting = getRoomSettings(room);
+
+        const today = new Date();
+        value = `${today.getTime()}`;
+        setting[key] = value;
+      } else {
+        if (room.setting === null) {
+          setting = {};
+        } else {
+          setting = JSON.parse(room.setting);
+          delete setting[key];
+        }
+      }
+
+      dispatch(
+        modifyRoomSetting({
+          roomID: room.roomID,
+          key: key,
+          value: value,
+          setting: JSON.stringify(setting),
+        }),
+      );
+    },
+    [pinnedRooms, dispatch, pinToTopLimit],
   );
 
   const showModalMenu = useCallback(
@@ -74,7 +151,28 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
         //   }
         // });
       }
+
+      const pinToTop = {
+        title: getDic('PinToTop', '상단고정'),
+        onPress: () => {
+          handleChangeSetting({ room, key: 'pinTop', type: 'ADD' });
+        },
+      };
+      const unpinToTop = {
+        title: getDic('UnpinToTop', '상단고정 해제'),
+        onPress: () => {
+          handleChangeSetting({ room, key: 'pinTop', type: 'DEL' });
+        },
+      };
+
+      const setting = getRoomSettings(room);
+      let isPinTop = false;
+      if (!isEmptyObj(setting) && !!setting.pinTop) {
+        isPinTop = true;
+      }
+
       const modalBtn = [
+        pinToTopLimit >= 0 && (isPinTop ? unpinToTop : pinToTop),
         {
           title: getDic('OpenChat'),
           onPress: () => {
@@ -102,7 +200,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
               params,
             );
             if (resultModify.status !== 200) {
-              alert(
+              Alert.alert(
                 `${getSysMsgFormatStr(
                   getDic('Tmp_failAlarmOnOff'),
                   onNoti ? getDic('off_low') : getDic('on_low'),
@@ -125,24 +223,30 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
       );
       dispatch(openModal());
     },
-    [dispatch, id, navigation],
+    [dispatch, id, navigation, pinToTopLimit],
   );
 
   return (
     <>
-      {rooms && (
+      {sortedRooms && (
         <View>
           <FlatList
             onScroll={handleUpdate}
-            data={rooms.slice(
+            data={sortedRooms.slice(
               0,
-              pageSize * pageNum < rooms.length
+              pageSize * pageNum < sortedRooms.length
                 ? pageSize * pageNum - 1
-                : rooms.length,
+                : sortedRooms.length,
             )}
             keyExtractor={item => item.roomID.toString()}
             renderItem={({ item }) => {
               const isSelect = item.roomID === selectId;
+              const setting = getRoomSettings(item);
+
+              let isPinTop = false;
+              if (!isEmptyObj(setting) && !!setting.pinTop) {
+                isPinTop = true;
+              }
               return (
                 <Room
                   key={item.roomID}
@@ -150,6 +254,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
                   onRoomChange={onRoomChange}
                   isSelect={isSelect}
                   showModalMenu={showModalMenu}
+                  pinnedTop={isPinTop}
                 />
               );
             }}
