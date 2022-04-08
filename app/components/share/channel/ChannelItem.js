@@ -12,10 +12,8 @@ import {
 import { useTheme } from '@react-navigation/native';
 import ToggleButton from '@COMMON/buttons/ToggleButton';
 
-const Channel = ({ channel, checkObj }) => {
+const Channel = ({ channel, checkObj, pinnedTop }) => {
   const { sizes } = useTheme();
-
-  const handleClick = useCallback(() => {}, []);
 
   const makeMessageText = useMemo(() => {
     // room.lastMessage, room.lastMessageType
@@ -209,6 +207,7 @@ const Channel = ({ channel, checkObj }) => {
                 {channel.roomName}
               </Text>
             )}
+            <Text>{pinnedTop && '📌'}</Text>
           </View>
           <Text
             numberOfLines={1}
