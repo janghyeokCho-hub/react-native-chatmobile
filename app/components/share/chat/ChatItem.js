@@ -135,7 +135,7 @@ const makeMessageText = lastMessage => {
   return returnText;
 };
 
-const Room = ({ room, checkObj }) => {
+const Room = ({ room, checkObj, pinnedTop }) => {
   const { sizes } = useTheme();
   const id = useSelector(({ login }) => login.id);
   const filterMember = useMemo(
@@ -266,7 +266,7 @@ const Room = ({ room, checkObj }) => {
           )}
         </View>
         <View style={styles.content}>
-          <View style={styles.title}>{makeRoomName(filterMember)}</View>
+          <View style={styles.title}>{makeRoomName(filterMember)}<Text>{pinnedTop && '📌'}</Text></View>
           <Text
             numberOfLines={2}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}
