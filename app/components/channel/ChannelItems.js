@@ -9,7 +9,7 @@ import { isJSONStr } from '@/lib/common';
 import { modifyChannelSetting } from '@/modules/channel';
 
 const isEmptyObj = obj => {
-  if (obj.constructor === Object && Object.keys(obj).length === 0) {
+  if (obj && obj.constructor === Object && Object.keys(obj).length === 0) {
     return true;
   }
 
@@ -58,13 +58,15 @@ const ChannelItems = ({
 
     rooms.forEach(r => {
       const setting = getRoomSettings(r);
-      if (isEmptyObj(setting)) {
-        unpinned.push(r);
-      } else {
-        if (!!setting.pinTop) {
-          pinned.push(r);
-        } else {
+      if (setting) {
+        if (isEmptyObj(setting)) {
           unpinned.push(r);
+        } else {
+          if (!!setting.pinTop) {
+            pinned.push(r);
+          } else {
+            unpinned.push(r);
+          }
         }
       }
     });
@@ -155,7 +157,7 @@ const ChannelItems = ({
 
       const setting = getRoomSettings(room);
       let isPinTop = false;
-      if (!isEmptyObj(setting) && !!setting.pinTop) {
+      if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
         isPinTop = true;
       }
 
@@ -200,7 +202,7 @@ const ChannelItems = ({
               const setting = getRoomSettings(item);
 
               let isPinTop = false;
-              if (!isEmptyObj(setting) && !!setting.pinTop) {
+              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
                 isPinTop = true;
               }
 
