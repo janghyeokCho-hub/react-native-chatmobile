@@ -21,6 +21,8 @@ import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import { getJobInfo, getBackgroundColor } from '@/lib/common';
 import useSWR from 'swr';
+import RequiredIcon from '@/components/common/icons/RequiredIcon'
+
 
 function _smallProfileBox({ name, photoPath }) {
   const [imgVisible, setImgVisible] = useState(true);
@@ -212,7 +214,11 @@ const OrgList = ({ setRecipient, allCheck }) => {
   return (
     <View style={allCheck ? styles.orgList_disable : styles.orgList}>
       <View style={styles.Recipient}>
-        <Text>{getDic('Note_Recipient')}</Text>
+        <Text>{getDic('Note_Recipient','받는사람')}</Text>
+        <View style={{height:13, width:8 }}>
+        <RequiredIcon />
+        </View>
+
       </View>
       <View style={styles.flatListStyle}>
         <FlatList
@@ -274,6 +280,7 @@ const styles = StyleSheet.create({
   },
   flatListStyle: {
     flex: 4,
+    marginLeft:5
   },
   profileBox: {
     marginLeft: '2%',
@@ -318,6 +325,7 @@ const styles = StyleSheet.create({
   },
   Recipient: {
     flex: 1,
+    flexDirection:'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
