@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
   SafeAreaView,
   ScrollView,
   Alert,
-  TextInput,
   TouchableOpacity,
   Text,
 } from 'react-native';
@@ -14,10 +13,12 @@ import NoteHeader from '@C/note/NoteHeader';
 import { getDic } from '@/config';
 import OrgList from '@/components/common/orgList';
 import ChannelList from '@/components/common/ChannelList';
+import ContextBox from '@/components/usersetting/noticetalk/ContextBox';
 import { useSelector } from 'react-redux';
 import { chatsvr } from '@API/api';
 import { useTheme } from '@react-navigation/native';
-import LoadingWrap from '../common/LoadingWrap';
+import LoadingWrap from '../../common/LoadingWrap';
+import { checkURL } from '@/lib/common';
 
 const NoticeTalk = ({ navigation, route }) => {
   const { params = {} } = route;
@@ -30,6 +31,16 @@ const NoticeTalk = ({ navigation, route }) => {
   const [allCheck, setAllCheck] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recipient, setRecipient] = useState([]);
+  const [url, setUrl] = useState('');
+  const [validURL, setValidURL] = useState(false)
+
+  useEffect(()=>{
+    if(url && checkURL(url).isURL){
+      setValidURL(true)
+    }else{
+      setValidURL(false)
+    }
+  },[url])
 
   async function handleSend() {
     let subjectId = '';
@@ -73,6 +84,28 @@ const NoticeTalk = ({ navigation, route }) => {
       return;
     }
 
+
+    if (url && !validURL) {
+      setIsLoading(false);
+      Alert.alert(
+        getDic('NoticeTalk', '알림톡'),
+        getDic('CheckURL', '올바를 url형식을 사용하고 있는지 확인하세요'),
+      );
+      return;
+    }
+
+    var objLink = {
+      title: '시스템 알림',
+      context: context.trim(),
+      func: {
+        name: '페이지로 이동',
+        type: 'link',
+        data: {
+          baseURL: checkURL(url).url,
+        },
+      },
+    };
+
     if (recipient.length === 0 && !allCheck) {
       setIsLoading(false);
       Alert.alert(
@@ -86,7 +119,7 @@ const NoticeTalk = ({ navigation, route }) => {
       const sendData = {
         subjectId: subjectId.toString(),
         targets: allCheck ? userCompanyCode : selectTargets,
-        message: context.trim(),
+        message: url ? JSON.stringify(objLink) : context.trim(),
         companyCode: userInfo.CompanyCode,
         push: 'Y',
       };
@@ -140,17 +173,12 @@ const NoticeTalk = ({ navigation, route }) => {
             allCheck={allCheck}
             setAllCheck={setAllCheck}
           />
-          <View style={styles.textInputBox}>
-            <TextInput
-              style={styles.textInput}
-              onChangeText={text => setChangeText(text)}
-              multiline
-              numberOfLines={20}
-              scrollEnabled
-              value={changeText}
-              placeholder={getDic('Msg_Note_EnterContext', '내용을 입력하세요')}
-            />
-          </View>
+          <ContextBox
+            setChangeText={setChangeText}
+            changeText={changeText}
+            url={url}
+            setUrl={setUrl}
+          />
         </ScrollView>
       </View>
       <View style={{ flex: 0.1 }}>
@@ -194,16 +222,6 @@ const styles = StyleSheet.create({
     color: '#444',
     width: 22,
     height: 22,
-  },
-  textInputBox: {
-    alignItems: 'center',
-    paddingVertical: 5,
-  },
-  textInput: {
-    width: '95%',
-    height: 400,
-    paddingHorizontal: 15,
-    textAlignVertical: 'top',
   },
   sendBtnTxt: {
     color: 'white',

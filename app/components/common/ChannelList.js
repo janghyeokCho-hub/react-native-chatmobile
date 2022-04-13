@@ -10,6 +10,7 @@ import {
   MenuOptions,
   Menu,
 } from 'react-native-popup-menu';
+import RequiredIcon from '@/components/common/icons/RequiredIcon'
 
 const ChannelList = ({ channelName, channelPhoto }) => {
   const navigation = useNavigation();
@@ -32,7 +33,11 @@ const ChannelList = ({ channelName, channelPhoto }) => {
   return (
     <View style={styles.channelList}>
       <View style={styles.channelTitle}>
-        <Text>{getDic('Notification_Channel', '알림채널')}</Text>
+        <Text>{getDic('Notification_Channel', '알림채널')}
+        <View style={{height:13, width:8 }}>
+        <RequiredIcon />
+        </View>
+        </Text>
       </View>
       <View style={styles.channelBox}>
         {channelName && (
@@ -97,9 +102,11 @@ const styles = StyleSheet.create({
   },
   channelBox: {
     flex: 4,
+    marginLeft:10
   },
   channelTitle: {
     flex: 1,
+    flexDirection:'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
