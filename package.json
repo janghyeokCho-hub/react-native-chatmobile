@@ -1,6 +1,6 @@
 {
   "name": "chatmobile",
-  "version": "1.11.1",
+  "version": "1.11.2",
   "main": "app/index.js",
   "private": true,
   "scripts": {
