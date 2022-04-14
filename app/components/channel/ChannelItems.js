@@ -68,6 +68,8 @@ const ChannelItems = ({
             unpinned.push(r);
           }
         }
+      } else {
+        unpinned.push(r);
       }
     });
     setPinnedRooms(pinned);

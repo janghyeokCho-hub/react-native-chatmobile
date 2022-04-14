@@ -57,12 +57,13 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
           unpinned.push(r);
         } else {
           if (!!setting.pinTop) {
-            console.log(r);
             pinned.push(r);
           } else {
             unpinned.push(r);
           }
         }
+      } else {
+        unpinned.push(r);
       }
     });
     setPinnedRooms(pinned);
