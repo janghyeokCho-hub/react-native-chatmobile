@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   format,
@@ -55,13 +55,29 @@ const makeDateTime = timestamp => {
   }
 };
 
-const Channel = ({ room, onRoomChange, showModalMenu, pinnedTop }) => {
+const Channel = ({
+  room,
+  onRoomChange,
+  showModalMenu,
+  getRoomSettings,
+  isEmptyObj,
+}) => {
   const dispatch = useDispatch();
   const { sizes } = useTheme();
   const { loading, channel } = useSelector(({ channel, loading }) => ({
     channel: channel.currentChannel,
     loading: loading['channel/GET_CHANNEL_INFO'],
   }));
+  const [pinnedTop, setPinnedTop] = useState(false);
+  const setting = useMemo(() => getRoomSettings(room), [room, getRoomSettings]);
+
+  useEffect(() => {
+    if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
+      setPinnedTop(true);
+    } else {
+      setPinnedTop(false);
+    }
+  }, [setting, isEmptyObj]);
   const handleClick = useCallback(() => {
     onRoomChange(room);
   }, [onRoomChange, room]);

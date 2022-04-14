@@ -48,6 +48,7 @@ const SocketContainer = () => {
       onChannelClosure: socketActions.handleChannelClosure(dispatch),
       onAuthChanged: socketActions.handleAuthChanged(dispatch),
       onDelMessage: socketActions.handleDelChatroomMessage(dispatch),
+      onRoomSettingChanged: socketActions.handleRoomSettingChanged(dispatch),
     };
   }, [userInfo, dispatch, setNoteList]);
 

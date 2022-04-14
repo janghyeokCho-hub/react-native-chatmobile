@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import RoomMemberBox from '@C/chat/RoomMemberBox';
 import {
@@ -161,13 +161,23 @@ const makeDateTime = timestamp => {
   }
 };
 
-const Room = ({ room, onRoomChange, isSelect, showModalMenu, pinnedTop }) => {
+const Room = ({ room, onRoomChange, isSelect, showModalMenu, getRoomSettings, isEmptyObj }) => {
   const { sizes } = useTheme();
   const id = useSelector(({ login }) => login.id);
   const filterMember = useMemo(
     () => getFilterMember(room.members, id, room.roomType),
     [room.members, id, room.roomType],
   );
+  const [pinnedTop, setPinnedTop] = useState(false)
+  const setting = useMemo(() => getRoomSettings(room), [room]);
+
+  useEffect(() => {
+    if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
+      setPinnedTop(true);
+    } else {
+      setPinnedTop(false);
+    }
+  }, [setting])
 
   const makeRoomName = useCallback(
     member => {

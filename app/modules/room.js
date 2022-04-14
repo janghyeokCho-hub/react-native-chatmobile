@@ -102,6 +102,8 @@ const [
 
 const SET_SEARCH_KEYWORD_ROOM = 'room/SET_SEARCH_KEYWORD_ROOM';
 
+const RECEIVE_ROOMSETTING = 'room/RECEIVE_ROOMSETTING';
+
 export const getRooms = createAction(GET_ROOMS);
 export const updateRooms = createAction(UPDATE_ROOMS);
 export const getRoomInfo = createAction(GET_ROOM_INFO);
@@ -147,6 +149,8 @@ export const closeRoom = createAction(CLOSE_ROOM);
 export const modifyRoomSetting = createAction(MODIFY_ROOMSETTING);
 
 export const setSearchKeywordRoom = createAction(SET_SEARCH_KEYWORD_ROOM);
+
+export const receiveRoomSetting = createAction(RECEIVE_ROOMSETTING);
 
 const inviteMemberSaga = createRequestSaga(INVITE_MEMBER, roomApi.inviteMember);
 
@@ -875,6 +879,31 @@ const room = handleActions(
           room.lastMessage = lastMessage;
         }
         /* */
+      });
+    },
+    [RECEIVE_ROOMSETTING]: (state, action) => {
+      return produce(state, draft => {
+        if (action.payload.roomID) {
+          const roomID = Number(action.payload.roomID);
+          const room = draft.rooms.find(item => item.roomID === roomID);
+          let setting = {};
+          if (typeof action.payload.setting === 'object') {
+            setting = action.payload.setting;
+          } else {
+            setting = JSON.parse(action.payload.setting);
+          }
+
+          room.setting = setting;
+          if (!!draft.currentRoom && draft.currentRoom.roomID === roomID) {
+            try {
+              for (const key of Object.keys(setting).entries()) {
+                draft.currentRoom.setting[key] = setting[key];
+              }
+            } catch (e) {
+              draft.currentRoom.setting = null;
+            }
+          }
+        }
       });
     },
   },
