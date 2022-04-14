@@ -118,8 +118,12 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
         if (room.setting === null) {
           setting = {};
         } else {
-          setting = JSON.parse(room.setting);
-          delete setting[key];
+          if (typeof room.setting === 'object') {
+            setting = room.setting;
+          } else {
+            setting = JSON.parse(room.setting);
+          }
+          setting[key] = value;
         }
       }
 
@@ -243,12 +247,6 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
             keyExtractor={item => item.roomID.toString()}
             renderItem={({ item }) => {
               const isSelect = item.roomID === selectId;
-              const setting = getRoomSettings(item);
-
-              let isPinTop = false;
-              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
-                isPinTop = true;
-              }
               return (
                 <Room
                   key={item.roomID}
@@ -256,7 +254,8 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
                   onRoomChange={onRoomChange}
                   isSelect={isSelect}
                   showModalMenu={showModalMenu}
-                  pinnedTop={isPinTop}
+                  getRoomSettings={getRoomSettings}
+                  isEmptyObj={isEmptyObj}
                 />
               );
             }}

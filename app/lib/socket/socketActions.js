@@ -8,6 +8,7 @@ import {
   roomLeaveTargetUser,
   messageReadOtherDevice,
   roomMessageDel,
+  receiveRoomSetting,
 } from '@/modules/room';
 
 import {
@@ -24,6 +25,7 @@ import {
   resetUnreadCount,
   channelLeaveOtherDevice,
   changeChannelAuth,
+  receiveChannelSetting,
 } from '@/modules/channel';
 
 import { setUsersPresence, addFixedUsers } from '@/modules/presence';
@@ -34,36 +36,38 @@ import * as RoomList from '@/lib/class/RoomList';
 import * as dbAction from '@/lib/appData/action';
 import { Alert } from 'react-native';
 import { restartApp } from '@/lib/device/common';
-import { getDic,initConfig,  getServerConfigs, initHostInfo } from '@/config';
+import { getDic, initConfig, getServerConfigs, initHostInfo } from '@/config';
 import produce from 'immer';
 
 // 앱 자동 동기화
-export const handleAppUpdateConfig = (dispatch) => {
+export const handleAppUpdateConfig = dispatch => {
   return data => {
     if (!data) return;
 
     console.log(dispatch, data, 'sdfdsfdsf');
     const json_data = JSON.parse(data);
-    let message = getDic("Msg_App_Resync", '관리자 정책에 의한 앱 자동 동기화를 실행합니다.');
-
-    if (json_data.platform === "Mobile") {
-
-    Alert.alert(
-      '앱 자동 동기화',
-      message,
-      [
-        {
-          text: getDic('Ok'),
-          onPress: () => {
-            AsyncStorage.removeItem('ESETINF').then(() => {
-              restartApp();
-            });         
-          },
-        },
-      ],
-      { cancelable: true },
+    let message = getDic(
+      'Msg_App_Resync',
+      '관리자 정책에 의한 앱 자동 동기화를 실행합니다.',
     );
-    };
+
+    if (json_data.platform === 'Mobile') {
+      Alert.alert(
+        '앱 자동 동기화',
+        message,
+        [
+          {
+            text: getDic('Ok'),
+            onPress: () => {
+              AsyncStorage.removeItem('ESETINF').then(() => {
+                restartApp();
+              });
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    }
   };
 };
 
@@ -432,6 +436,17 @@ export const handleDelChatroomMessage = dispatch => {
     } catch (err) {
       console.log('An error occured on onDelMessage : ', err);
       return;
+    }
+  };
+};
+
+export const handleRoomSettingChanged = dispatch => {
+  return data => {
+    const json_data = JSON.parse(data);
+    if (json_data && json_data.roomType === 'C') {
+      dispatch(receiveChannelSetting(json_data));
+    } else {
+      dispatch(receiveRoomSetting(json_data));
     }
   };
 };

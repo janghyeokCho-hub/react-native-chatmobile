@@ -119,6 +119,7 @@ const [
 ] = createRequestActionTypes('channel/MODIFY_CHANNELSETTING');
 
 const CHANNEL_AUTH_CHANGED = 'channel/AUTH_CHANGED';
+const RECEIVE_CHANNELSETTING = 'channel/RECEIVE_CHANNELSETTING';
 
 export const setChannels = createAction(SET_CHANNELS);
 export const init = createAction(INIT);
@@ -173,6 +174,7 @@ export const channelLeaveOtherDevice = createAction(CHANNEL_LEAVE_OTHER_DEVICE);
 export const modifyChannelSetting = createAction(MODIFY_CHANNELSETTING);
 
 export const changeChannelAuth = createAction(CHANNEL_AUTH_CHANGED);
+export const receiveChannelSetting = createAction(RECEIVE_CHANNELSETTING);
 
 const getChannelsSaga = saga.createGetChannelsSaga();
 const updateChannelsSaga = saga.createUpdateChannelsSaga();
@@ -1149,6 +1151,33 @@ const channel = handleActions(
               cm.channelAuth = action.payload.auth;
             }
           });
+        }
+      });
+    },
+    [RECEIVE_CHANNELSETTING]: (state, action) => {
+      return produce(state, draft => {
+        if (action.payload.roomID) {
+          const roomID = Number(action.payload.roomID);
+          const room = draft.channels.find(item => item.roomId === roomID);
+          let setting = {};
+          if (typeof action.payload.setting === 'object') {
+            setting = action.payload.setting;
+          } else {
+            setting = JSON.parse(action.payload.setting);
+          }
+          room.settingJSON = setting;
+          if (
+            !!draft.currentChannel &&
+            draft.currentChannel.roomId === roomID
+          ) {
+            try {
+              for (const key of Object.keys(setting).entries()) {
+                draft.currentChannel.settingJSON[key] = setting[key];
+              }
+            } catch (e) {
+              draft.currentChannel.settingJSON = null;
+            }
+          }
         }
       });
     },

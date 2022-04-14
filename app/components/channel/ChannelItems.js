@@ -123,8 +123,12 @@ const ChannelItems = ({
         if (room.settingJSON === null) {
           setting = {};
         } else {
-          setting = JSON.parse(room.settingJSON);
-          delete setting[key];
+          if (typeof room.settingJSON === 'object') {
+            setting = room.settingJSON;
+          } else {
+            setting = JSON.parse(room.settingJSON);
+          }
+          setting[key] = value;
         }
       }
 
@@ -199,12 +203,6 @@ const ChannelItems = ({
             keyExtractor={(_, idx) => idx.toString()}
             renderItem={({ item }) => {
               const isSelect = item.roomId === selectId;
-              const setting = getRoomSettings(item);
-
-              let isPinTop = false;
-              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
-                isPinTop = true;
-              }
 
               if (item?.isJoin) {
                 return (
@@ -221,7 +219,8 @@ const ChannelItems = ({
                     onRoomChange={onRoomChange}
                     isSelect={isSelect}
                     showModalMenu={showModalMenu}
-                    pinnedTop={isPinTop}
+                    getRoomSettings={getRoomSettings}
+                    isEmptyObj={isEmptyObj}
                   />
                 );
               }
