@@ -20,14 +20,12 @@ const isEmptyObj = obj => {
 };
 
 const getRoomSettings = room => {
-  let setting = null;
+  let setting = {};
 
-  if (room.setting === null) {
-    setting = {};
-  } else if (typeof room.setting === 'object') {
+  if (typeof room.setting === 'object') {
     setting = { ...room.setting };
   } else if (isJSONStr(room.setting)) {
-    setting = JSON.parse(room.setting);
+    setting = { ...JSON.parse(room.setting) };
   }
   return setting;
 };
@@ -49,32 +47,30 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
   const sortedRooms = useMemo(() => {
     const pinned = [];
     const unpinned = [];
-
-    rooms.forEach(r => {
-      const setting = getRoomSettings(r);
-      if (setting) {
-        if (isEmptyObj(setting)) {
-          unpinned.push(r);
+    const result = [];
+    if (pinToTopLimit >= 0) {
+      rooms.forEach(r => {
+        const setting = getRoomSettings(r);
+        if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
+          pinned.push(r);
         } else {
-          if (!!setting.pinTop) {
-            pinned.push(r);
-          } else {
-            unpinned.push(r);
-          }
+          unpinned.push(r);
         }
-      } else {
-        unpinned.push(r);
-      }
-    });
-    setPinnedRooms(pinned);
+      });
+      setPinnedRooms(pinned);
 
-    pinned.sort((a, b) => {
-      const aSetting = getRoomSettings(a);
-      const bSetting = getRoomSettings(b);
-      return bSetting.pinTop - aSetting.pinTop;
-    });
-    return [...pinned, ...unpinned];
-  }, [rooms]);
+      pinned.sort((a, b) => {
+        const aSetting = getRoomSettings(a);
+        const bSetting = getRoomSettings(b);
+        return bSetting.pinTop - aSetting.pinTop;
+      });
+      return result.concat([...pinned, ...unpinned]);
+    } else {
+      return result.concat(rooms).sort((a, b) => {
+        return b.lastMessageDate - a.lastMessageDate;
+      });
+    }
+  }, [rooms, pinToTopLimit]);
 
   const handleUpdate = useCallback(
     value => {
@@ -95,7 +91,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
 
   const handleChangeSetting = useCallback(
     ({ room, key, type }) => {
-      let setting = null;
+      let setting = getRoomSettings(room);
       let value = '';
       if (type === 'ADD') {
         if (
@@ -109,9 +105,6 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
           );
           return;
         }
-
-        setting = getRoomSettings(room);
-
         const today = new Date();
         value = `${today.getTime()}`;
         setting[key] = value;
@@ -119,12 +112,11 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
         if (room.setting === null) {
           setting = {};
         } else {
-          if (typeof room.setting === 'object') {
-            setting = room.setting;
+          if (isEmptyObj(setting)) {
+            setting = {};
           } else {
-            setting = JSON.parse(room.setting);
+            setting[key] = value;
           }
-          setting[key] = value;
         }
       }
 
@@ -230,7 +222,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
       );
       dispatch(openModal());
     },
-    [dispatch, id, navigation, pinToTopLimit],
+    [dispatch, id, navigation, pinToTopLimit, handleChangeSetting],
   );
 
   return (

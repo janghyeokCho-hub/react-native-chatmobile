@@ -1171,7 +1171,7 @@ const channel = handleActions(
             draft.currentChannel.roomId === roomID
           ) {
             try {
-              for (const key of Object.keys(setting).entries()) {
+              for (const [_, key] of Object.keys(setting).entries()) {
                 draft.currentChannel.settingJSON[key] = setting[key];
               }
             } catch (e) {

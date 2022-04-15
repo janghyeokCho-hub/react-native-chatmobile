@@ -896,7 +896,7 @@ const room = handleActions(
           room.setting = setting;
           if (!!draft.currentRoom && draft.currentRoom.roomID === roomID) {
             try {
-              for (const key of Object.keys(setting).entries()) {
+              for (const [_, key] of Object.keys(setting).entries()) {
                 draft.currentRoom.setting[key] = setting[key];
               }
             } catch (e) {
