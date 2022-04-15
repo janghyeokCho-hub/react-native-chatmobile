@@ -1157,21 +1157,33 @@ const channel = handleActions(
     [RECEIVE_CHANNELSETTING]: (state, action) => {
       return produce(state, draft => {
         if (action.payload.roomID) {
+          const getSetting = item => {
+            if (!item) {
+              return {};
+            } else {
+              if (typeof item === 'object') {
+                return item;
+              } else {
+                return JSON.parse(item);
+              }
+            }
+          };
           const roomID = Number(action.payload.roomID);
-          const room = draft.channels.find(item => item.roomId === roomID);
-          let setting = {};
-          if (typeof action.payload.setting === 'object') {
-            setting = action.payload.setting;
-          } else {
-            setting = JSON.parse(action.payload.setting);
+          const channel = draft.channels.find(c => c.roomId == roomID);
+          let originSetting = getSetting(channel.settingJSON);
+          let setting = getSetting(action.payload.setting);
+
+          for (const [_, key] of Object.keys(setting).entries()) {
+            originSetting[key] = setting[key];
           }
-          room.settingJSON = setting;
+          channel.settingJSON = originSetting;
+
           if (
             !!draft.currentChannel &&
             draft.currentChannel.roomId === roomID
           ) {
             try {
-              for (const key of Object.keys(setting).entries()) {
+              for (const [_, key] of Object.keys(setting).entries()) {
                 draft.currentChannel.settingJSON[key] = setting[key];
               }
             } catch (e) {
