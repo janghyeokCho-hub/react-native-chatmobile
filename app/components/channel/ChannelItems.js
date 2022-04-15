@@ -16,13 +16,13 @@ const isEmptyObj = obj => {
   return false;
 };
 
-const getRoomSettings = room => {
+const getRoomSettings = (room = {}) => {
   let setting = {};
 
   if (typeof room.settingJSON === 'object') {
     setting = { ...room.settingJSON };
   } else if (isJSONStr(room.settingJSON)) {
-    setting = { ...JSON.parse(room.settingJSON) };
+    setting = JSON.parse(room.settingJSON);
   }
   return setting;
 };
