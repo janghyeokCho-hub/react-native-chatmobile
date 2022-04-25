@@ -14,12 +14,14 @@ const ContextBox = props => {
               {getDic('Insert_Link', '바로가기 링크 추가')}
             </Text>
         </View>
+        <View style={styles.linkInputContainer}>
         <TextInput
           onChangeText={text => setUrl(text)}
           style={styles.LinkInput}
           value={url}
           placeholder={getDic('Msg_Enter_Url', '바로가기 url을 입력하세요.')}
         />
+        </View>
       </View>
       <View style={styles.textInputBox}>
         <View style={styles.ContextTxt}>
@@ -53,18 +55,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#cecece',
+    height:38,
+    alignItems:'center',
+    paddingHorizontal:0,
+
   },
   checkboxContainer: {
     borderRightColor: '#cecece',
     borderRightWidth: 1,
-  },
-  checkbox: {
-    alignSelf: 'center',
+    justifyContent:'center',
+    alignItems:'center',
+    height:'100%'
   },
   label: {
-    marginHorizontal: 15,
-    height: '100%',
-    textAlignVertical: 'center',
+    marginHorizontal: 14,
+  },
+  linkInputContainer:{
+    paddingHorizontal:5
   },
   LinkInput: {
     width: '100%',
