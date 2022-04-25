@@ -19,9 +19,9 @@ import { getRoomNotification, modifyRoomNotification } from '@/lib/api/setting';
 import messaging from '@react-native-firebase/messaging';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
-import AsyncStorage from '@react-native-community/async-storage';
 import { downloadMessageData } from '@/lib/fileUtil';
 import { getDictionary } from '@/lib/common';
+import { getConfig } from '@/config';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -134,10 +134,7 @@ const ChatMenuBox = ({
     });
   }, [roomInfo]);
 
-  const useMsgExport = useMemo(async () =>{
-    const config = await AsyncStorage.getItem('ESETINF');
-    return config.UseMsgExport || false;
-  }, []);
+  const useMsgExport = useMemo(() => getConfig('UseMsgExport') || false, []);
 
   const handleSaveChat = () => {
     Alert.alert(null, getDic('Msg_SaveChat'), [
