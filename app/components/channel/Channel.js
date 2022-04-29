@@ -61,6 +61,7 @@ const Channel = ({
   const handleClick = useCallback(() => {
     onRoomChange(room);
   }, [onRoomChange, room]);
+
   const makeMessageText = useMemo(() => {
     // room.lastMessage, room.lastMessageType
     const { lastMessage, lastMessageType } = room;
