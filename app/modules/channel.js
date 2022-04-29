@@ -223,7 +223,7 @@ const initialState = {
   makeInfo: null,
 };
 
-const channel = handleActions(
+const channelActionHandlers = handleActions(
   {
     [INIT]: (state, action) => ({
       ...initialState,
@@ -434,6 +434,10 @@ const channel = handleActions(
         if (channel) {
           channel.lastMessage = lastMessageData;
           channel.lastMessageDate = action.payload.sendDate;
+          
+          if (action.payload?.messageType) {
+            channel.lastMessageType = action.payload.messageType;
+          }
 
           draft.channels.splice(
             draft.channels.findIndex(c => c.roomId === action.payload.roomID),
@@ -1197,4 +1201,4 @@ const channel = handleActions(
   initialState,
 );
 
-export default channel;
+export default channelActionHandlers;
