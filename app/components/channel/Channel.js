@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   format,
   isValid,
@@ -7,7 +6,6 @@ import {
   differenceInMilliseconds,
 } from 'date-fns';
 import { getServer } from '@/config';
-import { readMessage, getChannelNotice } from '@/modules/channel';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import LockIcon from '@COMMON/icons/LockIcon';
 import { getDic } from '@/config';
@@ -18,20 +16,6 @@ import {
   convertEumTalkProtocolPreview,
 } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
-
-const getFilterMember = (members, id) => {
-  if (members) {
-    const filterMember = members.filter(item => {
-      if (item.id === id) return false;
-
-      return true;
-    });
-
-    return filterMember;
-  }
-
-  return [];
-};
 
 const makeDateTime = timestamp => {
   if (isValid(new Date(timestamp))) {
@@ -62,12 +46,7 @@ const Channel = ({
   getRoomSettings,
   isEmptyObj,
 }) => {
-  const dispatch = useDispatch();
   const { sizes } = useTheme();
-  const { loading, channel } = useSelector(({ channel, loading }) => ({
-    channel: channel.currentChannel,
-    loading: loading['channel/GET_CHANNEL_INFO'],
-  }));
   const [pinnedTop, setPinnedTop] = useState(false);
   const setting = useMemo(() => getRoomSettings(room), [room, getRoomSettings]);
 
@@ -78,6 +57,7 @@ const Channel = ({
       setPinnedTop(false);
     }
   }, [setting, isEmptyObj]);
+
   const handleClick = useCallback(() => {
     onRoomChange(room);
   }, [onRoomChange, room]);
@@ -129,7 +109,9 @@ const Channel = ({
           fileObj = msgObj.File;
         }
 
-        if (!fileObj) return returnText;
+        if (!fileObj) {
+          return returnText;
+        }
 
         // files 일경우
         if (fileObj.length !== undefined && fileObj.length > 1) {
@@ -171,19 +153,6 @@ const Channel = ({
 
     return returnText;
   }, [room]);
-
-  useEffect(() => {
-    if (!loading && channel) {
-      // 채널 공지 조회
-      dispatch(
-        getChannelNotice({
-          roomId: channel.roomId,
-          method: 'TOP',
-        }),
-      );
-      dispatch(readMessage({ roomID: channel.roomId }));
-    }
-  }, [dispatch, channel, loading]);
 
   return (
     <TouchableOpacity

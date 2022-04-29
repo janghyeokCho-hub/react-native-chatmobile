@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Animated, Easing } from 'react-native';
+import { Animated } from 'react-native';
 
 const SearchMessageWrap = ({ onLayout, children }) => {
-  const [animation, setAnimation] = useState(new Animated.Value(1));
+  const [animation] = useState(new Animated.Value(1));
 
   useEffect(() => {
-    /*
-    const animationConfigs = Animated.timing(animation, {
-      toValue: 0,
-      duration: 800,
-      easing: Easing.Bounce,
-    });
-
-    Animated.loop(animationConfigs, {
-      iterations: 5,
-    }).start();
-    */
-
     Animated.spring(animation, {
       toValue: 0,
       duration: 1000,
