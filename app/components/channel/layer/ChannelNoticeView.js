@@ -6,7 +6,14 @@ import {
   differenceInMilliseconds,
 } from 'date-fns';
 import { useSelector } from 'react-redux';
-import { View, ScrollView, Text, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
+import {
+  View,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  Image,
+  useWindowDimensions,
+} from 'react-native';
 import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
 import ChannelNoticeIcon from '@/components/common/icons/ChannelNoticeIcon';
 import { getDic } from '@/config';
@@ -57,11 +64,7 @@ const ChannelNoticeView = ({
   onDisableHandler,
   onNoticeRemoveHandler,
 }) => {
-  const { userInfo } = useSelector(({ login }) => ({
-    userInfo: login.userInfo,
-  }));
-  const { members } = useSelector(({ channel }) => channel.currentChannel);
-
+  const userInfo = useSelector(({ login }) => login.userInfo);
   const [noticeTitleMinimumSize, setNoticeTitleMinimumSize] = useState(false);
   const makeDateTime = timestamp => {
     if (isValid(new Date(timestamp))) {
@@ -93,24 +96,18 @@ const ChannelNoticeView = ({
   const [processedContext, setProcessedContext] = useState([]);
 
   const generateJSX = async () => {
-    const pattern = new RegExp(
-      /[<](MENTION|LINK)[^>]*[/>]/,
-      'gi',
-    );
+    const pattern = new RegExp(/[<](MENTION|LINK)[^>]*[/>]/, 'gi');
     const returnJSX = [];
     let match = null;
     let beforeLastIndex = 0;
     if (eumTalkRegularExp.test(context) || /[<](LINK)[^>]*[/>]/.test(context)) {
-      const { message, mentionInfo } = convertEumTalkProtocol(context, { messageType: 'channel' });
+      const { message, mentionInfo } = convertEumTalkProtocol(context, {
+        messageType: 'channel',
+      });
       while ((match = pattern.exec(message)) !== null) {
         if (match.index > 0 && match.index > beforeLastIndex) {
           const txt = message.substring(beforeLastIndex, match.index);
-          returnJSX.push(
-            <Plain
-              key={returnJSX.length}
-              text={txt}
-            />,
-          );
+          returnJSX.push(<Plain key={returnJSX.length} text={txt} />);
         }
         const attrs = getAttribute(match[0]);
         if (match[1] === 'MENTION') {
@@ -123,45 +120,32 @@ const ChannelNoticeView = ({
           }
           returnJSX.push(
             <Text key={returnJSX.length} style={{ fontWeight: 'bold' }}>
-              { mention }
-            </Text>
+              {mention}
+            </Text>,
           );
-
         } else if (match[1] === 'LINK') {
-          returnJSX.push(
-            <Link
-              key={returnJSX.length}
-              {...attrs}
-            />,
-          );
+          returnJSX.push(<Link key={returnJSX.length} {...attrs} />);
         }
         beforeLastIndex = match.index + match[0].length;
       }
 
-      if(beforeLastIndex < message.length) {
-        const txt = message.substring(beforeLastIndex); 
-        returnJSX.push(<Plain
-          key={returnJSX.length}
-          text={txt}
-        />);
+      if (beforeLastIndex < message.length) {
+        const txt = message.substring(beforeLastIndex);
+        returnJSX.push(<Plain key={returnJSX.length} text={txt} />);
       }
     }
-    
-    if(beforeLastIndex === 0 && returnJSX.length === 0) {
-      returnJSX.push(<Plain
-        key={returnJSX.length}
-        text={context}
-      />);
+    if (beforeLastIndex === 0 && returnJSX.length === 0) {
+      returnJSX.push(<Plain key={returnJSX.length} text={context} />);
     }
     return returnJSX;
-  }
+  };
 
   useEffect(() => {
     generateJSX().then(jsx => {
       setProcessedContext(jsx);
-    })
+    });
   }, [context]);
-  
+
   useEffect(() => {
     return () => setNoticeTitleMinimumSize(false);
   }, []);
@@ -182,20 +166,22 @@ const ChannelNoticeView = ({
     return Math.round(height * 0.4);
   }, [height]);
 
-  const [ paddingBottom, setPaddingBottom ] = useState(0);
-  const handleLayout = useCallback((event) => {
-    const { height } = event.nativeEvent.layout;
-    /**
-     * =공지 컴포넌트를 펼쳤을 경우=
-     * 접어두기/공지내리기 버튼이 메시지에 덮여 가려지는 현상 방지를 위해 가려지는 만큼의 paddingBottom을 붙여주는 로직 구현 
-     */
-    if (height > maxHeight - 30) {
-      setPaddingBottom(height - maxHeight + 30);
-    }
-    else {
-      setPaddingBottom(0);
-    }
-  }, [height]);
+  const [paddingBottom, setPaddingBottom] = useState(0);
+  const handleLayout = useCallback(
+    event => {
+      const { height } = event.nativeEvent.layout;
+      /**
+       * =공지 컴포넌트를 펼쳤을 경우=
+       * 접어두기/공지내리기 버튼이 메시지에 덮여 가려지는 현상 방지를 위해 가려지는 만큼의 paddingBottom을 붙여주는 로직 구현
+       */
+      if (height > maxHeight - 30) {
+        setPaddingBottom(height - maxHeight + 30);
+      } else {
+        setPaddingBottom(0);
+      }
+    },
+    [height],
+  );
 
   return (
     <View
@@ -203,7 +189,7 @@ const ChannelNoticeView = ({
         maxHeight: noticeTitleMinimumSize && flip ? maxHeight : '100%',
         paddingBottom: noticeTitleMinimumSize && flip ? paddingBottom : 0,
       }}
-      onLayout={ handleLayout }
+      onLayout={handleLayout}
     >
       <View
         style={{
@@ -226,7 +212,7 @@ const ChannelNoticeView = ({
             >
               <ChannelNoticeIcon color="black" width="24" height="24" />
             </View>
-            <ScrollView style={{ }}>
+            <ScrollView>
               <View
                 style={{ marginLeft: 12 }}
                 onLayout={event => {
@@ -242,9 +228,9 @@ const ChannelNoticeView = ({
                   }}
                   // 공지가 접혀있을 때 => 4줄을 넘는 내용은 '...' 노출
                   // 공지를 펼쳤을 때 => numberOfLines 제한을 없애고 ScrollView 노출
-                  numberOfLines={ (noticeTitleMinimumSize && flip) ? 0 : 3 }
+                  numberOfLines={noticeTitleMinimumSize && flip ? 0 : 3}
                 >
-                  { processedContext }
+                  {processedContext}
                 </Text>
                 <Text style={{ fontSize: 14, color: '#777' }}>
                   {makeDateTime(noticeInfo.sendDate) + ' ' + createName}
@@ -262,7 +248,10 @@ const ChannelNoticeView = ({
               {flip ? (
                 <Image source={upBtnIcon} style={{ width: 24, height: 24 }} />
               ) : (
-                <Image source={downBtnIcon} style={{ width: 24, height: 24 }} />
+                <Image
+                  source={downBtnIcon}
+                  style={{ width: 24, height: 24 }}
+                />
               )}
             </TouchableOpacity>
           </View>
