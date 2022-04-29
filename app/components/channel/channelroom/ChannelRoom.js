@@ -1,38 +1,53 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { rematchingMember, closeRoom } from '@/modules/room';
-import { getChannelInfo, readMessage } from '@/modules/channel';
+import {
+  getChannelInfo,
+  getChannelNotice,
+  readMessage,
+} from '@/modules/channel';
 import { clearFiles, sendChannelMessage } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
 import * as fileUtil from '@/lib/fileUtil';
 import SearchView from '@C/channel/search/SearchView';
-import { View, Text } from 'react-native';
+import { Text } from 'react-native';
 
 const ChannelRoom = ({ navigation, route }) => {
   let roomID;
-  if (route.params && route.params.roomID)
-    roomID = parseInt(route.params.roomID);
-  else roomID = null;
-
-  const { channel, moveVisible, loading } = useSelector(
-    ({ channel, loading, message }) => ({
-      channel: channel.currentChannel,
-      moveVisible: message.moveVisible,
-      loading: loading['channel/GET_CHANNEL_INFO'],
-    }),
+  if (route.params && route.params.roomID) {
+    roomID = Number(route.params.roomID);
+  } else {
+    roomID = null;
+  }
+  const channel = useSelector(state => state?.channel?.currentChannel);
+  const loading = useSelector(
+    state => state?.loading?.['channel/GET_CHANNEL_INFO'],
   );
-
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
-
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const fileCtrl = fileUtil.getInstance();
     fileCtrl.clear();
     dispatch(clearFiles());
 
+    if (channel?.roomId) {
+      // 채널 공지 조회
+      dispatch(
+        getChannelNotice({
+          roomId: channel.roomId,
+          method: 'TOP',
+        }),
+      );
+      dispatch(readMessage({ roomID: channel.roomId }));
+    }
     return () => {
       dispatch(closeRoom());
     };
@@ -78,7 +93,7 @@ const ChannelRoom = ({ navigation, route }) => {
       roomType: channel.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
-      mentionInfo: mentionArr
+      mentionInfo: mentionArr,
     };
 
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
@@ -89,22 +104,26 @@ const ChannelRoom = ({ navigation, route }) => {
       dispatch(sendChannelMessage(data));
     }
   };
-
   const handleSearchBox = visible => {
     setSearchVisible(visible);
   };
 
   const handleReadMessage = useCallback(
-    (roomID, isNotice) => {
-      dispatch(readMessage({ roomID, isNotice }));
+    (_roomID, isNotice) => {
+      dispatch(readMessage({ roomID: _roomID, isNotice }));
     },
-    [roomID],
+    [dispatch],
   );
 
+  if (loading) {
+    return <LoadingWrap />;
+  }
+  if (!roomID) {
+    return <Text>잘못된 접근입니다.</Text>;
+  }
   return (
     <>
-      {loading && <LoadingWrap />}
-      {!loading && roomID && (
+      {roomID && (
         <>
           {(searchVisible && (
             <>
@@ -128,7 +147,6 @@ const ChannelRoom = ({ navigation, route }) => {
           )}
         </>
       )}
-      {!loading && !roomID && <Text>잘못된 접근입니다.</Text>}
     </>
   );
 };

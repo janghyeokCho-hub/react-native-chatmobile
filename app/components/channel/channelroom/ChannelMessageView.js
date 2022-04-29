@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useLayoutEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import ChatRoomHeader from '@C/chat/chatroom/normal/ChatRoomHeader';
 import MessagePostBox from '@C/chat/chatroom/normal/MessagePostBox';
@@ -6,7 +6,6 @@ import ChannelMessageList from '@C/channel/channelroom/ChannelMessageList';
 import { View, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import Drawer from 'react-native-drawer';
 import ChannelMenuBox from '@C/channel/channelroom/controls/ChannelMenuBox';
-import ChannelMentionBox from '@C/channel/channelroom/controls/ChannelMentionBox';
 import { getTopPadding } from '@/lib/device/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { addBackHandler, delBackHandler } from '@/modules/app';
@@ -22,11 +21,8 @@ const ChannelMessageView = ({
   postAction,
   navigation,
 }) => {
-  const { isBackLock, userInfo } = useSelector(({ app, login }) => ({
-    isBackLock: app.backHandler['ChatMenuBox'],
-    userInfo: login.userInfo,
-  }));
-
+  const isBackLock = useSelector(({ app }) => app.backHandler.ChatMenuBox);
+  const userInfo = useSelector(({ login }) => login.userInfo);
   const [extensionType, setExtensionType] = useState('');
   const [flip, setFlip] = useState(false);
   const [noticeFlip, setNoticeFlip] = useState(false);
@@ -37,7 +33,7 @@ const ChannelMessageView = ({
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     AsyncStorage.getItem(':channel_notice_' + roomInfo.roomId).then(data => {
       if (data) {
         const json_data = JSON.parse(data);
@@ -59,7 +55,7 @@ const ChannelMessageView = ({
     Keyboard.dismiss();
     _drawer.current.open();
 
-    if (isBackLock == undefined) {
+    if (isBackLock === undefined) {
       dispatch(addBackHandler({ name: 'ChannelMenuBox' }));
     }
   }, [dispatch, isBackLock]);
