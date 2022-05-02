@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { differenceInCalendarDays } from 'date-fns';
 import ChannelMessageBox from '@C/chat/message/ChannelMessageBox';
 import ChannelNoticeMessageBox from '@C/chat/message/ChannelNoticeMessageBox';
 import NoticeBox from '@C/chat/message/NoticeBox';
@@ -7,7 +8,6 @@ import TempMessageBox from '@C/chat/message/TempMessageBox';
 import SystemMessageBox from '@C/chat/message/SystemMessageBox';
 import LatestMessage from '@C/chat/chatroom/normal/LatestMessage';
 import { setMessages, initMessages } from '@/modules/channel';
-import { setChannelNotice } from '@/lib/api/channel';
 import { getChannelMessage } from '@/lib/messageUtil';
 import {
   StyleSheet,
@@ -16,11 +16,9 @@ import {
   Keyboard,
   TouchableOpacity,
   Image,
-  Clipboard,
 } from 'react-native';
-import { openModal, changeModal } from '@/modules/modal';
 import ChannelMessageSync from '@C/channel/channelroom/controls/ChannelMessageSync';
-import { getDic } from '@/config';
+
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
 const ChannelMessageList = React.forwardRef(
@@ -120,26 +118,6 @@ const ChannelMessageList = React.forwardRef(
         const beforeMessage = index > 0 ? messageData[index - 1] : null;
         const nextMessage =
           index < messageData.length - 1 ? messageData[index + 1] : null;
-        /**
-         * 2021.10.27
-         * 
-         * getTimezoneOffset() 메소드:
-         * - UTC 기준보다 느린 timezone은 positive value
-         * - UTC 기준보다 빠른 timezone은 negative value를 가짐.
-         * 
-         * => 실제 시각을 계산하려면 timezone 부호를 반전하여 계산해야 함
-         * Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset
-        */
-        const timeZoneOffset = -(new Date().getTimezoneOffset() * 60 * 1000);
-
-        const dateCompareVal = Math.floor(
-          (message.sendDate + timeZoneOffset) / 86400000,
-        );
-        const nextCompareVal =
-          (nextMessage &&
-            Math.floor((nextMessage.sendDate + timeZoneOffset) / 86400000)) ||
-          0;
-
         const nextMessageSender = (nextMessage && nextMessage.sender) || '';
 
         const currentTime = Math.floor(message.sendDate / 60000);
@@ -150,15 +128,32 @@ const ChannelMessageList = React.forwardRef(
 
         let nameBox = !(message.sender == nextMessageSender);
 
-        const dateBox = dateCompareVal != nextCompareVal;
+        let dateBox = true;
+        try {
+          if (!Number(message?.sendDate) || !Number(nextMessage?.sendDate)) {
+            dateBox = true;
+          } else {
+            const currentMessageDate = new Date(message.sendDate);
+            const nextMessageDate = new Date(nextMessage.sendDate);
+            dateBox = Boolean(
+              differenceInCalendarDays(currentMessageDate, nextMessageDate),
+            );
+          }
+        } catch (err) {
+          dateBox = true;
+        }
 
-        if (dateBox || nextMessage.messageType === 'S') nameBox = true;
+        if (dateBox || nextMessage.messageType === 'S') {
+          nameBox = true;
+        }
 
         let timeBox = !(beforeSendTime == currentTime);
         if (!timeBox) {
           // time은 같지만 다른사용자의 채팅으로 넘어가는경우
           timeBox = !(message.sender == beforeSender);
         }
+
+        const dateCompareVal = Math.floor(message.sendDate / 86400000);
         if (message.messageType === 'I') {
           return (
             <ChannelNoticeMessageBox
