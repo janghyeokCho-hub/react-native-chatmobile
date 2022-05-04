@@ -1,27 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import ChatItem from '@C/share/chat/ChatItem';
 import { FlatList, View } from 'react-native';
-import { isJSONStr } from '@/lib/common'
-
-const isEmptyObj = obj => {
-  if (obj && obj.constructor === Object && Object.keys(obj).length === 0) {
-    return true;
-  }
-  return false;
-};
-
-const getRoomSettings = room => {
-  let setting = null;
-
-  if (room.setting === null) {
-    setting = {};
-  } else if (typeof room.setting === 'object') {
-    setting = { ...room.setting };
-  } else if (isJSONStr(room.setting)) {
-    setting = JSON.parse(room.setting);
-  }
-  return setting;
-};
+import { isEmptyObj, getSettings } from '@C/share/share';
 
 const RoomItems = ({ rooms, checkObj }) => {
   const pageSize = 13;
@@ -33,9 +13,8 @@ const RoomItems = ({ rooms, checkObj }) => {
     const unpinned = [];
 
     rooms.forEach(r => {
-      const setting = getRoomSettings(r);
-      if(setting){
-
+      const setting = getSettings(r, 'CHAT');
+      if (setting) {
         if (isEmptyObj(setting)) {
           unpinned.push(r);
         } else {
@@ -49,8 +28,8 @@ const RoomItems = ({ rooms, checkObj }) => {
     });
 
     pinned.sort((a, b) => {
-      const aSetting = getRoomSettings(a);
-      const bSetting = getRoomSettings(b);
+      const aSetting = getSettings(a, 'CHAT');
+      const bSetting = getSettings(b, 'CHAT');
       return bSetting.pinTop - aSetting.pinTop;
     });
     return [...pinned, ...unpinned];
@@ -87,13 +66,18 @@ const RoomItems = ({ rooms, checkObj }) => {
             )}
             keyExtractor={item => item.roomID.toString()}
             renderItem={({ item }) => {
-                const setting = getRoomSettings(item);
-                let isPinTop = false;
-                if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
-                  isPinTop = true;
-                }
+              const setting = getSettings(item, 'CHAT');
+              let isPinTop = false;
+              if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
+                isPinTop = true;
+              }
               return (
-                <ChatItem key={item.roomID} room={item} checkObj={checkObj} pinnedTop={isPinTop} />
+                <ChatItem
+                  key={item.roomID}
+                  room={item}
+                  checkObj={checkObj}
+                  pinnedTop={isPinTop}
+                />
               );
             }}
           />

@@ -14,7 +14,7 @@ import {
   Image,
   useWindowDimensions,
 } from 'react-native';
-import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
+import { Plain, Link } from '@C/chat/message/types';
 import ChannelNoticeIcon from '@/components/common/icons/ChannelNoticeIcon';
 import { getDic } from '@/config';
 import {
@@ -24,36 +24,10 @@ import {
   convertURLMessage,
 } from '@/lib/common';
 import useMemberInfo from '@/lib/hooks/useMemberInfo';
+import { getAttribute } from '@/lib/messageUtil';
 
 const upBtnIcon = require('@C/assets/group_button_up.png');
 const downBtnIcon = require('@C/assets/group_button_down.png');
-
-const getAttribute = tag => {
-  const attrPattern = new RegExp(
-    /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/,
-    'gi',
-  );
-  let attrs = {};
-  const match = tag.match(attrPattern);
-
-  if (match && match.length > 0) {
-    match.forEach(item => {
-      try {
-        const key = item.split('=')[0];
-        let value = decodeURIComponent(item.split('=')[1]);
-
-        if (
-          (value[0] == '"' && value[value.length - 1] == '"') ||
-          (value[0] == "'" && value[value.length - 1] == "'")
-        ) {
-          value = value.substring(1, value.length - 1);
-        }
-        attrs[key] = value;
-      } catch (e) {}
-    });
-  }
-  return attrs;
-};
 
 const ChannelNoticeView = ({
   noticeInfo,
@@ -104,11 +78,13 @@ const ChannelNoticeView = ({
       const { message, mentionInfo } = convertEumTalkProtocol(context, {
         messageType: 'channel',
       });
+
       while ((match = pattern.exec(message)) !== null) {
         if (match.index > 0 && match.index > beforeLastIndex) {
           const txt = message.substring(beforeLastIndex, match.index);
           returnJSX.push(<Plain key={returnJSX.length} text={txt} />);
         }
+
         const attrs = getAttribute(match[0]);
         if (match[1] === 'MENTION') {
           const memberInfo = await findMemberInfo(mentionInfo, attrs.targetId);
@@ -248,10 +224,7 @@ const ChannelNoticeView = ({
               {flip ? (
                 <Image source={upBtnIcon} style={{ width: 24, height: 24 }} />
               ) : (
-                <Image
-                  source={downBtnIcon}
-                  style={{ width: 24, height: 24 }}
-                />
+                <Image source={downBtnIcon} style={{ width: 24, height: 24 }} />
               )}
             </TouchableOpacity>
           </View>

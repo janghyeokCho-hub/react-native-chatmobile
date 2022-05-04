@@ -33,7 +33,7 @@ import LockIcon from '@COMMON/icons/LockIcon';
 import OrgChartList from '@C/orgchart/OrgChartList';
 import ChatList from '@C/share/chat/ChatList';
 import ChannelList from '@C/share/channel/ChannelList';
-import { makeParams, handleMessage, handleShareFile } from '@C/share/Share';
+import { makeParams, handleMessage, handleShareFile } from '@C/share/share';
 
 const ShareContainer = ({ navigation, route }) => {
   const dispatch = useDispatch();

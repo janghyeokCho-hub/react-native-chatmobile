@@ -4,136 +4,10 @@ import RoomMemberBox from '@C/chat/RoomMemberBox';
 import ProfileBox from '@COMMON/ProfileBox';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { getDic } from '@/config';
-import { getSysMsgFormatStr } from '@/lib/common';
-import * as common from '@/lib/common';
+import { makeMessageText } from '@/lib/common';
+import { getJobInfo, getFilterMember } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import ToggleButton from '@COMMON/buttons/ToggleButton';
-
-const isJSONStr = str => {
-  try {
-    return typeof JSON.parse(str) === 'object';
-  } catch (e) {
-    return false;
-  }
-};
-
-const getFilterMember = (members, id, roomType) => {
-  if (members && roomType !== 'O') {
-    const filterMember = members.filter(item => {
-      if (item.id === id) {
-        return false;
-      }
-
-      return true;
-    });
-
-    return filterMember;
-  } else if (members && roomType === 'O') {
-    const filterMember = members;
-
-    return filterMember;
-  }
-
-  return [];
-};
-
-const makeMessageText = lastMessage => {
-  let returnText = getDic('Msg_NoMessages');
-  try {
-    let msgObj = null;
-
-    if (typeof lastMessage === 'string') {
-      msgObj = JSON.parse(lastMessage);
-    } else if (typeof lastMessage === 'object') {
-      msgObj = lastMessage;
-    }
-
-    if (!msgObj) {
-      return returnText;
-    }
-
-    if (msgObj.Message !== '') {
-      let drawText = msgObj.Message;
-      if (isJSONStr(msgObj.Message)) {
-        const drawData = JSON.parse(msgObj.Message);
-
-        if (typeof drawData === 'object') {
-          drawText = drawData.context || JSON.stringify(drawData);
-        } else {
-          drawText = drawData.context;
-        }
-
-        if (isJSONStr(drawText)) {
-          const jsonText = JSON.parse(drawText);
-          if (jsonText.templateKey && jsonText.datas) {
-            drawText = getSysMsgFormatStr(
-              getDic(jsonText.templateKey),
-              jsonText.datas,
-            );
-          }
-        }
-      }
-      // protocol check
-      if (common.eumTalkRegularExp.test(drawText)) {
-        const messageObj = common.convertEumTalkProtocolPreview(drawText);
-        if (messageObj.type === 'emoticon') {
-          returnText = getDic('Emoticon');
-        } else {
-          returnText = messageObj.message.split('\n')[0];
-        }
-      } else {
-        // 첫줄만 노출
-        returnText = drawText.split('\n')[0];
-      }
-    } else if (msgObj.File) {
-      let fileObj = null;
-
-      if (typeof msgObj.File === 'string') {
-        fileObj = JSON.parse(msgObj.File);
-      } else if (typeof msgObj.File === 'object') {
-        fileObj = msgObj.File;
-      }
-
-      if (!fileObj) {
-        return returnText;
-      }
-
-      // files 일경우
-      if (fileObj.length !== undefined && fileObj.length > 1) {
-        const firstObj = fileObj[0];
-        if (
-          firstObj.ext === 'png' ||
-          firstObj.ext === 'jpg' ||
-          firstObj.ext === 'jpeg' ||
-          firstObj.ext === 'bmp'
-        ) {
-          returnText = getSysMsgFormatStr(getDic('Tmp_imgExCnt'), [
-            { type: 'Plain', data: `${fileObj.length - 1}` },
-          ]);
-        } else {
-          returnText = getSysMsgFormatStr(getDic('Tmp_fileExCnt'), [
-            { type: 'Plain', data: `${fileObj.length - 1}` },
-          ]);
-        }
-      } else {
-        if (
-          fileObj.ext === 'png' ||
-          fileObj.ext === 'jpg' ||
-          fileObj.ext === 'jpeg' ||
-          fileObj.ext === 'bmp'
-        ) {
-          returnText = getDic('Image');
-        } else {
-          returnText = getDic('File');
-        }
-      }
-    }
-  } catch (e) {
-    // Error
-  }
-
-  return returnText;
-};
 
 const Room = ({ room, checkObj, pinnedTop }) => {
   const { sizes } = useTheme();
@@ -154,7 +28,7 @@ const Room = ({ room, checkObj, pinnedTop }) => {
             style={{ ...styles.titleTxt, fontSize: 15 + sizes.inc }}
             numberOfLines={1}
           >
-            {common.getJobInfo(target)}
+            {getJobInfo(target)}
           </Text>
         );
       } else {
@@ -188,9 +62,9 @@ const Room = ({ room, checkObj, pinnedTop }) => {
               >
                 {filterMember.map((item, index) => {
                   if (index === filterMember.length - 1) {
-                    return common.getJobInfo(item);
+                    return getJobInfo(item);
                   } else {
-                    return `${common.getJobInfo(item)},`;
+                    return `${getJobInfo(item)},`;
                   }
                 })}
               </Text>
@@ -266,7 +140,10 @@ const Room = ({ room, checkObj, pinnedTop }) => {
           )}
         </View>
         <View style={styles.content}>
-          <View style={styles.title}>{makeRoomName(filterMember)}<Text>{pinnedTop && '📌'}</Text></View>
+          <View style={styles.title}>
+            {makeRoomName(filterMember)}
+            <Text>{pinnedTop && '📌'}</Text>
+          </View>
           <Text
             numberOfLines={2}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}

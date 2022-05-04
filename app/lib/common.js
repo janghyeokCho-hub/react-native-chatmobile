@@ -1,5 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
-import { getSetting } from '@/config';
+import { getSetting, getDic } from '@/config';
 
 // json array 중복 제거
 export const removeDuplicates = (jsonArray, key) => {
@@ -324,8 +324,117 @@ export const getBackgroundColor = name => {
 
 export const isJSONStr = str => {
   try {
-    return typeof JSON.parse(str) == 'object';
+    return typeof JSON.parse(str) === 'object';
   } catch (e) {
     return false;
+  }
+};
+
+export const makeMessageText = (lastMessage, lastMessageType) => {
+  let returnText = getDic('Msg_NoMessages', '대화내용 없음');
+  try {
+    let msgObj = null;
+
+    if (typeof lastMessage === 'string') {
+      msgObj = JSON.parse(lastMessage);
+    } else if (typeof lastMessage === 'object') {
+      msgObj = lastMessage;
+    }
+
+    if (!msgObj) {
+      return returnText;
+    }
+
+    if (!!msgObj.Message) {
+      let drawText = msgObj.Message || '';
+      if (isJSONStr(msgObj.Message)) {
+        const drawData = JSON.parse(msgObj.Message);
+
+        if (typeof drawData === 'object') {
+          drawText = drawData.context || JSON.stringify(drawData);
+        } else {
+          drawText = drawData.context;
+        }
+
+        if (isJSONStr(drawText)) {
+          const jsonText = JSON.parse(drawText);
+          if (jsonText.templateKey && jsonText.datas) {
+            drawText = getSysMsgFormatStr(
+              getDic(jsonText.templateKey),
+              jsonText.datas,
+            );
+          }
+        }
+      }
+      // protocol check
+      if (eumTalkRegularExp.test(drawText)) {
+        const messageObj = convertEumTalkProtocolPreview(drawText);
+        if (messageObj.type === 'emoticon') {
+          returnText = getDic('Emoticon', '이모티콘');
+        } else {
+          returnText = messageObj.message.split('\n')[0];
+        }
+      } else {
+        // 첫줄만 노출
+        returnText = drawText.split('\n')[0];
+      }
+    } else if (msgObj.File) {
+      let fileObj = null;
+
+      if (typeof msgObj.File === 'string') {
+        fileObj = JSON.parse(msgObj.File);
+      } else if (typeof msgObj.File === 'object') {
+        fileObj = msgObj.File;
+      }
+
+      if (!fileObj) {
+        return returnText;
+      }
+
+      // files 일경우
+      if (fileObj.length > 1) {
+        const firstObj = fileObj[0];
+        if (firstObj.isImage === 'Y') {
+          returnText = getSysMsgFormatStr(
+            getDic('Tmp_imgExCnt', '사진 외 %s건'),
+            [{ type: 'Plain', data: `${fileObj.length - 1}` }],
+          );
+        } else {
+          returnText = getSysMsgFormatStr(
+            getDic('Tmp_fileExCnt', '파일 외 %s건'),
+            [{ type: 'Plain', data: `${fileObj.length - 1}` }],
+          );
+        }
+      } else {
+        if (fileObj.isImage === 'Y') {
+          returnText = getDic('Image', '사진');
+        } else {
+          returnText = getDic('File', '파일');
+        }
+      }
+    }
+
+    if (lastMessageType === 'I') {
+      returnText = getDic('NewNotice');
+    }
+  } catch (e) {
+    // Error
+  }
+
+  return returnText;
+};
+
+export const getFilterMember = (members, id, roomType = null) => {
+  if (!members) {
+    return [];
+  } else if (roomType === 'O') {
+    return members;
+  } else {
+    return members.filter(item => {
+      if (item.id === id) {
+        return false;
+      }
+      return true;
+    });
   }
 };

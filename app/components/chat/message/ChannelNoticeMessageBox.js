@@ -3,49 +3,18 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileBox from '@COMMON/ProfileBox';
-import Message from '@C/chat/message/Message';
-
 import { format } from 'date-fns';
 import * as common from '@/lib/common';
 import LinkMessageBox from '@C/chat/message/LinkMessageBox';
 import FileMessageBox from '@C/chat/message/FileMessageBox';
 import { getDic } from '@/config';
-import { linkPreview } from '@/lib/api/api';
 import { getScreenWidth } from '@/lib/device/common';
 import Svg, { G, Rect, Circle } from 'react-native-svg';
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import useMemberInfo from '@/lib/hooks/useMemberInfo';
 import { Plain, Link, Mention } from '@C/chat/message/types';
 import ChannelNoticeIcon from '@/components/common/icons/ChannelNoticeIcon';
-
-const getAttribute = tag => {
-  const attrPattern = new RegExp(
-    /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/,
-    'gi',
-  );
-  let attrs = {};
-  const match = tag.match(attrPattern);
-
-  if (match && match.length > 0) {
-    match.forEach(item => {
-      try {
-        const key = item.split('=')[0];
-        let value = decodeURIComponent(item.split('=')[1]);
-
-        if (
-          (value[0] == '"' && value[value.length - 1] == '"') ||
-          (value[0] == "'" && value[value.length - 1] == "'")
-        ) {
-          value = value.substring(1, value.length - 1);
-        }
-
-        attrs[key] = value;
-      } catch (e) { }
-    });
-  }
-
-  return attrs;
-};
+import { getAttribute } from '@/lib/messageUtil';
 
 const ChannelNoticeMessageBox = ({
   dateBox,
@@ -76,80 +45,67 @@ const ChannelNoticeMessageBox = ({
   const { findMemberInfo } = useMemberInfo('channel');
 
   const generateJSX = async () => {
-    const pattern = new RegExp(
-      /[<](MENTION|LINK)[^>]*[/>]/,
-      'gi',
-    );
+    const pattern = new RegExp(/[<](MENTION|LINK)[^>]*[/>]/, 'gi');
     const returnJSX = [];
     let match = null;
     let beforeLastIndex = 0;
-    
-    if (common.eumTalkRegularExp.test(context) || /[<](LINK)[^>]*[/>]/.test(context)) {
-      const { type, message, mentionInfo } = common.convertEumTalkProtocol(context, { messageType: 'channel' });
+
+    if (
+      common.eumTalkRegularExp.test(context) ||
+      /[<](LINK)[^>]*[/>]/.test(context)
+    ) {
+      const { type, message, mentionInfo } = common.convertEumTalkProtocol(
+        context,
+        { messageType: 'channel' },
+      );
       while ((match = pattern.exec(message)) !== null) {
         if (match.index > 0 && match.index > beforeLastIndex) {
           const txt = message.substring(beforeLastIndex, match.index);
-          returnJSX.push(
-            <Plain
-              key={returnJSX.length}
-              text={txt}
-            />,
-          );
+          returnJSX.push(<Plain key={returnJSX.length} text={txt} />);
         }
 
         const attrs = getAttribute(match[0]);
         if (match[1] === 'MENTION') {
           const memberInfo = await findMemberInfo(mentionInfo, attrs.targetId);
-          returnJSX.push(<Mention
-            key={returnJSX.length}
-            marking={marking}
-            mentionInfo={mentionInfo}
-            style={{ ...styles.sentMentionText, fontSize: sizes.chat }}
-            navigation={navigation}
-            // 현재 
-            longPressEvt={() => {}}
-            {...attrs}
-          />);
-        } else if (match[1] === 'LINK') {
           returnJSX.push(
-            <Link
+            <Mention
               key={returnJSX.length}
+              marking={marking}
+              mentionInfo={mentionInfo}
+              style={{ ...styles.sentMentionText, fontSize: sizes.chat }}
+              navigation={navigation}
+              // 현재
+              longPressEvt={() => {}}
               {...attrs}
             />,
           );
+        } else if (match[1] === 'LINK') {
+          returnJSX.push(<Link key={returnJSX.length} {...attrs} />);
         }
         beforeLastIndex = match.index + match[0].length;
       }
 
       if (beforeLastIndex < message.length) {
         const txt = message.substring(beforeLastIndex);
-        returnJSX.push(<Plain
-          key={returnJSX.length}
-          text={txt}
-        />);
+        returnJSX.push(<Plain key={returnJSX.length} text={txt} />);
       }
-    }
-    else {
+    } else {
     }
 
-    if(beforeLastIndex === 0 && returnJSX.length === 0) {
-      returnJSX.push(<Plain
-        key={returnJSX.length}
-        text={context}
-      />);
+    if (beforeLastIndex === 0 && returnJSX.length === 0) {
+      returnJSX.push(<Plain key={returnJSX.length} text={context} />);
     }
 
     return returnJSX;
-  }
+  };
 
   useEffect(() => {
     generateJSX().then(jsx => {
       setProcessedContext(jsx);
-    })
-  }, [context, ]);
+    });
+  }, [context]);
 
   const drawMessage = useMemo(() => {
-
     let nameBoxVisible = nameBox;
     let senderInfo = null;
 
@@ -579,7 +535,7 @@ const ChannelNoticeMessageBox = ({
       );
     }
   }, [message.context, processedContext]);
-  
+
   return (
     <>
       {dateBox && dateBox}

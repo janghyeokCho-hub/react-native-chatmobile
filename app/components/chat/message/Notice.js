@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   View,
@@ -17,35 +17,7 @@ import { getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { moveToChannelRoom } from '@/lib/channelUtil';
 import { getConfig, getDic } from '@/config';
 import axios from 'axios';
-
-const getAttribute = tag => {
-  const attrPattern = new RegExp(
-    /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/,
-    'gi',
-  );
-  let attrs = {};
-  const match = tag.match(attrPattern);
-
-  if (match && match.length > 0) {
-    match.forEach(item => {
-      try {
-        const key = item.split('=')[0];
-        let value = decodeURIComponent(item.split('=')[1]);
-
-        if (
-          (value[0] == '"' && value[value.length - 1] == '"') ||
-          (value[0] == "'" && value[value.length - 1] == "'")
-        ) {
-          value = value.substring(1, value.length - 1);
-        }
-
-        attrs[key] = value;
-      } catch (e) {}
-    });
-  }
-
-  return attrs;
-};
+import { getAttribute } from '@/lib/messageUtil';
 
 const Notice = ({ value, title, func, style, navigation, styleType }) => {
   const { sizes, colors } = useTheme();
@@ -77,7 +49,8 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
           />,
         );
       }
-      var attrs = getAttribute(match[0]);
+
+      const attrs = getAttribute(match[0]);
       if (match[1] == 'LINK') {
         returnJSX.push(
           <Link

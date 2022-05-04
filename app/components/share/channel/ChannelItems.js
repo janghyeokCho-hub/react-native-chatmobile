@@ -1,27 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import ChannelItem from '@C/share/channel/ChannelItem';
 import { FlatList, View } from 'react-native';
-import { isJSONStr } from '@/lib/common'
-
-const isEmptyObj = obj => {
-  if (obj && obj.constructor === Object && Object.keys(obj).length === 0) {
-    return true;
-  }
-  return false;
-};
-
-const getChannelSettings = channel => {
-  let setting = null;
-
-  if (channel.settingJSON === null) {
-    setting = {};
-  } else if (typeof channel.settingJSON === 'object') {
-    setting = { ...channel.settingJSON };
-  } else if (isJSONStr(channel.settingJSON)) {
-    setting = JSON.parse(channel.settingJSON);
-  }
-  return setting;
-};
+import { isEmptyObj, getSettings } from '@C/share/share';
 
 const ChannelItems = ({ channelList, checkObj }) => {
   const pageSize = 13;
@@ -33,9 +13,8 @@ const ChannelItems = ({ channelList, checkObj }) => {
     const unpinned = [];
 
     channelList.forEach(r => {
-      const setting = getChannelSettings(r);
-      if(setting){
-
+      const setting = getSettings(r, 'CHANNEL');
+      if (setting) {
         if (isEmptyObj(setting)) {
           unpinned.push(r);
         } else {
@@ -49,8 +28,8 @@ const ChannelItems = ({ channelList, checkObj }) => {
     });
 
     pinned.sort((a, b) => {
-      const aSetting = getChannelSettings(a);
-      const bSetting = getChannelSettings(b);
+      const aSetting = getSettings(a, 'CHANNEL');
+      const bSetting = getSettings(b, 'CHANNEL');
       return bSetting.pinTop - aSetting.pinTop;
     });
     return [...pinned, ...unpinned];
@@ -87,12 +66,18 @@ const ChannelItems = ({ channelList, checkObj }) => {
             )}
             keyExtractor={(_, idx) => idx.toString()}
             renderItem={({ item }) => {
-              const setting = getChannelSettings(item);
+              const setting = getSettings(item, 'CHANNEL');
               let isPinTop = false;
               if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
                 isPinTop = true;
               }
-              return <ChannelItem channel={item} checkObj={checkObj} pinnedTop={isPinTop} />;
+              return (
+                <ChannelItem
+                  channel={item}
+                  checkObj={checkObj}
+                  pinnedTop={isPinTop}
+                />
+              );
             }}
           />
         </View>
