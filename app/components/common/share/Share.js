@@ -23,8 +23,6 @@ import LoadingWrap from '@COMMON/LoadingWrap';
 import ShareProfileBox from '@COMMON/share/common/ShareProfileBox';
 import SharePostBox from '@COMMON/share/common/SharePostBox';
 import { getDictionary } from '@/lib/common';
-import { getDic } from '@/config';
-
 import * as api from '@COMMON/share/lib/api';
 import {
   shareFactory,
@@ -32,6 +30,11 @@ import {
   messageFactory,
   getFileInfoStr,
 } from '@COMMON/share/lib/share';
+
+import { accessTokenCheck } from '@API/login';
+import { initConfig, getServerConfigs, getServer, getDic } from '@/config';
+import AsyncStorage from '@react-native-community/async-storage';
+
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
 const Share = () => {
@@ -85,27 +88,71 @@ const Share = () => {
     return true;
   }, []);
 
+  const getAccessTokenCheck = useCallback(async tokenData => {
+    let flag = false;
+    const hostInfo = tokenData?.host;
+    if (hostInfo) {
+      const serverCheck = getServer('MANAGE');
+      if (!serverCheck) {
+        // 서버 정보가 없으면 서버 정보 생성
+        let settings = await AsyncStorage.getItem('ESETINF');
+        if (!settings) {
+          const response = await getServerConfigs(hostInfo);
+          settings = response.data.result;
+          AsyncStorage.setItem('ESETINF', JSON.stringify(settings));
+        }
+        await initConfig(hostInfo, settings);
+      }
+
+      const { data } = await accessTokenCheck({
+        token: tokenData.token,
+        deviceType: 'm',
+      });
+      flag = data?.tokenInfo === 'true';
+    }
+
+    return flag;
+  }, []);
+
   useEffect(() => {
     // Promise.All
     const initialShareComponent = async () => {
-      const tokenShareData = await getTokenInfo();
-      const shareDatas = await getShareData();
-      const netState = await getNetworkState();
-      const checkAuth = await getAuth();
+      try {
+        const tokenShareData = await getTokenInfo();
+        const shareDatas = await getShareData();
+        const netState = await getNetworkState();
+        const checkAuth = await getAuth();
+        const checkTokenStatus = await getAccessTokenCheck(tokenShareData);
 
-      setLoginInfo(tokenShareData);
-      setShareData(shareDatas);
-      setIsConnected(netState.isConnected);
-      setLoading(false);
+        if (!checkTokenStatus) {
+          handleAlert(
+            getDic(
+              'Msg_NetworkOrLoginError',
+              '네트워크가 불안정하거나 앱에 로그인된 정보가 없습니다.',
+            ),
+            'Alert',
+            () => {
+              handleClose();
+            },
+          );
+        }
 
-      if (tokenShareData !== null) {
-        api.makeServerUtil(tokenShareData);
-      }
+        setLoginInfo(tokenShareData);
+        setShareData(shareDatas);
+        setIsConnected(netState.isConnected);
+        setLoading(false);
 
-      if (!checkAuth) {
-        handleAlert('공유에 필요한 권한이 없습니다.', 'Alert', () => {
-          handleClose();
-        });
+        if (tokenShareData !== null) {
+          api.makeServerUtil(tokenShareData);
+        }
+
+        if (!checkAuth) {
+          handleAlert('공유에 필요한 권한이 없습니다.', 'Alert', () => {
+            handleClose();
+          });
+        }
+      } catch (e) {
+        console.error(e);
       }
     };
 
@@ -121,7 +168,9 @@ const Share = () => {
       message: message,
       type: (!!type && type) || 'Alert',
       callback: () => {
-        if (typeof callback === 'function') callback();
+        if (typeof callback === 'function') {
+          callback();
+        }
         setAlert(null);
         setAlertVisible(false);
       },
@@ -154,7 +203,9 @@ const Share = () => {
         targets.push(item);
       }
 
-      if (targets.length > 0) setShareTarget(targets);
+      if (targets.length) {
+        setShareTarget(targets);
+      }
     },
     [shareTarget],
   );
@@ -209,7 +260,7 @@ const Share = () => {
         fileInfos: getFileInfoStr(item.fileInfos),
       }));
 
-      const sendMessageResult = await messageFactory(messageDatas);
+      await messageFactory(messageDatas);
 
       shareFlag = true;
     }
@@ -252,8 +303,11 @@ const Share = () => {
       }
 
       const files = data.reduce((acc, cval) => {
-        if (cval.type === 'media') return [...acc, cval.value];
-        else return [...acc];
+        if (cval.type === 'media') {
+          return [...acc, cval.value];
+        } else {
+          return [...acc];
+        }
       }, []);
 
       handleAlert('메시지 전송중입니다.', 'Progress', null);
@@ -330,17 +384,6 @@ const Share = () => {
       </View>
       {(loading && <LoadingWrap />) || (
         <View style={styles.contentWrap}>
-          {!isConnected ||
-            (loginInfo === null && (
-              <View>
-                <Text>
-                  {getDictionary(
-                    '네트워크가 불안정하거나 앱에 로그인된 정보가 없습니다.;Network is unstable or login info not exists.;',
-                    'ko',
-                  )}
-                </Text>
-              </View>
-            ))}
           {isConnected && loginInfo !== null && step === 0 && (
             <View style={styles.content}>
               <View style={styles.selectList}>
@@ -365,7 +408,7 @@ const Share = () => {
                           {item.type === 'R' && (
                             <View style={styles.profile}>
                               {((item.roomType === 'M' ||
-                                item.filterMember.length == 1) && (
+                                item.filterMember.length === 1) && (
                                 <ShareProfileBox
                                   type="U"
                                   userName={item.filterMember[0].name}

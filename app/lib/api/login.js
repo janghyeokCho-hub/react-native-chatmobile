@@ -15,10 +15,15 @@ import { Platform } from 'react-native';
  */
 const defaultFlag = {
   useMACAddress: true,
-  useMACEncryption: true
-}
+  useMACEncryption: true,
+};
 
-async function _loginRequest(method, path, params, { useMACAddress, useMACEncryption } = defaultFlag) {
+async function _loginRequest(
+  method,
+  path,
+  params,
+  { useMACAddress, useMACEncryption } = defaultFlag,
+) {
   const AESUtil = getAesUtil();
   if (useMACAddress) {
     try {
@@ -26,11 +31,7 @@ async function _loginRequest(method, path, params, { useMACAddress, useMACEncryp
       const addr = await DeviceInfo.getMacAddress();
       let addrString;
 
-      if (
-        !addr ||
-        addr === '02:00:00:00:00:00' ||
-        Platform.OS === 'ios'
-      ) {
+      if (!addr || addr === '02:00:00:00:00:00' || Platform.OS === 'ios') {
         // MAC Address 획득이 불가능한 경우 (모듈 자체문제 or iOS)
         addrString = DeviceInfo.getUniqueId();
       } else if (Platform.OS === 'android') {
@@ -54,7 +55,7 @@ async function _loginRequest(method, path, params, { useMACAddress, useMACEncryp
         console.log('request header  ', headers);
       } else {
         //암호화가 안될경우
-        console.log('MAC Encryption(Off) : MAC Address in Rqeuest Header')
+        console.log('MAC Encryption(Off) : MAC Address in Rqeuest Header');
         headers['Covi-User-Device-MAC'] = addrString;
         console.log('request header  ', headers);
       }
@@ -111,8 +112,11 @@ export const tokencheckRequest = params => {
   return managesvr('post', '/na/m/v/k', params);
 };
 
+export const accessTokenCheck = params => {
+  return managesvr('post', '/na/token/validation', params);
+};
 
 export const saveLocalStorage = async ({ token, accessid }) => {
   await AsyncStorage.setItem('covi_user_access_token', token);
   await AsyncStorage.setItem('covi_user_access_id', accessid);
-}
+};

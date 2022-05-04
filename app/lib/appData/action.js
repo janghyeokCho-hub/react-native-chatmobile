@@ -160,13 +160,13 @@ const syncPresence = async param => {
             if (updatedList.length > 0) {
               /**
                * 2021.10.27
-               * 
+               *
                * background > foreground 전환시 presence sync 단계에서
                * presence update가 발생한 유저에 대해서만 presence 이벤트 구독이 끊어지는 현상 있음
                * Problem solve: 해당 유저 목록(updatedList)을 다시 presence target으로 등록하는 요청 전송
                */
               setPresenceTargetUser(
-                updatedList.map(item => ({ type: 'add', userId: item.userId }))
+                updatedList.map(item => ({ type: 'add', userId: item.userId })),
               );
             }
             // { userId, state, type: null }
@@ -611,14 +611,19 @@ export const getRooms = async () => {
           if (item.lastMessageDate === null) {
             try {
               await dbCon.transaction(async tx => {
-                const lastMessage = await db.tx(tx).query(
-                  `SELECT m.context, m.fileInfos, m.sendDate FROM message as m WHERE m.roomId = ${item?.roomId} ORDER BY m.sendDate DESC LIMIT 1`
-                ).execute();
+                const lastMessage = await db
+                  .tx(tx)
+                  .query(
+                    `SELECT m.context, m.fileInfos, m.sendDate FROM message as m WHERE m.roomId = ${
+                      item?.roomId
+                    } ORDER BY m.sendDate DESC LIMIT 1`,
+                  )
+                  .execute();
                 if (lastMessage?.length > 1) {
                   const message = lastMessage[1].rows.item(0);
                   room.lastMessage = {
                     Message: message?.context || '',
-                    File: message?.fileInfos || ''
+                    File: message?.fileInfos || '',
                   };
                   room.lastMessageDate = message?.sendDate || null;
                   room.unreadCnt = item?.unreadCnt;
@@ -637,11 +642,11 @@ export const getRooms = async () => {
         } else {
           //console.log(`reqGetRoom - There is no room, '${item.roomId}'`);
         }
-      };
+      }
       outdatedRooms.sort((a, b) => b.lastMessageDate - a.lastMessageDate);
       rooms.push(...outdatedRooms);
     } catch (err) {
-      console.log('Get Rooms Error : ', err)
+      console.log('Get Rooms Error : ', err);
     }
   }
   return { rooms };
@@ -804,7 +809,9 @@ export const delContact = async param => {
         .query(
           'UPDATE contact_item SET ' +
             "folderID = (SELECT folderId FROM contact_folder WHERE FolderType='C') " +
-            `WHERE contactTarget='${delObj.contactId}' AND folderId='${delObj.folderId}' `,
+            `WHERE contactTarget='${delObj.contactId}' AND folderId='${
+              delObj.folderId
+            }' `,
         )
         .execute();
     } else {
@@ -833,72 +840,69 @@ export const delContact = async param => {
 
 export const addCustomGroup = async addObj => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
-  let sub =  addObj.sub ? JSON.parse(addObj.sub): [];
+  let sub = addObj.sub ? JSON.parse(addObj.sub) : [];
 
   dbCon.transaction(tx => {
     db.tx(tx, 'contact_folder')
-    .insert({
-      pChat: addObj.pChat,
-      registDate: addObj.RegistDate,
-      folderName: addObj.folderName,
-      folderSortKey: addObj.folderSortKey,
-      ownerID: addObj.ownerID,
-      folderType: addObj.folderType,
-      folderId: addObj.folderID
-    })
-    .execute();
+      .insert({
+        pChat: addObj.pChat,
+        registDate: addObj.RegistDate,
+        folderName: addObj.folderName,
+        folderSortKey: addObj.folderSortKey,
+        ownerID: addObj.ownerID,
+        folderType: addObj.folderType,
+        folderId: addObj.folderID,
+      })
+      .execute();
 
     sub.forEach(contact => {
       db.tx(tx, 'contact_item')
         .insert({
-            folderId: addObj.folderID,
-            contactTarget: contact.id,
-            companyCode: contact.companyCode || '',
-            contactType: contact.type,
-            globalFolder: 'N',
-            registDate: addObj.RegistDate
+          folderId: addObj.folderID,
+          contactTarget: contact.id,
+          companyCode: contact.companyCode || '',
+          contactType: contact.type,
+          globalFolder: 'N',
+          registDate: addObj.RegistDate,
         })
         .execute();
-      });
+    });
 
     db.tx(tx, 'sync_date')
       .update({ contactSyncDate: addObj.RegistDate })
       .execute();
   });
-
 };
 
 export const modifyGroupMember = async modObj => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
   let users = modObj.sub ? JSON.parse(modObj.sub) : [];
-  let userIds = users.map( user => user.id).join(",");
+  let userIds = users.map(user => user.id).join(',');
 
   dbCon.transaction(tx => {
-
     /* 해당 그룹 유저 모두 삭제 후 재등록 */
     db.tx(tx, 'contact_item')
-        .delete()
-        .where(`folderId = ${modObj.folderID}`)
-        .execute();
-
-    users.forEach( user =>{
-      db.tx(tx, 'contact_item')
-      .insert({
-        folderId: modObj.folderID,
-        contactTarget: user.id,
-        companyCode: user.companyCode || '',
-        contactType: user.type,
-        globalFolder: 'N',
-        registDate: modObj.RegistDate
-      })
+      .delete()
+      .where(`folderId = ${modObj.folderID}`)
       .execute();
+
+    users.forEach(user => {
+      db.tx(tx, 'contact_item')
+        .insert({
+          folderId: modObj.folderID,
+          contactTarget: user.id,
+          companyCode: user.companyCode || '',
+          contactType: user.type,
+          globalFolder: 'N',
+          registDate: modObj.RegistDate,
+        })
+        .execute();
     });
 
     db.tx(tx, 'sync_date')
       .update({ contactSyncDate: modObj.RegistDate })
       .execute();
   });
-  
 };
 
 export const removeCustomGroup = async rmvObj => {
@@ -907,17 +911,20 @@ export const removeCustomGroup = async rmvObj => {
 
   dbCon.transaction(tx => {
     //그룹삭제
-    if(params.contactId || params.companyCode){
+    if (params.contactId || params.companyCode) {
       //그룹내 멤버/조직 삭제
-      const where = `folderId = ${params.folderId} ` +
+      const where =
+        `folderId = ${params.folderId} ` +
         `AND contactTarget = "${params.contactId}" ` +
-        (params.companyCode ? ` AND companyCode = "${params.companyCode}" `: ``);
-  
+        (params.companyCode
+          ? ` AND companyCode = "${params.companyCode}" `
+          : ``);
+
       db.tx(tx, 'contact_item')
         .delete()
         .where(where)
         .execute();
-    }else{
+    } else {
       db.tx(tx, 'contact_folder')
         .delete()
         .where(`folderId = ${params.folderId}`)
@@ -931,7 +938,6 @@ export const removeCustomGroup = async rmvObj => {
       .update({ contactSyncDate: rmvObj.updateDate })
       .execute();
   });
-
 };
 
 export const modifyCustomGroupName = async modObj => {
@@ -942,7 +948,7 @@ export const modifyCustomGroupName = async modObj => {
       .update({ folderName: modObj.displayName })
       .where(`folderId = ${modObj.folderId}`)
       .execute();
-    
+
     db.tx(tx, 'sync_date')
       .update({ contactSyncDate: modObj.updateDate })
       .execute();
@@ -1681,8 +1687,8 @@ export const syncUnreadCount = async (param, callback) => {
             .update(updateParam)
             .where(`messageId IN (${item.messageId})`)
             .execute();
-          
-          updatedMessageIds.push(...item.messageId.split(","));
+
+          updatedMessageIds.push(...item.messageId.split(','));
         });
 
         /**
@@ -1701,12 +1707,12 @@ export const syncUnreadCount = async (param, callback) => {
         const nonUpdatedMessageIds = messageIds.filter(m => {
           return updatedMessageIds.includes(`${m}`) === false;
         });
-        if(nonUpdatedMessageIds.length > 0) {
+        if (nonUpdatedMessageIds.length > 0) {
           const _nonUpdated = nonUpdatedMessageIds.join(',');
           db.tx(tx, 'message')
-          .update({ unreadCnt: 0 })
-          .where(`messageId IN (${_nonUpdated})`)
-          .execute();
+            .update({ unreadCnt: 0 })
+            .where(`messageId IN (${_nonUpdated})`)
+            .execute();
 
           unreadCnts.push({ messageId: _nonUpdated, unreadCnt: 0 });
         }
@@ -2045,7 +2051,11 @@ export const roomDeletemessage = async (roomId, deletedMessageIds) => {
       .whereIn('messageId', deletedMessageIds)
       .execute()
       .then((_, result) => {
-        console.log(`Sync DeletedMessages in room ${roomId} with ${deletedMessageIds?.length} data`);
+        console.log(
+          `Sync DeletedMessages in room ${roomId} with ${
+            deletedMessageIds?.length
+          } data`,
+        );
       });
   });
 };
