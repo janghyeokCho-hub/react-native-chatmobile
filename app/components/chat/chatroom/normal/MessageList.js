@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { differenceInCalendarDays } from 'date-fns';
 import MessageBox from '@C/chat/message/MessageBox';
 import NoticeBox from '@C/chat/message/NoticeBox';
 import TempMessageBox from '@C/chat/message/TempMessageBox';
@@ -21,7 +22,6 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { getScreenWidth } from '@/lib/device/common';
 import MessageSync from '../controls/MessageSync';
 import * as dbAction from '@/lib/appData/action';
 
@@ -181,27 +181,6 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
       const beforeMessage = index > 0 ? messageData[index - 1] : null;
       const nextMessage =
         index < messageData.length - 1 ? messageData[index + 1] : null;
-
-      /**
-       * 2021.10.27
-       * 
-       * getTimezoneOffset() 메소드:
-       * - UTC 기준보다 느린 timezone은 positive value
-       * - UTC 기준보다 빠른 timezone은 negative value를 가짐.
-       * 
-       * => 실제 시각을 계산하려면 timezone 부호를 반전하여 계산해야 함
-       * Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset
-      */
-      const timeZoneOffset = -(new Date().getTimezoneOffset() * 60 * 1000);
-
-      const dateCompareVal = Math.floor(
-        (message.sendDate - timeZoneOffset) / 86400000,
-      );
-      const nextCompareVal =
-        (nextMessage &&
-          Math.floor((nextMessage.sendDate - timeZoneOffset) / 86400000)) ||
-        0;
-
       const nextMessageSender = (nextMessage && nextMessage.sender) || '';
 
       const currentTime = Math.floor(message.sendDate / 60000);
@@ -211,9 +190,20 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
       const beforeSender = (beforeMessage && beforeMessage.sender) || '';
 
       let nameBox = !(message.sender == nextMessageSender);
-      const dateBox = dateCompareVal !== nextCompareVal;
-
-      if (dateBox) nameBox = true;
+      let dateBox = true;
+      try {
+        if (!Number(message?.sendDate) || !Number(nextMessage?.sendDate)) {
+          dateBox = true;
+        } else {
+          const currentMessageDate = new Date(message.sendDate);
+          const nextMessageDate = new Date(nextMessage.sendDate);
+          dateBox = Boolean(
+            differenceInCalendarDays(currentMessageDate, nextMessageDate),
+          );
+        }
+      } catch (err) {
+        dateBox = true;
+      }
 
       let timeBox = !(beforeSendTime == currentTime);
       if (!timeBox) {
@@ -221,6 +211,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         timeBox = !(message.sender == beforeSender);
       }
 
+      const dateCompareVal = Math.floor(message.sendDate / 86400000);
       if (message.messageType !== 'S') {
         if (message.messageType === 'A') {
           return (
