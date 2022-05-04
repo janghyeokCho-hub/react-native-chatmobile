@@ -15,6 +15,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const useMessageDelete = isChannel
     ? getConfig('UseChannelDeleteMessage', false) === true
     : getConfig('UseChatroomDeleteMessage', false) === true;
+  const useForwardFile = getConfig('UseForwardFile') || false;
   const buttons = useMemo(() => {
     let modalBtn = [];
 
@@ -48,43 +49,45 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       });
     }
     //Forward
-    modalBtn.push({
-      type: 'share',
-      title: getDic('Msg_Note_Forward', '전달하기'),
-      onPress: async () => {
-        if (!messageData.fileInfos) {
-          RootNavigation.navigate('Share', {
-            messageData,
-            messageType: 'message',
-          });
-        } else {
-          // 파일 토큰 유효검사 로직 추가해야함
-          let files = JSON.parse(messageData.fileInfos);
-          if (!Array.isArray(files) && files) {
-            files = Array(files);
-          }
-          files = files.map(item => item.token);
-          const result = await messageApi.checkFileTokenValidation({
-            token: files,
-            serviceType: 'CHAT',
-          });
-          if (result.status === 204) {
-            Alert.alert(getDic('Msg_FileExpired', '만료된 파일입니다.'));
-            return;
-          } else if (result.status === 403) {
-            Alert.alert(
-              getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
-            );
-            return;
-          } else {
+    if (useForwardFile) {
+      modalBtn.push({
+        type: 'share',
+        title: getDic('Msg_Note_Forward', '전달하기'),
+        onPress: async () => {
+          if (!messageData.fileInfos) {
             RootNavigation.navigate('Share', {
               messageData,
-              messageType: 'file',
+              messageType: 'message',
             });
+          } else {
+            // 파일 토큰 유효검사 로직 추가해야함
+            let files = JSON.parse(messageData.fileInfos);
+            if (!Array.isArray(files) && files) {
+              files = Array(files);
+            }
+            files = files.map(item => item.token);
+            const result = await messageApi.checkFileTokenValidation({
+              token: files,
+              serviceType: 'CHAT',
+            });
+            if (result.status === 204) {
+              Alert.alert(getDic('Msg_FileExpired', '만료된 파일입니다.'));
+              return;
+            } else if (result.status === 403) {
+              Alert.alert(
+                getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
+              );
+              return;
+            } else {
+              RootNavigation.navigate('Share', {
+                messageData,
+                messageType: 'file',
+              });
+            }
           }
-        }
-      },
-    });
+        },
+      });
+    }
 
     // notice
     isChannel &&
@@ -133,6 +136,15 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         },
       });
 
+    if (!modalBtn?.length) {
+      modalBtn.push({
+        type: 'close',
+        title: getDic('Close'),
+        onPress() {
+          return;
+        },
+      });
+    }
     return modalBtn;
   }, [currentRoom, isChannel, messageData, useMessageDelete]);
 
