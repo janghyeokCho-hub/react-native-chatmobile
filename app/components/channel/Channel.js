@@ -8,13 +8,7 @@ import {
 import { getServer } from '@/config';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import LockIcon from '@COMMON/icons/LockIcon';
-import { getDic } from '@/config';
-import {
-  getBackgroundColor,
-  getSysMsgFormatStr,
-  isJSONStr,
-  convertEumTalkProtocolPreview,
-} from '@/lib/common';
+import { getBackgroundColor, makeMessageText } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 
 const makeDateTime = timestamp => {
@@ -61,99 +55,6 @@ const Channel = ({
   const handleClick = useCallback(() => {
     onRoomChange(room);
   }, [onRoomChange, room]);
-
-  const makeMessageText = useMemo(() => {
-    // room.lastMessage, room.lastMessageType
-    const { lastMessage, lastMessageType } = room;
-    let returnText = getDic('Msg_NoMessages');
-    try {
-      let msgObj = null;
-
-      if (typeof lastMessage == 'string') {
-        msgObj = JSON.parse(lastMessage);
-      } else if (typeof lastMessage == 'object') {
-        msgObj = lastMessage;
-      }
-
-      if (!msgObj) return returnText;
-
-      if (msgObj.Message !== '') {
-        // returnText = commonApi.getPlainText(msgObj.Message);
-        let drawText = msgObj.Message;
-        if (isJSONStr(msgObj.Message)) {
-          const drawData = JSON.parse(msgObj.Message);
-          drawText = drawData.context;
-        }
-        // protocol check
-        if (/eumtalk:\/\//.test(drawText)) {
-          const messageObj = convertEumTalkProtocolPreview(drawText);
-          if (messageObj.type === 'emoticon') {
-            returnText = getDic('Emoticon');
-          } else {
-            /**
-             * 2021.01.19
-             * 멘션은 @userid 로 표시됨
-             * @username 으로 변경시 추가 로직 필요
-             */
-            returnText = messageObj.message.split('\n')[0];
-          }
-        } else {
-          // 첫줄만 노출
-          returnText = drawText.split('\n')[0];
-        }
-      } else if (msgObj.File) {
-        let fileObj = null;
-
-        if (typeof msgObj.File == 'string') {
-          fileObj = JSON.parse(msgObj.File);
-        } else if (typeof msgObj.File == 'object') {
-          fileObj = msgObj.File;
-        }
-
-        if (!fileObj) {
-          return returnText;
-        }
-
-        // files 일경우
-        if (fileObj.length !== undefined && fileObj.length > 1) {
-          const firstObj = fileObj[0];
-          if (
-            firstObj.ext == 'png' ||
-            firstObj.ext == 'jpg' ||
-            firstObj.ext == 'jpeg' ||
-            firstObj.ext == 'bmp'
-          ) {
-            returnText = getSysMsgFormatStr(getDic('Tmp_imgExCnt'), [
-              { type: 'Plain', data: `${fileObj.length - 1}` },
-            ]);
-          } else {
-            returnText = getSysMsgFormatStr(getDic('Tmp_fileExCnt'), [
-              { type: 'Plain', data: `${fileObj.length - 1}` },
-            ]);
-          }
-        } else {
-          if (
-            fileObj.ext === 'png' ||
-            fileObj.ext === 'jpg' ||
-            fileObj.ext === 'jpeg' ||
-            fileObj.ext === 'bmp'
-          ) {
-            returnText = getDic('Image');
-          } else {
-            returnText = getDic('File');
-          }
-        }
-      }
-
-      if (lastMessageType === 'I') {
-        returnText = getDic('NewNotice');
-      }
-    } catch (e) {
-      // console.log(e);
-    }
-
-    return returnText;
-  }, [room]);
 
   return (
     <TouchableOpacity
@@ -237,7 +138,8 @@ const Channel = ({
             numberOfLines={1}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}
           >
-            {room.lastMessage && makeMessageText}
+            {room.lastMessage &&
+              makeMessageText(room.lastMessage, room.lastMessageType)}
           </Text>
         </View>
         <View style={styles.info}>

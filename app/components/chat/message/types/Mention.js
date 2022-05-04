@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Text, View, TouchableOpacity } from 'react-native';
 import { getProfileInfo } from '@API/profile';
@@ -12,31 +12,48 @@ const Mention = ({
   type,
   targetId,
   longPressEvt,
-  messageType
+  messageType,
 }) => {
   const [value, setValue] = useState('');
   const [memberInfo, setMemberInfo] = useState(null);
   const { findMemberInfo } = useMemberInfo(messageType);
+  const _isMounted = useRef(true);
 
   const setMention = async () => {
-    if (type == 'user' && targetId) {
+    if (type === 'user' && targetId) {
       if (mentionInfo && Array.isArray(mentionInfo)) {
-        const memberInfo = await findMemberInfo(mentionInfo, targetId);
-        if (memberInfo === null) {
-          // 서버로부터 데이터를 받아오지 못한 경우 기본값으로 Unknown 노출
-          setValue('@Unknown');
-        } else if (memberInfo.name) {
-          setValue(`@${getJobInfo(memberInfo)}`);
-        } else if (memberInfo.id) {
-          setValue(`@${memberInfo.id}`);
+        try {
+          const info = await findMemberInfo(mentionInfo, targetId);
+          let txt = '@Unknown';
+
+          if (info?.name) {
+            const jobInfo = getJobInfo(info);
+            txt = `@${jobInfo}`;
+          } else if (info?.id) {
+            txt = `@${info.id}`;
+          }
+
+          if (_isMounted.current === true) {
+            setValue(txt);
+            setMemberInfo(info);
+          }
+        } catch (e) {
+          console.error(e);
         }
-        setMemberInfo(memberInfo);
       }
     }
-  }
+  };
 
   useEffect(() => {
     setMention();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      setValue(null);
+      setMemberInfo(null);
+      _isMounted.current = false;
+    };
   }, []);
 
   const handleClick = () => {

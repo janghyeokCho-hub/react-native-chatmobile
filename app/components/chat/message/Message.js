@@ -1,38 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
 import { View, StyleSheet } from 'react-native';
-
 import { useTheme } from '@react-navigation/native';
-
-const getAttribute = tag => {
-  const attrPattern = new RegExp(
-    /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/,
-    'gi',
-  );
-  let attrs = {};
-  const match = tag.match(attrPattern);
-
-  if (match && match.length > 0) {
-    match.forEach(item => {
-      try {
-        const key = item.split('=')[0];
-        let value = decodeURIComponent(item.split('=')[1]);
-
-        if (
-          (value[0] == '"' && value[value.length - 1] == '"') ||
-          (value[0] == "'" && value[value.length - 1] == "'")
-        ) {
-          value = value.substring(1, value.length - 1);
-        }
-
-        attrs[key] = value;
-      } catch (e) {}
-    });
-  }
-
-  return attrs;
-};
+import { getAttribute } from '@/lib/messageUtil';
 
 const Message = ({
   children,
@@ -71,7 +41,7 @@ const Message = ({
         );
       }
 
-      var attrs = getAttribute(match[0]);
+      const attrs = getAttribute(match[0]);
 
       if (match[1] === 'LINK') {
         returnJSX.push(
