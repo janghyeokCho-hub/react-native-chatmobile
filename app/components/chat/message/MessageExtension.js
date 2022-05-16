@@ -7,7 +7,6 @@ import * as channelApi from '@API/channel';
 import { getPlainText } from '@/lib/common';
 import Share from 'react-native-share';
 import * as RootNavigation from '@/components/RootNavigation';
-import { checkFileTokenValidation } from '@C/common/share/lib/share';
 
 const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const currentRoom = useSelector(({ room }) => room.currentRoom);
@@ -48,42 +47,47 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         },
       });
     }
+
     //Forward
-    if (useForwardFile) {
+    if (!messageData.fileInfos) {
       modalBtn.push({
         type: 'share',
         title: getDic('Msg_Note_Forward', '전달하기'),
         onPress: async () => {
-          if (!messageData.fileInfos) {
+          RootNavigation.navigate('Share', {
+            messageData,
+            messageType: 'message',
+          });
+        },
+      });
+    } else if (useForwardFile) {
+      modalBtn.push({
+        type: 'share',
+        title: getDic('Msg_Note_Forward', '전달하기'),
+        onPress: async () => {
+          // 파일 토큰 유효검사 로직 추가해야함
+          let files = JSON.parse(messageData.fileInfos);
+          if (!Array.isArray(files) && files) {
+            files = Array(files);
+          }
+          files = files.map(item => item.token);
+          const result = await messageApi.checkFileTokenValidation({
+            token: files,
+            serviceType: 'CHAT',
+          });
+          if (result.status === 204) {
+            Alert.alert(getDic('Msg_FileExpired', '만료된 파일입니다.'));
+            return;
+          } else if (result.status === 403) {
+            Alert.alert(
+              getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
+            );
+            return;
+          } else {
             RootNavigation.navigate('Share', {
               messageData,
-              messageType: 'message',
+              messageType: 'file',
             });
-          } else {
-            // 파일 토큰 유효검사 로직 추가해야함
-            let files = JSON.parse(messageData.fileInfos);
-            if (!Array.isArray(files) && files) {
-              files = Array(files);
-            }
-            files = files.map(item => item.token);
-            const result = await messageApi.checkFileTokenValidation({
-              token: files,
-              serviceType: 'CHAT',
-            });
-            if (result.status === 204) {
-              Alert.alert(getDic('Msg_FileExpired', '만료된 파일입니다.'));
-              return;
-            } else if (result.status === 403) {
-              Alert.alert(
-                getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
-              );
-              return;
-            } else {
-              RootNavigation.navigate('Share', {
-                messageData,
-                messageType: 'file',
-              });
-            }
           }
         },
       });
