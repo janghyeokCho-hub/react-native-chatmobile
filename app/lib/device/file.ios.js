@@ -1,14 +1,12 @@
 import * as RNFS from 'react-native-fs';
 import { getServer, getDic } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
-import { sendViewerServer } from '@API/viewer';
-import { getConfig } from '@/config';
 import {
   makeFileName,
   isImageOrVideo,
   makeRandomFileName,
 } from '@/lib/fileUtil';
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import CameraRoll from '@react-native-community/cameraroll';
 import Share from 'react-native-share';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -171,30 +169,6 @@ export const downloadByTokenAlert = (item, progressCallback) => {
     },
     progressCallback,
   );
-};
-
-export const viewerByTokenAlert = item => {
-  const synapURL = getConfig('SynapDocViewServer', null);
-  if (synapURL != null) {
-    sendViewerServer('get', synapURL, item)
-      .then(response => {
-        let sendURL = response.config.url.indexOf('job');
-        sendURL = response.config.url.substring(0, sendURL);
-        Linking.openURL(`${sendURL}view/${response.data.key}`);
-      })
-      .catch(response => {
-        Alert.alert(
-          getDic('Eumtalk'),
-          getDic('Msg_FileExpired'),
-          [
-            {
-              text: getDic('Ok'),
-            },
-          ],
-          { cancelable: true },
-        );
-      });
-  }
 };
 
 export const downloadAndShare = item => {

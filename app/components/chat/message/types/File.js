@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Progress from '@C/common/buttons/Progress';
 import {
   getFileExtension,
   convertFileSize,
-  //resizeImage,
   fileTypeImage,
 } from '@/lib/fileUtil';
 import PrevImage from '@/components/chat/message/types/PrevImage';
@@ -13,13 +12,13 @@ import {
   View,
   Image,
   Text,
-  radio,
   StyleSheet,
 } from 'react-native';
 import { getDic, getConfig } from '@/config';
-import { openModal, changeModal, closeModal } from '@/modules/modal';
+import { openModal, changeModal } from '@/modules/modal';
 import * as file from '@/lib/device/file';
-import { useSelector, useDispatch } from 'react-redux';
+import { openSynapViewer } from '@/lib/device/viewer';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useTheme } from '@react-navigation/native';
 
@@ -29,6 +28,13 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
   const { sizes } = useTheme();
   const extension = getFileExtension(item.ext);
   const [progressData, setProgressData] = useState(null);
+  const currentRoom = useSelector(({ room }) => room.currentRoom);
+  const currentChannel = useSelector(({ channel }) => channel.currentChannel);
+  const roomID = useMemo(() => currentRoom?.roomID || currentChannel?.roomId, [
+    currentRoom,
+    currentChannel,
+  ]);
+
   let selectDownloadOrViewer = getConfig('FileAttachViewMode');
   if (selectDownloadOrViewer) {
     selectDownloadOrViewer = selectDownloadOrViewer[1];
@@ -51,7 +57,10 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
   };
 
   const handleRunViewer = () => {
-    file.viewerByTokenAlert(item);
+    openSynapViewer({
+      ...item,
+      roomID,
+    });
   };
 
   const showModalMenu = () => {
@@ -66,7 +75,10 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
     const viewer = {
       title: getDic('RunViewer'),
       onPress: () => {
-        file.viewerByTokenAlert(item);
+        openSynapViewer({
+          ...item,
+          roomID,
+        });
       },
     };
 

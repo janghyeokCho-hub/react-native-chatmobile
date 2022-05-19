@@ -1,8 +1,6 @@
 import * as RNFS from 'react-native-fs';
 import { getServer, getDic } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
-import { sendViewerServer } from '@API/viewer';
-import { getConfig } from '@/config';
 import {
   makeFileName,
   isImageOrVideo,
@@ -91,12 +89,7 @@ const fileDownload = async (optionObj, callback) => {
 };
 
 export const downloadByToken = async (
-  {
-    token,
-    fileName,
-    type = 'chat',
-    userId
-  },
+  { token, fileName, type = 'chat', userId },
   callback,
   progressCallback,
 ) => {
@@ -118,11 +111,13 @@ export const downloadByToken = async (
   } else {
     filePath = `${RNFS.ExternalStorageDirectoryPath}/${directoryPath}`;
   }
-  
+
   if (type === 'chat') {
-    downloadPath = `${getServer('MANAGE')}/download/${token}`
+    downloadPath = `${getServer('MANAGE')}/download/${token}`;
   } else if (type === 'note') {
-    downloadPath = `${getServer('MANAGE')}/na/download/CR/${userId}/${token}/NOTE`;
+    downloadPath = `${getServer(
+      'MANAGE',
+    )}/na/download/CR/${userId}/${token}/NOTE`;
   }
 
   let optionObj = {
@@ -239,42 +234,6 @@ export const downloadByTokenAlert = (item, progressCallback) => {
   );
 };
 
-export const viewerByTokenAlert = item => {
-  const synapURL = getConfig('SynapDocViewServer', null);
-  if (synapURL != null) {
-    sendViewerServer('get', synapURL, item)
-      .then(response => {
-        let sendURL = response.config.url.indexOf('job');
-        sendURL = response.config.url.substring(0, sendURL);
-        Linking.openURL(`${sendURL}view/${response.data.key}`);
-      })
-      .catch(err => {
-        let message;
-        if (!err) {
-          message = getDic('Msg_Error');
-        } else if (err.response.status === 500) {
-          // '파일이 만료되었거나 문서 변환 오류가 발생했습니다.;The file has already expired or failed to convert from the server'
-          message = getDic('Msg_SynapError', '파일이 만료되었거나 문서 변환 오류가 발생했습니다.');
-        } else if (err.response.status === 404) {
-          // '문서뷰어 서버를 찾을 수 없습니다. 관리자에게 문의해주세요.;Cannot find Viewer Server. Please contact the manager.'
-          message = getDic('Msg_SynapFailed', '문서뷰어 서버를 찾을 수 없습니다. 관리자에게 문의해주세요.');
-        } else {
-          message = "Synap Viewer failed to convert the file with errStatus " + err.response.status;
-        }
-        Alert.alert(
-          getDic('Eumtalk'),
-          message,
-          [
-            {
-              text: getDic('Ok'),
-            },
-          ],
-          { cancelable: true },
-        );
-      });
-  }
-};
-
 export const downloadAndShare = item => {
   downloadShareFile(item.token, item.fileName, data => {
     if (data.result !== 'SUCCESS') {
@@ -380,12 +339,12 @@ export const openFileViewer = async item => {
 export const creteContentFile = async (contents, fileName) => {
   const directoryPath = `${RNFS.ExternalStorageDirectoryPath}/Eumtalk/`;
   const path = directoryPath + fileName;
-  const directoryName =  [{ type: 'Plain', data: 'Eumtalk' }];
+  const directoryName = [{ type: 'Plain', data: 'Eumtalk' }];
 
   const isExist = await RNFS.exists(directoryPath);
-  
-  if(!isExist){
-    await RNFS.mkdir(directoryPath)
+
+  if (!isExist) {
+    await RNFS.mkdir(directoryPath);
   }
 
   const granted = await PermissionsAndroid.request(
@@ -393,22 +352,16 @@ export const creteContentFile = async (contents, fileName) => {
     null,
   );
   if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-    RNFS.writeFile(path, contents, 'utf8').then(()=>{
+    RNFS.writeFile(path, contents, 'utf8').then(() => {
       Alert.alert(
         null,
-        getSysMsgFormatStr(
-          getDic('Tmp_DownloadSuccess'),
-          directoryName,
-        ),
+        getSysMsgFormatStr(getDic('Tmp_DownloadSuccess'), directoryName),
         [
           {
             text: getDic('Open'),
             onPress: () => {
               RNFetchBlob.android
-                .actionViewIntent(
-                  path,
-                  getFileMimeByFileName(path),
-                )
+                .actionViewIntent(path, getFileMimeByFileName(path))
                 .catch(() => {
                   let ext = getFileExtensionByFileName(path);
                   let message = '';

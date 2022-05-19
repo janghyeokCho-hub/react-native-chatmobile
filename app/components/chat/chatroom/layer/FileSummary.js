@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getRoomFiles } from '@API/message';
-import { setMoveView } from '@/modules/message';
 import LoadingWrap from '@/components/common/LoadingWrap';
 import { format } from 'date-fns';
 import {
@@ -13,7 +12,8 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { downloadByToken, downloadByTokenAlert, viewerByTokenAlert } from '@/lib/device/file';
+import { downloadByToken, downloadByTokenAlert } from '@/lib/device/file';
+import { openSynapViewer } from '@/lib/device/viewer';
 import ToggleButton from '@/components/common/buttons/ToggleButton';
 import {
   convertFileSize,
@@ -32,7 +32,6 @@ import { useTheme } from '@react-navigation/native';
 const checkBlackImg = require('@C/assets/ico_check_black.png');
 
 const FileList = ({ files, onSelect, selectMode, onMoveChat }) => {
-  console.log('selectMode',selectMode)
   return (
     <View style={styles.fileList}>
       {files &&
@@ -72,22 +71,37 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
   };
 
   const handleViewer = () => {
-    viewerByTokenAlert({ token: file.FileID, fileName: file.FileName});
-  }
+    openSynapViewer({
+      token: file.FileID,
+      fileName: file.FileName,
+      ext: file.Extension,
+      roomID: file.RoomID,
+    });
+  };
 
   const handlePress = () => {
     if (selectMode) {
       handleCheck();
-    } else if(selectDownloadOrViewer && selectDownloadOrViewer.Download === true){
+    } else if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Download === true
+    ) {
       handleMenu();
-    } else if(selectDownloadOrViewer && selectDownloadOrViewer.Viewer === true){
+    } else if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Viewer === true
+    ) {
       handleViewer();
     }
   };
 
   const handleMoreOption = () => {
     let buttons = [];
-    if(selectDownloadOrViewer && selectDownloadOrViewer.Download === true && selectDownloadOrViewer.Viewer === true){
+    if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Download === true &&
+      selectDownloadOrViewer.Viewer === true
+    ) {
       buttons = [
         {
           code: 'showContent',
@@ -111,7 +125,10 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
           },
         },
       ];
-    }else if(selectDownloadOrViewer && selectDownloadOrViewer.Download === true){
+    } else if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Download === true
+    ) {
       buttons = [
         {
           code: 'showContent',
@@ -127,8 +144,11 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
             handleMenu();
           },
         },
-      ]
-    }else if(selectDownloadOrViewer && selectDownloadOrViewer.Viewer === true){
+      ];
+    } else if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Viewer === true
+    ) {
       buttons = [
         {
           code: 'showContent',
@@ -144,8 +164,12 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
             handleViewer();
           },
         },
-      ]
-    }else if(selectDownloadOrViewer && selectDownloadOrViewer.Download === false && selectDownloadOrViewer.Viewer === false){
+      ];
+    } else if (
+      selectDownloadOrViewer &&
+      selectDownloadOrViewer.Download === false &&
+      selectDownloadOrViewer.Viewer === false
+    ) {
       buttons = [
         {
           code: 'showContent',
@@ -154,7 +178,7 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
             onMoveChat(file.RoomID, file.MessageID);
           },
         },
-      ]
+      ];
     }
 
     dispatch(
@@ -272,11 +296,13 @@ const FileSummary = ({ route, navigation }) => {
       // 이전 상태가 선택모드였다면 변경시 cnt도 0으로 초기화
 
       if (selectItems.length > 0) {
-
         // [0] PC [1] MOBILE
         const downloadOption = getConfig('FileAttachViewMode') || [];
         // 다운로드가 금지되어 있는 경우
-        if (downloadOption.length !== 0 && downloadOption[1].Download === false) {
+        if (
+          downloadOption.length !== 0 &&
+          downloadOption[1].Download === false
+        ) {
           Alert.alert(
             null,
             getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
@@ -293,10 +319,13 @@ const FileSummary = ({ route, navigation }) => {
           selectItems.forEach(item => {
             arrDownloadList.push(
               new Promise((resolove, reject) => {
-                downloadByToken({ token: item.token, fileName: item.name }, data => {
-                  downloadMsgObject = data;
-                  resolove();
-                });
+                downloadByToken(
+                  { token: item.token, fileName: item.name },
+                  data => {
+                    downloadMsgObject = data;
+                    resolove();
+                  },
+                );
               }),
             );
           });
@@ -358,7 +387,6 @@ const FileSummary = ({ route, navigation }) => {
   useEffect(() => {
     // fileData 호출
     // initialData
-
     if (networkState) {
       setLoading(true);
       getRoomFiles({
@@ -486,14 +514,24 @@ const FileSummary = ({ route, navigation }) => {
           {networkState && (
             <View style={styles.okbtnView}>
               <TouchableOpacity onPress={handleSelect}>
-                <View style={{...styles.topBtn}}>
+                <View style={{ ...styles.topBtn }}>
                   {!select ? (
-                    <View style={{width: '100%',height:'100%',flexDirection:'row',justifyContent:'center',alignItems:'center',marginRight:20}}>
-                      <Text>
-                      {getDic('chooseFile')}
-                    </Text>
-                  <Image style={{marginLeft:10}} source={checkBlackImg} />
-                  </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 20,
+                      }}
+                    >
+                      <Text>{getDic('chooseFile')}</Text>
+                      <Image
+                        style={{ marginLeft: 10 }}
+                        source={checkBlackImg}
+                      />
+                    </View>
                   ) : (
                     <>
                       <Text

@@ -17,6 +17,7 @@ import {
 } from '@/lib/device/common';
 import { getDic, getConfig } from '@/config';
 import { downloadByTokenAlert, downloadAndShare } from '@/lib/device/file';
+import { openSynapViewer } from '@/lib/device/viewer';
 
 const loadingImg = require('@C/assets/loading.gif');
 const cancelBtnImg = require('@C/assets/ico_message_delete.png');
@@ -31,26 +32,34 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
   const [allSize, setAllSize] = useState(0);
   const [loading, setLoading] = useState(false);
   const selectDownloadOrViewer = useMemo(
-    // 다운로드 금지 설정이 없는 경우 기본값: 다운로드 허용
-    () => getConfig('FileAttachViewMode')?.[1] || { Download: true },
+    // 다운로드 금지 설정이 없는 경우 기본값: 다운로드 허용, 뷰어 미설정
+    () =>
+      getConfig('FileAttachViewMode')?.[1] || {
+        Download: true,
+        Viewer: false,
+      },
     [],
   );
 
   useEffect(() => {
-    if (type == 'ROOM' && show) {
+    if (type === 'ROOM' && show) {
       getFileInfo({
         fileId: image,
-      }).then(({ data }) => {
-        const fileInfo = data.result;
-        setRoomID(fileInfo.roomID);
-        getRoomImages({
-          roomID: fileInfo.roomID,
-          token: image,
-          type: 'C',
-          cnt: _imagePreviewLoadSize,
-        }).then(({ data }) => {
-          let realIndex = data.images.findIndex(item => item.FileID == image);
-
+      })
+        .then(({ data }) => {
+          const fileInfo = data.result;
+          setRoomID(fileInfo.roomID);
+          return getRoomImages({
+            roomID: fileInfo.roomID,
+            token: image,
+            type: 'C',
+            cnt: _imagePreviewLoadSize,
+          });
+        })
+        .then(({ data }) => {
+          const realIndex = data.images.findIndex(
+            item => item.FileID === image,
+          );
           const { rowNum, maxCnt } = data.cntInfo;
           const sourceImages = data.images.map(item => {
             return {
@@ -64,8 +73,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
           setVirtualIndex(rowNum);
           setAllSize(maxCnt);
         });
-      });
-    } else if (type == 'NORMAL' && show) {
+    } else if (type === 'NORMAL' && show) {
       setSources([
         {
           url: image,
@@ -142,6 +150,16 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
     });
   };
 
+  const openSynapViewerCurrent = () => {
+    const findItem = sources[index]._item;
+    openSynapViewer({
+      token: findItem?.FileID,
+      fileName: findItem?.FileName,
+      ext: findItem?.Extension,
+      roomID: findItem.RoomID,
+    });
+  };
+
   return (
     <>
       {sources && show && (
@@ -156,6 +174,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
               >
                 <Image
                   source={cancelBtnImg}
+                  useNativeDriver={true}
                   style={{ width: 13, height: 13 }}
                 />
               </TouchableOpacity>
@@ -211,6 +230,18 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
                       </TouchableOpacity>
                     </>
                   )}
+                  {selectDownloadOrViewer?.Viewer === true && (
+                    <TouchableOpacity
+                      style={styles.bottomBtn}
+                      onPress={e => {
+                        openSynapViewerCurrent();
+                      }}
+                    >
+                      <Text style={styles.bottomBtnText}>
+                        {getDic('RunViewer')}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                   {onMove && (
                     <TouchableOpacity
                       style={styles.bottomBtn}
@@ -230,6 +261,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
               <View style={styles.loadingContainer}>
                 <Image
                   source={loadingImg}
+                  useNativeDriver={true}
                   style={{ width: 150, height: 150 }}
                 />
               </View>
