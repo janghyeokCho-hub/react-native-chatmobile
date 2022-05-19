@@ -78,7 +78,6 @@ const ChannelNoticeView = ({
       const { message, mentionInfo } = convertEumTalkProtocol(context, {
         messageType: 'channel',
       });
-
       while ((match = pattern.exec(message)) !== null) {
         if (match.index > 0 && match.index > beforeLastIndex) {
           const txt = message.substring(beforeLastIndex, match.index);
@@ -224,7 +223,10 @@ const ChannelNoticeView = ({
               {flip ? (
                 <Image source={upBtnIcon} style={{ width: 24, height: 24 }} />
               ) : (
-                <Image source={downBtnIcon} style={{ width: 24, height: 24 }} />
+                <Image
+                  source={downBtnIcon}
+                  style={{ width: 24, height: 24 }}
+                />
               )}
             </TouchableOpacity>
           </View>
