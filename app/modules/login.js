@@ -52,6 +52,8 @@ const [
 const CHANGE_SOCKETCONNECT = 'login/CHANGE_SOCKETCONNECT';
 const SET_CHINESEWALL = 'login/SET_CHINESEWALL';
 
+const PRE_LOGIN_SUCCESS = 'login/PRE_LOGIN_SUCCESS';
+
 export const loginRequest = createAction(LOGIN_REQUEST);
 export const extLoginRequest = createAction(EXT_LOGIN_REQUEST);
 export const loginInit = createAction(LOGIN_INIT);
@@ -72,6 +74,8 @@ export const changeMyInfo = createAction(CHANGE_MYINFO);
 
 export const sync = createAction(SYNC);
 export const setChineseWall = createAction(SET_CHINESEWALL);
+
+export const preLoginSuccess = createAction(PRE_LOGIN_SUCCESS);
 
 const loginRequestSaga = saga.createLoginRequestSaga(LOGIN_REQUEST);
 const extLoginRequestSaga = saga.createExtLoginRequestSaga(
@@ -99,6 +103,7 @@ export function* loginSaga() {
   yield takeLatest(SYNC_TOKEN_REQUEST, syncTokenRequestSaga);
   yield takeLatest(SYNC_TOKEN_OFFLINE, syncTokenOfflineSaga);
   yield takeLatest(SYNC, syncSaga);
+  yield takeLatest(PRE_LOGIN_SUCCESS, saga.preLoginSuccessSaga);
 }
 
 const initialState = {

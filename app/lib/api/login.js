@@ -120,3 +120,7 @@ export const saveLocalStorage = async ({ token, accessid }) => {
   await AsyncStorage.setItem('covi_user_access_token', token);
   await AsyncStorage.setItem('covi_user_access_id', accessid);
 };
+
+export const getSystemConfigSaaS = params => {
+  return managesvr('post', '/na/saas/config', params);
+};

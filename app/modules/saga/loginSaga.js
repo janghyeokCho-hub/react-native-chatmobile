@@ -1,10 +1,12 @@
 import { call, put, fork } from 'redux-saga/effects';
+import AsyncStorage from '@react-native-community/async-storage';
 import { startLoading, finishLoading } from '@/modules/loading';
 import {
   logout,
   loginTokenAuth,
   authCheckComplate,
   sync,
+  preLoginSuccess,
   setChineseWall,
 } from '@/modules/login';
 import * as loginApi from '@API/login';
@@ -20,6 +22,7 @@ import * as dbAction from '@/lib/appData/action';
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import { Alert } from 'react-native';
 import { exceptionHandler } from './createRequestSaga';
+import { getConfig, initConfig } from '@/config';
 // ChineseWall
 import { getChineseWall } from '@/lib/api/orgchart';
 
@@ -33,19 +36,19 @@ export function createLoginRequestSaga(loginType, syncType) {
         yield put(startLoading(loginType));
         const response = yield call(loginApi.loginRequest, action.payload);
         const resData = response.data;
-        if (resData.status == 'SUCCESS') {
+        if (resData.status === 'SUCCESS') {
           if (resData.result && resData.token) {
-            yield console.log('loginSaga Start !!');
             // localStorage에 token 세팅
             yield loginApi.saveLocalStorage({
               token: resData.token,
               accessid: resData.result.id,
             });
-
             LoginInfo.setData(resData.result.id, resData.token, resData.result);
 
+            yield put(preLoginSuccess(resData.result));
+
             // login 후처리 시작
-            const syncResult = yield call(dbAction.initSyncAppData, {
+            yield call(dbAction.initSyncAppData, {
               token: resData.token,
               accessid: resData.result.id,
               id: resData.result.id,
@@ -156,7 +159,7 @@ export function createExtLoginRequestSaga(loginType, syncType) {
         const response = yield call(loginApi.extLoginRequest, action.payload);
 
         const resData = response.data;
-        if (resData.status == 'SUCCESS') {
+        if (resData.status === 'SUCCESS') {
           if (resData.result && resData.token) {
             // localStorage에 token 세팅
             yield loginApi.saveLocalStorage({
@@ -165,6 +168,8 @@ export function createExtLoginRequestSaga(loginType, syncType) {
             });
 
             LoginInfo.setData(resData.result.id, resData.token, resData.result);
+
+            yield put(preLoginSuccess(resData.result));
 
             // login 후처리 시작
             const syncResult = yield call(dbAction.initSyncAppData, {
@@ -342,12 +347,14 @@ export function createSyncTokenRequestSaga(type) {
       try {
         const result = action.payload.result;
 
-        if (result.status == 'SUCCESS') {
+        if (result.status === 'SUCCESS') {
           const authData = result.userInfo;
+
+          yield put(preLoginSuccess(authData));
 
           // login 후처리 시작
           LoginInfo.setData(authData.id, result.token, authData);
-          const syncResult = yield call(dbAction.initSyncAppData, {
+          yield call(dbAction.initSyncAppData, {
             token: result.token,
             id: authData.id,
             createDate: result.createDate,
@@ -432,7 +439,7 @@ export function createSyncTokenOfflineSaga(type) {
       const id = action.payload.id;
       const result = yield call(dbAction.getLoginInfo, id);
 
-      if (result.status == 'SUCCESS') {
+      if (result.status === 'SUCCESS') {
         const authData = result.userInfo;
 
         // login 후처리 시작
@@ -484,4 +491,29 @@ export function createSyncTokenOfflineSaga(type) {
       });
     }
   };
+}
+
+export function* preLoginSuccessSaga(action) {
+  const isSaaSClient = getConfig('IsSaaSClient', 'N') === 'Y';
+  /**
+   * 2022.05.23
+   * SaaS버전 클라이언트인 경우 유저의 CompanyCode를 사용해서 사별 시스템설정 가져오기
+   */
+  if (isSaaSClient && action?.payload?.CompanyCode) {
+    console.log('PRE_LOGIN_SUCCESS SAGA ::', isSaaSClient, action.payload);
+    try {
+      const response = yield call(loginApi.getSystemConfigSaaS, {
+        companyCode: action.payload.CompanyCode,
+      });
+      // localStorage의 서버설정 값을 사별 설정값으로 업데이트
+      if (response?.data?.result?.config) {
+        const hostInfo = yield call(AsyncStorage.getItem, 'EHINF');
+        const config = response.data.result;
+        AsyncStorage.setItem('ESETINF', JSON.stringify(config));
+        yield call(initConfig, hostInfo, config);
+      }
+    } catch (err) {
+      console.log('preLoginSuccessSaga occured an error: ', err);
+    }
+  }
 }
