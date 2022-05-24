@@ -78,7 +78,11 @@ export const handleNewMessage = (dispatch, userInfo) => {
     const json_data = JSON.parse(data);
     json_data.senderInfo = JSON.parse(json_data.senderInfo);
 
-    if (json_data.sender == userInfo.id) json_data.isMine = 'Y';
+    if (json_data.sender == userInfo.id) {
+      json_data.isMine = 'Y';
+    } else {
+      json_data.isMine = 'N';
+    }
     json_data.isNotice = false;
 
     dispatch(receiveMessage(json_data));
@@ -94,6 +98,11 @@ export const handleNewNoteMessage = (setNoteList, navigationRef) => {
       const receivedInfo = {
         // noteId string to number
         noteId: +json_data.noteId,
+        senderInfo: {
+          sender: json_data.userId,
+          companyCode: json_data.companyCode,
+          deptCode: json_data.deptCode,
+        },
         senderUserId: json_data.userId,
         senderDisplayName: json_data.multiDisplayName,
         senderJobPositionName: json_data.multiJobPositionName,
@@ -313,7 +322,11 @@ export const handleNewChannelMessage = (dispatch, userInfo) => {
     const json_data = JSON.parse(data);
     json_data.senderInfo = JSON.parse(json_data.senderInfo);
 
-    if (json_data.sender == userInfo.id) json_data.isMine = 'Y';
+    if (json_data.sender == userInfo.id) {
+      json_data.isMine = 'Y';
+    } else {
+      json_data.isMine = 'N';
+    }
 
     json_data.isNotice = false;
 

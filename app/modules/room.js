@@ -306,6 +306,9 @@ const room = handleActions(
         const lastMessageData = {
           Message: action.payload.context,
           File: action.payload.fileInfos,
+          sender: action.payload.sender || '',
+          companyCode: action.payload.senderInfo?.companyCode || '',
+          deptCode: action.payload.senderInfo?.deptCode || '',
         };
 
         if (room) {

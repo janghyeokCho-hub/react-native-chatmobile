@@ -10,8 +10,12 @@ import SearchIndexBox from '@C/chat/chatroom/search/SearchIndexBox';
 import { getDic } from '@/config';
 import * as messageApi from '@/lib/api/message';
 import { setSearchKeyword } from '@/modules/channel';
+import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const SearchView = ({ onSearchBox, navigation }) => {
+  const myInfo = useSelector(({ login }) => login.userInfo);
+  const { chineseWall } = useSelector(({ login }) => login.chineseWall);
   const { roomID, currentChannel } = useSelector(({ channel }) => ({
     roomID: channel.currentChannel.roomId,
     currentChannel: channel.currentChannel,
@@ -22,8 +26,33 @@ const SearchView = ({ onSearchBox, navigation }) => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchKeywordText, setSearchKeywordText] = useState('');
+  const [chineseWallState, setChineseWallState] = useState([]);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const getChineseWallList = async () => {
+      const { result, status } = await getChineseWall({
+        userId: myInfo?.id,
+        myInfo,
+      });
+      if (status === 'SUCCESS') {
+        setChineseWallState(result);
+      } else {
+        setChineseWallState([]);
+      }
+    };
+
+    if (chineseWall?.length) {
+      setChineseWallState(chineseWall);
+    } else {
+      getChineseWallList();
+    }
+
+    return () => {
+      setChineseWallState([]);
+    };
+  }, [myInfo, chineseWall]);
 
   const handleSearchBox = useCallback(() => {
     setMoveData(null);
@@ -48,28 +77,48 @@ const SearchView = ({ onSearchBox, navigation }) => {
     }
   }, [currentChannel]);
 
-  const setMoveMessagesData = useCallback(data => {
-    if (data.status == 'SUCCESS') {
-      if (data.search.length > 0 && data.firstPage.length > 0) {
-        // reverse
-        /*
-        const findId = data.firstPage.reverse().findIndex(
-          item => item.messageID === data.search[0],
-        );
-          */
+  const setMoveMessagesData = useCallback(
+    data => {
+      if (data.status === 'SUCCESS') {
+        // 차이니즈월 적용
+        let { firstPage, search } = data;
+        if (chineseWallState?.length) {
+          const blockList = firstPage?.map(item => {
+            const senderInfo = isJSONStr(item.senderInfo)
+              ? JSON.parse(item.senderInfo)
+              : item.senderInfo;
+            const targetInfo = {
+              ...senderInfo,
+              id: item.sender,
+            };
 
-        const findId = data.search[0];
-        setMoveData({
-          firstPage: data.firstPage,
-          moveId: findId,
-        });
-        setSearchResult(data.search);
+            const { blockChat } = isBlockCheck({
+              targetInfo,
+              chineseWall: chineseWallState,
+            });
+            return blockChat && item.messageID;
+          });
+          search = search.filter(item => !blockList.includes(item));
+        }
+        if (search?.length && firstPage?.length) {
+          setMoveData({
+            firstPage: firstPage,
+            moveId: search[0],
+          });
+          setSearchResult(search);
+        } else {
+          Alert.alert(getDic('Eumtalk'), getDic('Msg_noSearchResult'), {
+            cancelable: true,
+          });
+          setMoveData(null);
+        }
+      } else {
+        setSearchText('');
       }
-    } else {
-      setSearchText('');
-    }
-    setLoading(false);
-  }, []);
+      setLoading(false);
+    },
+    [chineseWall],
+  );
 
   const handleSearch = useCallback(
     searchText => {
@@ -112,7 +161,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
         setLoading(false);
       }
     },
-    [roomID, searchText],
+    [roomID, searchText, chineseWallState],
   );
 
   const handleIndex = useCallback(
@@ -185,6 +234,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
           markingText={searchText}
           roomID={roomID}
           navigation={navigation}
+          chineseWall={chineseWallState}
         />
 
         <SearchIndexBox length={searchResult.length} onChange={handleIndex} />

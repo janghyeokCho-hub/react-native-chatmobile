@@ -24,10 +24,14 @@ import {
 } from 'react-native';
 import MessageSync from '../controls/MessageSync';
 import * as dbAction from '@/lib/appData/action';
+import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
 const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
+  const userInfo = useSelector(({ login }) => login.userInfo);
+  const userChineseWall = useSelector(({ login }) => login.chineseWall);
   const { tempMessage, messages, currentRoom } = useSelector(
     ({ message, room }) => ({
       tempMessage: message.tempMessage,
@@ -37,15 +41,37 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   );
 
   let _listener = null;
-
   const [messageData, setMessageData] = useState(null);
   const [bottomView, setBottomView] = useState(false);
   const [refresh, setRefresh] = useState(false);
-
   const [useScroll, setUseScroll] = useState(false);
   const [topEnd, setTopEnd] = useState(false);
-
+  const [chineseWallState, setChineseWallState] = useState([]);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const getChineseWallList = async () => {
+      const { result, status } = await getChineseWall({
+        userId: userInfo.id,
+        myInfo: userInfo,
+      });
+      if (status === 'SUCCESS') {
+        setChineseWallState(result);
+      } else {
+        setChineseWallState([]);
+      }
+    };
+
+    if (userChineseWall?.length) {
+      setChineseWallState(userChineseWall);
+    } else {
+      getChineseWallList();
+    }
+
+    return () => {
+      setChineseWallState([]);
+    };
+  }, [userChineseWall, userInfo]);
 
   useEffect(() => {
     const messageData = [
@@ -177,7 +203,22 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
 
   const drawMessage = useCallback(
     (item, index) => {
+      let isBlock = false;
       const message = item;
+      if (message?.isMine === 'N' && chineseWallState.length) {
+        const senderInfo = isJSONStr(message?.senderInfo)
+          ? JSON.parse(message.senderInfo)
+          : message.senderInfo;
+        const { blockChat, blockFile } = isBlockCheck({
+          targetInfo: {
+            ...senderInfo,
+            id: message.sender,
+          },
+          chineseWall: chineseWallState,
+        });
+        const isFile = !!message.fileInfos;
+        isBlock = isFile ? blockFile : blockChat;
+      }
       const beforeMessage = index > 0 ? messageData[index - 1] : null;
       const nextMessage =
         index < messageData.length - 1 ? messageData[index + 1] : null;
@@ -253,6 +294,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
               isMine={message.isMine === 'Y'}
               nameBox={nameBox}
               timeBox={timeBox}
+              isBlock={isBlock}
             />
           );
         }

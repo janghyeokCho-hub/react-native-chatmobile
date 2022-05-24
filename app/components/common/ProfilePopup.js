@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { format } from 'date-fns';
 import { CommonActions } from '@react-navigation/native';
@@ -24,11 +25,13 @@ import { linkCall } from '@/lib/device/common';
 import { getJobInfo, getDictionary } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import { makePhotoPath } from '@/lib/util/paramUtil';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
 const ProfilePopup = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const viewType = useSelector(({ room }) => room.viewType);
   const rooms = useSelector(({ room }) => room.rooms);
   const selectId = useSelector(({ room }) => room.selectId);
@@ -72,15 +75,20 @@ const ProfilePopup = ({ route, navigation }) => {
   }, []);
 
   const opneChatRoomView = () => {
-    openChatRoomView(
-      dispatch,
-      viewType,
-      rooms,
-      selectId,
-      targetInfo,
-      myInfo,
-      navigation,
-    );
+    const { blockChat, blockFile } = isBlockCheck({ targetInfo, chineseWall });
+    if (blockChat && blockFile) {
+      Alert.alert(null, getDic('Msg_BlockTarget', '차단된 대상입니다.'));
+    } else {
+      openChatRoomView(
+        dispatch,
+        viewType,
+        rooms,
+        selectId,
+        targetInfo,
+        myInfo,
+        navigation,
+      );
+    }
   };
 
   const handlePhotoPreview = () => {

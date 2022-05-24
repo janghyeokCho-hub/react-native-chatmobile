@@ -30,7 +30,13 @@ const getRoomSettings = (room = {}) => {
   return setting;
 };
 
-const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
+const RoomItems = ({
+  rooms,
+  loading,
+  onRoomChange,
+  navigation,
+  chineseWall = [],
+}) => {
   const { id, selectId } = useSelector(({ login, room }) => ({
     id: login.id,
     selectId: room.selectId,
@@ -249,6 +255,7 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
                   showModalMenu={showModalMenu}
                   getRoomSettings={getRoomSettings}
                   isEmptyObj={isEmptyObj}
+                  chineseWall={chineseWall}
                 />
               );
             }}

@@ -1255,7 +1255,16 @@ export const getRoomInfo = async param => {
               .query(
                 'SELECT m.messageId AS messageID, m.context, m.sender, m.sendDate, m.roomId AS roomID, m.roomType, m.receiver, m.messageType, m.unreadCnt, m.readYN, m.isMine, m.tempId, m.fileInfos,' +
                   (room.roomType == 'A'
-                    ? `(SELECT '{"name":"' || name || '","PN":"' || PN || '","LN":"' || LN || '","TN":"' || TN || '","photoPath":"' || ifnull(photoPath, '') || '","presence":"' || ifnull(presence, '') || '","isMobile":"' || isMobile || '"}' from users where id = m.sender) as senderInfo`
+                    ? `(SELECT 
+                      '{"name":"' || name || '"
+                      ,"PN":"' || PN || '"
+                      ,"LN":"' || LN || '"
+                      ,"TN":"' || TN || '"
+                      ,"photoPath":"' || ifnull(photoPath, '') || '"
+                      ,"presence":"' || ifnull(presence, '') || '"
+                      ,"isMobile":"' || isMobile || '"}' 
+                      FROM users 
+                      WHERE id = m.sender) AS senderInfo`
                     : 'm.senderInfo') +
                   ', m.linkInfo ' +
                   'FROM message as m ' +
@@ -1365,7 +1374,16 @@ const getOtherMessages = async param => {
             'SELECT * FROM (' +
             ' SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos,' +
             (param.isNotice
-              ? `(select '{"name":"' || name || '","PN":"' || PN || '","LN":"' || LN || '","TN":"' || TN || '","photoPath":"' || ifnull(photoPath, '') || '","presence":"' || ifnull(presence, '') || '","isMobile":"' || isMobile || '"}' from users where id = m.sender) as senderInfo`
+              ? `(SELECT 
+                '{"name":"' || name || '"
+                ,"PN":"' || PN || '"
+                ,"LN":"' || LN || '"
+                ,"TN":"' || TN || '"
+                ,"photoPath":"' || ifnull(photoPath, '') || '"
+                ,"presence":"' || ifnull(presence, '') || '"
+                ,"isMobile":"' || isMobile || '"}' 
+                FROM users 
+                WHERE id = m.sender) AS senderInfo`
               : 'senderInfo') +
             ', linkInfo ' +
             ' FROM message as m ' +

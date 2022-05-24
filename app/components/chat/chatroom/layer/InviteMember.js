@@ -22,6 +22,7 @@ import { getAllUserWithGroupList } from '@/lib/api/room';
 import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const InviteMember = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
@@ -34,6 +35,7 @@ const InviteMember = ({ route, navigation }) => {
     callBack,
   } = route.params;
 
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { viewType, rooms, selectId, myInfo } = useSelector(
     ({ room, login }) => ({
       viewType: room.viewType,
@@ -265,15 +267,24 @@ const InviteMember = ({ route, navigation }) => {
 
       moveToRoom(navigation, 'MakeRoom', { makeData: makeData });
     } else if (isNewRoom && inviteMembers.length == 2) {
-      openChatRoomView(
-        dispatch,
-        viewType,
-        rooms,
-        selectId,
-        inviteMembers.find(item => item.id != myInfo.id),
-        myInfo,
-        navigation,
-      );
+      const targetInfo = inviteMembers.find(item => item.id != myInfo.id);
+      const { blockChat, blockFile } = isBlockCheck({
+        targetInfo,
+        chineseWall,
+      });
+      if (blockChat && blockFile) {
+        Alert.alert(null, getDic('Msg_BlockTarget', '차단된 대상입니다.'));
+      } else {
+        openChatRoomView(
+          dispatch,
+          viewType,
+          rooms,
+          selectId,
+          targetInfo,
+          myInfo,
+          navigation,
+        );
+      }
     } else {
       const params = {
         roomID: roomId,

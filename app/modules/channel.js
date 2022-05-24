@@ -275,7 +275,11 @@ const channelActionHandlers = handleActions(
               senderInfo.Name + ' ' + senderInfo.JobPosition;
             draft.currentChannel.notice = noticeMessage;
 
-            if (noticeMessage.isMine == null) noticeMessage.isMine = 'Y';
+            if (noticeMessage.isMine == null) {
+              noticeMessage.isMine = 'Y';
+            } else {
+              noticeMessage.isMine = 'N';
+            }
 
             const param = {
               noticeFlip: false,
@@ -429,12 +433,15 @@ const channelActionHandlers = handleActions(
               ? getDic('NewNotice')
               : action.payload.context,
           File: action.payload.fileInfos,
+          sender: action.payload.sender || '',
+          companyCode: action.payload.senderInfo?.companyCode || '',
+          deptCode: action.payload.senderInfo?.deptCode || '',
         };
 
         if (channel) {
           channel.lastMessage = lastMessageData;
           channel.lastMessageDate = action.payload.sendDate;
-          
+
           if (action.payload?.messageType) {
             channel.lastMessageType = action.payload.messageType;
           }

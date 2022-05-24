@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { getRoomImages, getFileInfo } from '@/lib/api/message';
 import { reqImage } from '@API/api';
@@ -17,7 +18,8 @@ import {
 } from '@/lib/device/common';
 import { getDic, getConfig } from '@/config';
 import { downloadByTokenAlert, downloadAndShare } from '@/lib/device/file';
-import { openSynapViewer } from '@/lib/device/viewer';
+import { isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const loadingImg = require('@C/assets/loading.gif');
 const cancelBtnImg = require('@C/assets/ico_message_delete.png');
@@ -25,6 +27,8 @@ const cancelBtnImg = require('@C/assets/ico_message_delete.png');
 const _imagePreviewLoadSize = 15;
 
 const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
+
   const [roomID, setRoomID] = useState(-1);
   const [sources, setSources] = useState(null);
   const [index, setIndex] = useState(0);
@@ -57,11 +61,40 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
           });
         })
         .then(({ data }) => {
-          const realIndex = data.images.findIndex(
-            item => item.FileID === image,
-          );
-          const { rowNum, maxCnt } = data.cntInfo;
-          const sourceImages = data.images.map(item => {
+          const results = data.images.filter(item => {
+            let isBlock = false;
+            if (item?.FileID && chineseWall?.length) {
+              const senderInfo = isJSONStr(item.SenderInfo)
+                ? JSON.parse(item.SenderInfo)
+                : item.SenderInfo;
+              const { blockFile } = isBlockCheck({
+                targetInfo: {
+                  ...senderInfo,
+                  id: item.sender || senderInfo.sender,
+                },
+                chineseWall,
+              });
+              isBlock = blockFile;
+            }
+            return !isBlock && item;
+          });
+
+          // 중간 차단된 메시지인 파일로부터 rowNum 이 꼬이기 때문에 다시 지정
+          let rowNum = 1;
+          const rNum = data.cntInfo.rowNum;
+          const images = results.map((item, i) => {
+            const newRNUM = i + 1;
+            if (item.RNUM == rNum) {
+              rowNum = newRNUM;
+            }
+            item.RNUM = newRNUM;
+            return item;
+          });
+          let realIndex = images.findIndex(item => item.FileID == image);
+
+          const maxCnt = images.length;
+
+          const sourceImages = images.map(item => {
             return {
               url: reqImage(item.FileID),
               _item: item,
@@ -83,7 +116,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
       setVirtualIndex(1);
       setAllSize(1);
     }
-  }, [show]);
+  }, [show, chineseWall]);
 
   const handleChange = changeIdx => {
     let derection = '';

@@ -33,6 +33,7 @@ const ChannelItems = ({
   onRoomChange,
   navigation,
   onChannelJoin,
+  chineseWall = [],
 }) => {
   const { id, selectId } = useSelector(({ login, channel }) => ({
     id: login.id,
@@ -213,6 +214,7 @@ const ChannelItems = ({
                     showModalMenu={showModalMenu}
                     getRoomSettings={getRoomSettings}
                     isEmptyObj={isEmptyObj}
+                    chineseWall={chineseWall}
                   />
                 );
               }

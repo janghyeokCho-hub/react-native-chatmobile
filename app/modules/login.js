@@ -50,6 +50,7 @@ const [
 ] = createRequestActionTypes('login/SYNC_TOKEN_OFFLINE');
 
 const CHANGE_SOCKETCONNECT = 'login/CHANGE_SOCKETCONNECT';
+const SET_CHINESEWALL = 'login/SET_CHINESEWALL';
 
 export const loginRequest = createAction(LOGIN_REQUEST);
 export const extLoginRequest = createAction(EXT_LOGIN_REQUEST);
@@ -70,6 +71,7 @@ export const changeMyPhotoPath = createAction(CHANGE_MYPHOTOPATH);
 export const changeMyInfo = createAction(CHANGE_MYINFO);
 
 export const sync = createAction(SYNC);
+export const setChineseWall = createAction(SET_CHINESEWALL);
 
 const loginRequestSaga = saga.createLoginRequestSaga(LOGIN_REQUEST);
 const extLoginRequestSaga = saga.createExtLoginRequestSaga(
@@ -149,7 +151,7 @@ const login = handleActions(
       token: initialState.token,
     }),
     [EXT_LOGIN_REQUEST_FAILURE]: (state, action) => ({
-        ...state,
+      ...state,
       authFail: true,
       ...(action.errMessage && { errMessage: action.errMessage }),
       ...(action.errStatus && { errStatus: action.errStatus }),
@@ -212,6 +214,11 @@ const login = handleActions(
       ...state,
       authCheck: true,
     }),
+    [SET_CHINESEWALL]: (state, action) => {
+      return produce(state, draft => {
+        draft.chineseWall = action.payload;
+      });
+    },
   },
   initialState,
 );

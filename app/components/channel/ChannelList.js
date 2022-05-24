@@ -19,19 +19,46 @@ import { getDic } from '@/config';
 import * as channelApi from '@/lib/api/channel';
 import { moveToChannelRoom } from '@/lib/channelUtil';
 import { getConfig } from '@/config';
+import { getChineseWall } from '@/lib/api/orgchart';
 
 const ChannelList = ({ navigation }) => {
   const { sizes } = useTheme();
+  const myInfo = useSelector(({ login }) => login.userInfo);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const channelList = useSelector(({ channel }) => channel.channels);
   const loading = useSelector(
     ({ loading: _loading }) => _loading['room/GET_ROOMS'],
   );
   const networkState = useSelector(({ app }) => app.networkState);
-  const myInfo = useSelector(({ login }) => login.userInfo);
 
   const [searchText, setSearchText] = useState('');
   const [listMode, setListMode] = useState('N'); //Normal, Search
   const [searchList, setSearchList] = useState([]);
+  const [chineseWallState, setChineseWallState] = useState([]);
+
+  useEffect(() => {
+    const getChineseWallList = async () => {
+      const { result, status } = await getChineseWall({
+        userId: myInfo?.id,
+        myInfo,
+      });
+      if (status === 'SUCCESS') {
+        setChineseWallState(result);
+      } else {
+        setChineseWallState([]);
+      }
+    };
+
+    if (chineseWall?.length) {
+      setChineseWallState(chineseWall);
+    } else {
+      getChineseWallList();
+    }
+
+    return () => {
+      setChineseWallState([]);
+    };
+  }, [myInfo, chineseWall]);
 
   const dispatch = useDispatch();
 
@@ -207,6 +234,7 @@ const ChannelList = ({ navigation }) => {
                 loading={loading}
                 onRoomChange={handleChannelChange}
                 navigation={navigation}
+                chineseWall={chineseWallState}
               />
             )}
             {listMode === 'S' && (
@@ -216,6 +244,7 @@ const ChannelList = ({ navigation }) => {
                 loading={false}
                 onRoomChange={handleChannelChange}
                 navigation={navigation}
+                chineseWall={chineseWallState}
               />
             )}
           </View>
