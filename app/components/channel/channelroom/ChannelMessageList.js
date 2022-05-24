@@ -18,6 +18,8 @@ import {
   Image,
 } from 'react-native';
 import ChannelMessageSync from '@C/channel/channelroom/controls/ChannelMessageSync';
+import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
@@ -30,6 +32,8 @@ const ChannelMessageList = React.forwardRef(
         currentChannel: channel.currentChannel,
       }),
     );
+    const userInfo = useSelector(({ login }) => login.userInfo);
+    const userChineseWall = useSelector(({ login }) => login.chineseWall);
 
     let _listener = null;
 
@@ -39,8 +43,33 @@ const ChannelMessageList = React.forwardRef(
 
     const [useScroll, setUseScroll] = useState(false);
     const [topEnd, setTopEnd] = useState(false);
+    const [chineseWallState, setChineseWallState] = useState([]);
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+      const getChineseWallList = async () => {
+        const { result, status } = await getChineseWall({
+          userId: userInfo.id,
+          myInfo: userInfo,
+        });
+        if (status === 'SUCCESS') {
+          setChineseWallState(result);
+        } else {
+          setChineseWallState([]);
+        }
+      };
+
+      if (userChineseWall?.length) {
+        setChineseWallState(userChineseWall);
+      } else {
+        getChineseWallList();
+      }
+
+      return () => {
+        setChineseWallState([]);
+      };
+    }, [userChineseWall, userInfo]);
 
     useEffect(() => {
       const messageData = [
@@ -114,7 +143,23 @@ const ChannelMessageList = React.forwardRef(
 
     const drawMessage = useCallback(
       (item, index) => {
+        let isBlock = false;
         const message = item;
+        if (message?.isMine === 'N' && chineseWallState.length) {
+          const senderInfo = isJSONStr(message?.senderInfo)
+            ? JSON.parse(message.senderInfo)
+            : message.senderInfo;
+
+          const { blockChat, blockFile } = isBlockCheck({
+            targetInfo: {
+              ...senderInfo,
+              id: message.sender,
+            },
+            chineseWall: chineseWallState,
+          });
+          const isFile = !!message.fileInfos;
+          isBlock = isFile ? blockFile : blockChat;
+        }
         const beforeMessage = index > 0 ? messageData[index - 1] : null;
         const nextMessage =
           index < messageData.length - 1 ? messageData[index + 1] : null;
@@ -173,6 +218,7 @@ const ChannelMessageList = React.forwardRef(
               nameBox={nameBox}
               timeBox={timeBox}
               navigation={navigation}
+              isBlock={isBlock}
             />
           );
         } else if (message.messageType === 'A') {
@@ -217,6 +263,7 @@ const ChannelMessageList = React.forwardRef(
                 timeBox={timeBox}
                 navigation={navigation}
                 roomInfo={roomInfo}
+                isBlock={isBlock}
               />
             )) ||
             (message.mentionInfo && (
@@ -238,6 +285,7 @@ const ChannelMessageList = React.forwardRef(
                 timeBox={timeBox}
                 navigation={navigation}
                 roomInfo={roomInfo}
+                isBlock={isBlock}
               />
             ))
           );
@@ -253,7 +301,9 @@ const ChannelMessageList = React.forwardRef(
         let messageComp = null;
         // status key 가 존재하면 tempMessage
         if (item.status) {
-          messageComp = <TempMessageBox message={item} messageType={'channel'} />;
+          messageComp = (
+            <TempMessageBox message={item} messageType={'channel'} />
+          );
         } else {
           messageComp = drawMessage(item, index);
         }

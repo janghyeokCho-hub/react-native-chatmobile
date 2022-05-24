@@ -5,7 +5,7 @@ import React, {
   useRef,
   useMemo,
 } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUnreadCountForSync } from '@/modules/room';
 import {
   View,
@@ -13,7 +13,6 @@ import {
   Image,
   ScrollView,
   RefreshControl,
-  Animated,
 } from 'react-native';
 import { getMessage } from '@/lib/messageUtil';
 import Svg, { Path, G } from 'react-native-svg';
@@ -21,10 +20,18 @@ import { format } from 'date-fns';
 import SearchMessageWrap from '@C/chat/chatroom/search/SearchMessageWrap';
 import MessageBox from '@C/chat/message/MessageBox';
 import SystemMessageBox from '@C/chat/message/SystemMessageBox';
+import { isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const loadingImg = require('@C/assets/loading.gif');
 
-const SearchList = ({ moveData, markingText, roomID, navigation }) => {
+const SearchList = ({
+  moveData,
+  markingText,
+  roomID,
+  navigation,
+  chineseWall,
+}) => {
   const [messages, setMessages] = useState([]);
   const [moveId, setMoveId] = useState(null);
 
@@ -84,6 +91,22 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
       );
       let returnJSX = [];
       messages.forEach((message, index) => {
+        let isBlock = false;
+        if (chineseWall?.length) {
+          const senderInfo = isJSONStr(message.senderInfo)
+            ? JSON.parse(message.senderInfo)
+            : message.senderInfo;
+          const targetInfo = {
+            ...senderInfo,
+            id: senderInfo.sender,
+          };
+          const { blockChat, blockFile } = isBlockCheck({
+            targetInfo,
+            chineseWall,
+          });
+          const isFile = !!message.fileInfos;
+          isBlock = isFile ? blockFile : blockChat;
+        }
         let nameBox = !(message.sender == currentSender);
         let sendDate = format(new Date(message.sendDate), 'yyyyMMdd');
         let nextSendTime = '';
@@ -137,6 +160,7 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
                   nameBox={nameBox}
                   timeBox={timeBox}
                   marking={markingText}
+                  isBlock={isBlock}
                 />
               </SearchMessageWrap>,
             );
@@ -161,6 +185,7 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
                   nameBox={nameBox}
                   timeBox={timeBox}
                   marking={markingText}
+                  isBlock={isBlock}
                 />
               </View>,
             );
@@ -178,7 +203,7 @@ const SearchList = ({ moveData, markingText, roomID, navigation }) => {
     }
   };
 
-  const renderMessage = useMemo(() => { 
+  const renderMessage = useMemo(() => {
     return drawMessage(messages, moveId);
   }, [messages, moveId, offset]);
 

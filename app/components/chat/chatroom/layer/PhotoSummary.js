@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRoomFiles, getThumbnail } from '@API/message';
-import { openFilePreview } from '@/lib/fileUtil';
+import { getRoomFiles } from '@API/message';
 import * as file from '@/lib/device/file';
 import LoadingWrap from '@/components/common/LoadingWrap';
 import { format } from 'date-fns';
@@ -24,6 +23,8 @@ import ImageModal from '@COMMON/layout/ImageModal';
 import NetworkError from '@/components/common/NetworkError';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@react-navigation/native';
+import { isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const initNoImg = require('@C/assets/no_image.jpg');
 const checkBlackImg = require('@C/assets/ico_check_black.png');
@@ -140,7 +141,7 @@ const PhotoSummary = ({ route, navigation }) => {
   const { sizes, colors } = useTheme();
   const networkState = useSelector(({ app }) => app.networkState);
 
-  const { roomID } = route.params;
+  const { roomID, chineseWall } = route.params;
 
   const loadCnt = 30;
   const [select, setSelect] = useState(false);
@@ -174,12 +175,14 @@ const PhotoSummary = ({ route, navigation }) => {
         // TODO: 차후 멀티다운로드로 수정 필요
         // 만료처리 등 처리 필요
 
-
         // [0] PC [1] MOBILE
         const downloadOption = getConfig('FileAttachViewMode') || [];
 
         // 다운로드가 금지되어 있는 경우
-        if(downloadOption.length !== 0 && downloadOption[1].Download === false) {
+        if (
+          downloadOption.length !== 0 &&
+          downloadOption[1].Download === false
+        ) {
           Alert.alert(
             null,
             getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
@@ -196,10 +199,13 @@ const PhotoSummary = ({ route, navigation }) => {
           selectItems.forEach(item => {
             arrDownloadList.push(
               new Promise((resolove, reject) => {
-                file.downloadByToken({ token: item.token, fileName: item.name }, data => {
-                  downloadMsgObject = data;
-                  resolove();
-                });
+                file.downloadByToken(
+                  { token: item.token, fileName: item.name },
+                  data => {
+                    downloadMsgObject = data;
+                    resolove();
+                  },
+                );
               }),
             );
           });
@@ -264,8 +270,25 @@ const PhotoSummary = ({ route, navigation }) => {
         loadCnt: loadCnt,
         isImage: 'Y',
       }).then(({ data }) => {
-        if (data.status == 'SUCCESS') {
-          setFiles(data.result);
+        if (data.status === 'SUCCESS') {
+          const result = data.result.filter(item => {
+            let isBlock = false;
+            if (item?.FileID && chineseWall?.length) {
+              const senderInfo = isJSONStr(item.SenderInfo)
+                ? JSON.parse(item.SenderInfo)
+                : item.SenderInfo;
+              const { blockFile } = isBlockCheck({
+                targetInfo: {
+                  ...senderInfo,
+                  id: item.sender || senderInfo.sender,
+                },
+                chineseWall,
+              });
+              isBlock = blockFile;
+            }
+            return !isBlock && item;
+          });
+          setFiles(result);
         } else {
           setFiles([]);
         }
@@ -385,14 +408,24 @@ const PhotoSummary = ({ route, navigation }) => {
           {networkState && (
             <View style={styles.okbtnView}>
               <TouchableOpacity onPress={handleSelect}>
-                <View style={{...styles.topBtn}}>
+                <View style={{ ...styles.topBtn }}>
                   {!select ? (
-                  <View style={{width: '100%',height:'100%',flexDirection:'row',justifyContent:'center',alignItems:'center',marginRight:20}}>
-                    <Text>
-                    {getDic('choosePhoto')}
-                  </Text>
-                  <Image style={{marginLeft:10}} source={checkBlackImg} />
-                  </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 20,
+                      }}
+                    >
+                      <Text>{getDic('choosePhoto')}</Text>
+                      <Image
+                        style={{ marginLeft: 10 }}
+                        source={checkBlackImg}
+                      />
+                    </View>
                   ) : (
                     <>
                       <Text

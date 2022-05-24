@@ -11,16 +11,19 @@ import RoomItems from './RoomItems';
 import NewChatIcon from '../common/icons/NewChatIcon';
 import SearchBar from '../common/SearchBar';
 import { getDic } from '@/config';
+import { getChineseWall } from '@/lib/api/orgchart';
 
 const ChatList = ({ navigation, route }) => {
   const roomList = useSelector(({ room }) => room.rooms);
   const loading = useSelector(({ loading }) => loading['room/GET_ROOMS']);
   const userId = useSelector(({ login }) => login.id);
   const myInfo = useSelector(({ login }) => login.userInfo);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
 
   const [searchText, setSearchText] = useState('');
   const [listMode, setListMode] = useState('N'); //Normal, Search
   const [searchList, setSearchList] = useState([]);
+  const [chineseWallState, setChineseWallState] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -31,6 +34,30 @@ const ChatList = ({ navigation, route }) => {
     },
     [dispatch, navigation],
   );
+
+  useEffect(() => {
+    const getChineseWallList = async () => {
+      const { result, status } = await getChineseWall({
+        userId: myInfo?.id,
+        myInfo,
+      });
+      if (status === 'SUCCESS') {
+        setChineseWallState(result);
+      } else {
+        setChineseWallState([]);
+      }
+    };
+
+    if (chineseWall?.length) {
+      setChineseWallState(chineseWall);
+    } else {
+      getChineseWallList();
+    }
+
+    return () => {
+      setChineseWallState([]);
+    };
+  }, [myInfo, chineseWall]);
 
   useEffect(() => {
     if (listMode == 'S') {
@@ -132,6 +159,7 @@ const ChatList = ({ navigation, route }) => {
                   loading={loading}
                   onRoomChange={handleRoomChange}
                   navigation={navigation}
+                  chineseWall={chineseWallState}
                 />
               )}
               {(!roomList || roomList.length === 0) && (
@@ -149,6 +177,7 @@ const ChatList = ({ navigation, route }) => {
               loading={false}
               onRoomChange={handleRoomChange}
               navigation={navigation}
+              chineseWall={chineseWallState}
             />
           )}
         </View>

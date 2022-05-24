@@ -13,6 +13,7 @@ import { linkPreview } from '@/lib/api/api';
 import { getScreenWidth } from '@/lib/device/common';
 import Svg, { Rect, G, Circle } from 'react-native-svg';
 import { openMsgUtilBox } from '@/lib/messageUtil';
+import { getDic } from '@/config';
 
 const ChannelMessageBox = ({
   dateBox,
@@ -25,6 +26,7 @@ const ChannelMessageBox = ({
   marking,
   navigation,
   roomInfo,
+  isBlock,
 }) => {
   const currMember = useSelector(
     ({ channel }) => channel.currentChannel.members,
@@ -53,7 +55,9 @@ const ChannelMessageBox = ({
   };
 
   const drawMessage = useMemo(() => {
-    let drawText = message.context;
+    let drawText = isBlock
+      ? getDic('BlockChat', '차단된 메시지 입니다.')
+      : message.context || '';
     let nameBoxVisible = nameBox;
 
     let senderInfo = null;
@@ -64,7 +68,7 @@ const ChannelMessageBox = ({
     let messageType = 'message';
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
-    if (common.eumTalkRegularExp.test(drawText)) {
+    if (!isBlock && common.eumTalkRegularExp.test(drawText)) {
       const processMsg = common.convertEumTalkProtocol(drawText, {
         messageType: 'channel',
       });
@@ -80,7 +84,7 @@ const ChannelMessageBox = ({
       }
     }
 
-    if (messageType === 'message') {
+    if (!isBlock && messageType === 'message') {
       let index = 0;
 
       if (drawText) {
@@ -472,7 +476,7 @@ const ChannelMessageBox = ({
         </>
       );
     }
-  }, [message, marking, linkData, timeBox, nameBox]);
+  }, [message, marking, linkData, timeBox, nameBox, isBlock]);
 
   return (
     <>

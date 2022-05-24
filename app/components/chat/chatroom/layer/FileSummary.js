@@ -28,6 +28,8 @@ import Svg, { G, Path, Circle } from 'react-native-svg';
 import SummaryBack from '@C/chat/chatroom/layer/SummaryBack';
 import NetworkError from '@/components/common/NetworkError';
 import { useTheme } from '@react-navigation/native';
+import { isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const checkBlackImg = require('@C/assets/ico_check_black.png');
 
@@ -265,7 +267,8 @@ const FileSummary = ({ route, navigation }) => {
   const { sizes, colors } = useTheme();
   const networkState = useSelector(({ app }) => app.networkState);
 
-  const { roomID } = route.params;
+  const { roomID, chineseWall } = route.params;
+  console.log(chineseWall);
 
   const loadCnt = 30;
   const [select, setSelect] = useState(false);
@@ -395,8 +398,25 @@ const FileSummary = ({ route, navigation }) => {
         loadCnt: loadCnt,
         isImage: 'N',
       }).then(({ data }) => {
-        if (data.status == 'SUCCESS') {
-          setFiles(data.result);
+        if (data.status === 'SUCCESS') {
+          const result = data.result.filter(item => {
+            let isBlock = false;
+            if (item?.FileID && chineseWall?.length) {
+              const senderInfo = isJSONStr(item.SenderInfo)
+                ? JSON.parse(item.SenderInfo)
+                : item.SenderInfo;
+              const { blockFile } = isBlockCheck({
+                targetInfo: {
+                  ...senderInfo,
+                  id: item.sender || senderInfo.sender,
+                },
+                chineseWall,
+              });
+              isBlock = blockFile;
+            }
+            return !isBlock && item;
+          });
+          setFiles(result);
         } else {
           setFiles([]);
         }

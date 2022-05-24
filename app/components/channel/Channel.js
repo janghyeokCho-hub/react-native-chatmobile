@@ -1,37 +1,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import {
-  format,
-  isValid,
-  startOfToday,
-  differenceInMilliseconds,
-} from 'date-fns';
 import { getServer } from '@/config';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import LockIcon from '@COMMON/icons/LockIcon';
-import { getBackgroundColor, makeMessageText } from '@/lib/common';
+import { getBackgroundColor, makeMessageText, isJSONStr } from '@/lib/common';
+import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
-
-const makeDateTime = timestamp => {
-  if (isValid(new Date(timestamp))) {
-    const toDay = startOfToday();
-    const procTime = new Date(timestamp);
-    let dateText = '';
-
-    if (differenceInMilliseconds(procTime, toDay) >= 0) {
-      // 오늘보다 큰 경우 시간 표시
-      dateText = format(procTime, 'HH:mm');
-    } else {
-      // 오늘과 이틀이상 차이나는 경우 날짜로 표시
-      dateText = format(procTime, 'yyyy.MM.dd');
-    }
-
-    // 오늘과 하루 차이인 경우 어제로 표시 -- 차후에 추가 ( 다국어처리 )
-
-    return dateText;
-  } else {
-    return '';
-  }
-};
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const Channel = ({
   room,
@@ -39,10 +13,39 @@ const Channel = ({
   showModalMenu,
   getRoomSettings,
   isEmptyObj,
+  chineseWall = [],
 }) => {
   const { sizes } = useTheme();
   const [pinnedTop, setPinnedTop] = useState(false);
   const setting = useMemo(() => getRoomSettings(room), [room, getRoomSettings]);
+  const [lastMessageText, setLastMessageText] = useState('');
+
+  useEffect(() => {
+    if (room?.lastMessage && chineseWall.length) {
+      const lastMessageInfo = isJSONStr(room.lastMessage)
+        ? JSON.parse(room.lastMessage)
+        : room.lastMessage;
+      const targetInfo = {
+        id: lastMessageInfo.sender,
+        companyCode: lastMessageInfo.companyCode,
+        deptCode: lastMessageInfo.deptCode,
+      };
+      const { blockChat, blockFile } = isBlockCheck({
+        targetInfo,
+        chineseWall,
+      });
+      const isFile = !!lastMessageInfo?.File;
+      const result = isFile ? blockFile : blockChat;
+
+      if (result) {
+        setLastMessageText(getDic('BlockChat', '차단된 메시지 입니다.'));
+      } else {
+        setLastMessageText(makeMessageText(room.lastMessage));
+      }
+    } else {
+      setLastMessageText(makeMessageText(room.lastMessage));
+    }
+  }, [room.lastMessage, chineseWall]);
 
   useEffect(() => {
     if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
@@ -138,14 +141,11 @@ const Channel = ({
             numberOfLines={1}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}
           >
-            {room.lastMessage &&
-              makeMessageText(room.lastMessage, room.lastMessageType)}
+            {lastMessageText}
           </Text>
         </View>
         <View style={styles.info}>
-          <Text style={styles.dateText}>
-            {room.lastMessageDate ? makeDateTime(room.lastMessageDate) : ''}
-          </Text>
+          <Text style={styles.dateText}>{lastMessageText}</Text>
           {room.unreadCnt > 0 ? (
             <View style={styles.count}>
               <Text style={styles.countTxt}>{room.unreadCnt}</Text>

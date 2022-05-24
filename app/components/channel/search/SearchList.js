@@ -22,10 +22,18 @@ import ChannelNoticeMessageBox from '@C/chat/message/ChannelNoticeMessageBox';
 import SearchMessageWrap from '@C/chat/chatroom/search/SearchMessageWrap';
 import ChannelMessageBox from '@C/chat/message/ChannelMessageBox';
 import SystemMessageBox from '@C/chat/message/SystemMessageBox';
+import { isBlockCheck } from '@/lib/api/orgchart';
+import { isJSONStr } from '@/lib/common';
 
 const loadingImg = require('@C/assets/loading.gif');
 
-const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
+const ChannelSearchList = ({
+  moveData,
+  markingText,
+  roomID,
+  navigation,
+  chineseWall,
+}) => {
   const [messages, setMessages] = useState([]);
   const [moveId, setMoveId] = useState(null);
 
@@ -85,6 +93,22 @@ const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
       );
       let returnJSX = [];
       messages.forEach((message, index) => {
+        let isBlock = false;
+        if (chineseWall?.length) {
+          const senderInfo = isJSONStr(message.senderInfo)
+            ? JSON.parse(message.senderInfo)
+            : message.senderInfo;
+          const targetInfo = {
+            ...senderInfo,
+            id: senderInfo.sender,
+          };
+          const { blockChat, blockFile } = isBlockCheck({
+            targetInfo,
+            chineseWall,
+          });
+          const isFile = !!message.fileInfos;
+          isBlock = isFile ? blockFile : blockChat;
+        }
         let nameBox = !(message.sender == currentSender);
         let sendDate = format(new Date(message.sendDate), 'yyyyMMdd');
         let nextSendTime = '';
@@ -139,6 +163,7 @@ const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
                   nameBox={nameBox}
                   timeBox={timeBox}
                   marking={markingText}
+                  isBlock={isBlock}
                 />
               </SearchMessageWrap>,
             );
@@ -170,6 +195,7 @@ const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
                   timeBox={timeBox}
                   marking={markingText}
                   navigation={navigation}
+                  isBlock={isBlock}
                 />,
               );
             } else {
@@ -194,6 +220,7 @@ const ChannelSearchList = ({ moveData, markingText, roomID, navigation }) => {
                     nameBox={nameBox}
                     timeBox={timeBox}
                     marking={markingText}
+                    isBlock={isBlock}
                   />
                 </View>,
               );

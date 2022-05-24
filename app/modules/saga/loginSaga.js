@@ -1,11 +1,11 @@
 import { call, put, fork } from 'redux-saga/effects';
 import { startLoading, finishLoading } from '@/modules/loading';
-import AsyncStorage from '@react-native-community/async-storage';
 import {
   logout,
   loginTokenAuth,
   authCheckComplate,
   sync,
+  setChineseWall,
 } from '@/modules/login';
 import * as loginApi from '@API/login';
 import * as channelApi from '@API/channel';
@@ -20,6 +20,8 @@ import * as dbAction from '@/lib/appData/action';
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import { Alert } from 'react-native';
 import { exceptionHandler } from './createRequestSaga';
+// ChineseWall
+import { getChineseWall } from '@/lib/api/orgchart';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -35,7 +37,10 @@ export function createLoginRequestSaga(loginType, syncType) {
           if (resData.result && resData.token) {
             yield console.log('loginSaga Start !!');
             // localStorage에 token 세팅
-            yield loginApi.saveLocalStorage({ token: resData.token, accessid: resData.result.id});
+            yield loginApi.saveLocalStorage({
+              token: resData.token,
+              accessid: resData.result.id,
+            });
 
             LoginInfo.setData(resData.result.id, resData.token, resData.result);
 
@@ -98,6 +103,16 @@ export function createLoginRequestSaga(loginType, syncType) {
             if (channels.data.status == 'SUCCESS') {
               yield put(setChannels(channels.data));
             }
+
+            // 차이니즈 월
+            const chineseWall = yield call(getChineseWall, {
+              userId: response.data.result.id,
+              myInfo: response.data.result,
+            });
+
+            if (chineseWall.status === 'SUCCESS') {
+              yield put(setChineseWall(chineseWall.result));
+            }
           } else {
             yield put({
               type: FAILURE,
@@ -143,10 +158,12 @@ export function createExtLoginRequestSaga(loginType, syncType) {
         const resData = response.data;
         if (resData.status == 'SUCCESS') {
           if (resData.result && resData.token) {
-
             // localStorage에 token 세팅
-            yield loginApi.saveLocalStorage({ token: resData.token, accessid: resData.result.id});
-            
+            yield loginApi.saveLocalStorage({
+              token: resData.token,
+              accessid: resData.result.id,
+            });
+
             LoginInfo.setData(resData.result.id, resData.token, resData.result);
 
             // login 후처리 시작
@@ -196,6 +213,15 @@ export function createExtLoginRequestSaga(loginType, syncType) {
             });
             if (channels.data.status == 'SUCCESS') {
               yield put(setChannels(channels.data));
+            }
+
+            // 차이니즈 월
+            const chineseWall = yield call(getChineseWall, {
+              userId: response.data.result.id,
+              myInfo: response.data.result,
+            });
+            if (chineseWall.status === 'SUCCESS') {
+              yield put(setChineseWall(chineseWall.result));
             }
           } else {
             yield put({
@@ -269,12 +295,11 @@ export function createSyncSaga(type) {
         );
       }
 
-    // 동기화 끝
-    if (action.payload.showLoading) yield put(finishLoading(type));
+      // 동기화 끝
+      if (action.payload.showLoading) yield put(finishLoading(type));
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
   };
 }
 
@@ -372,6 +397,15 @@ export function createSyncTokenRequestSaga(type) {
           });
           if (channels.data.status == 'SUCCESS') {
             yield put(setChannels(channels.data));
+          }
+
+          // 차이니즈 월
+          const chineseWall = yield call(getChineseWall, {
+            userId: authData.id,
+            myInfo: authData,
+          });
+          if (chineseWall.status === 'SUCCESS') {
+            yield put(setChineseWall(chineseWall.result));
           }
         } else {
           yield put(loginTokenAuth(result));

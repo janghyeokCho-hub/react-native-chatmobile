@@ -11,8 +11,14 @@ import ProfileBox from '@COMMON/ProfileBox';
 //import RightConxtMenu from '../common/popup/RightConxtMenu';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { getDic } from '@/config';
-import { makeMessageText, getJobInfo, getFilterMember } from '@/lib/common';
+import {
+  makeMessageText,
+  getJobInfo,
+  getFilterMember,
+  isJSONStr,
+} from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const makeDateTime = timestamp => {
   if (isValid(new Date(timestamp))) {
@@ -42,6 +48,7 @@ const Room = ({
   showModalMenu,
   getRoomSettings,
   isEmptyObj,
+  chineseWall = [],
 }) => {
   const { sizes } = useTheme();
   const id = useSelector(({ login }) => login.id);
@@ -51,6 +58,34 @@ const Room = ({
   );
   const [pinnedTop, setPinnedTop] = useState(false);
   const setting = useMemo(() => getRoomSettings(room), [room]);
+  const [lastMessageText, setLastMessageText] = useState('');
+
+  useEffect(() => {
+    if (room?.lastMessage && chineseWall.length) {
+      const lastMessageInfo = isJSONStr(room.lastMessage)
+        ? JSON.parse(room.lastMessage)
+        : room.lastMessage;
+      const targetInfo = {
+        id: lastMessageInfo.sender,
+        companyCode: lastMessageInfo.companyCode,
+        deptCode: lastMessageInfo.deptCode,
+      };
+      const { blockChat, blockFile } = isBlockCheck({
+        targetInfo,
+        chineseWall,
+      });
+      const isFile = !!lastMessageInfo?.File;
+      const result = isFile ? blockFile : blockChat;
+
+      if (result) {
+        setLastMessageText(getDic('BlockChat', '차단된 메시지 입니다.'));
+      } else {
+        setLastMessageText(makeMessageText(room.lastMessage));
+      }
+    } else {
+      setLastMessageText(makeMessageText(room.lastMessage));
+    }
+  }, [room.lastMessage, chineseWall]);
 
   useEffect(() => {
     if (setting && !isEmptyObj(setting) && !!setting.pinTop) {
@@ -173,7 +208,7 @@ const Room = ({
             numberOfLines={2}
             style={{ ...styles.lastMessage, fontSize: 13 + sizes.inc }}
           >
-            {room.lastMessage && makeMessageText(room.lastMessage)}
+            {lastMessageText}
           </Text>
         </View>
         <View style={styles.info}>
