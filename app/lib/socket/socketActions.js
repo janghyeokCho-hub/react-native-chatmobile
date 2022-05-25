@@ -416,7 +416,11 @@ export const handleNewChannelNotice = (dispatch, userInfo) => {
   return data => {
     if (data == null || data == undefined) return;
     const json_data = JSON.parse(data);
-
+    if (userInfo.id === json_data.sender) {
+      json_data.isMine = 'Y';
+    } else {
+      json_data.isMine = 'N';
+    }
     dispatch(receiveChannelMessage(json_data));
     dispatch(receiveChannelNotice(json_data));
   };

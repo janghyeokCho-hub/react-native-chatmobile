@@ -275,12 +275,6 @@ const channelActionHandlers = handleActions(
               senderInfo.Name + ' ' + senderInfo.JobPosition;
             draft.currentChannel.notice = noticeMessage;
 
-            if (noticeMessage.isMine == null) {
-              noticeMessage.isMine = 'Y';
-            } else {
-              noticeMessage.isMine = 'N';
-            }
-
             const param = {
               noticeFlip: false,
               noticeDisable: false,

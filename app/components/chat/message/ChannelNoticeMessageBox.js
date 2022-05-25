@@ -43,7 +43,7 @@ const ChannelNoticeMessageBox = ({
       ? getDic('BlockChat', '차단된 메시지 입니다.')
       : message.context;
     return common.convertURLMessage(text);
-  }, [message.context, isBlock]);
+  }, [message, isBlock]);
   const [processedContext, setProcessedContext] = useState([]);
   const { findMemberInfo } = useMemberInfo('channel');
 
