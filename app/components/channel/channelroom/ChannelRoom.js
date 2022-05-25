@@ -5,11 +5,12 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { rematchingMember, closeRoom } from '@/modules/room';
+import { rematchingMember } from '@/modules/room';
 import {
   getChannelInfo,
   getChannelNotice,
   readMessage,
+  closeChannel
 } from '@/modules/channel';
 import { clearFiles, sendChannelMessage } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
@@ -46,10 +47,9 @@ const ChannelRoom = ({ navigation, route }) => {
           method: 'TOP',
         }),
       );
-      dispatch(readMessage({ roomID: channel.roomId }));
     }
     return () => {
-      dispatch(closeRoom());
+      dispatch(closeChannel());
     };
   }, []);
 
@@ -59,6 +59,12 @@ const ChannelRoom = ({ navigation, route }) => {
       setSearchVisible(true);
     }
   }, [channel]);
+
+  useLayoutEffect(() => {
+    if (channel) {
+      dispatch(readMessage({ roomID: channel.roomId }));
+    }
+  }, [dispatch, channel]);
 
   useEffect(() => {
     handleSearchBox(true);

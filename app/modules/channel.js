@@ -121,6 +121,8 @@ const [
 const CHANNEL_AUTH_CHANGED = 'channel/AUTH_CHANGED';
 const RECEIVE_CHANNELSETTING = 'channel/RECEIVE_CHANNELSETTING';
 
+const CLOSE_CHANNEL = 'channel/CLOSE_CHANNEL';
+
 export const setChannels = createAction(SET_CHANNELS);
 export const init = createAction(INIT);
 export const getChannels = createAction(GET_CHANNELS);
@@ -129,6 +131,7 @@ export const getChannelCategories = createAction(GET_CHANNEL_CATEGORIES);
 export const receiveMessage = createAction(RECEIVE_MESSAGE);
 export const openChannel = createAction(OPEN_CHANNEL);
 export const changeOpenChannel = createAction(CHANGE_OPEN_CHANNEL);
+export const closeChannel = createAction(CLOSE_CHANNEL);
 export const newWinChannel = createAction(NEW_WIN_CHANNEL);
 export const closeWinChannel = createAction(CLOSE_WIN_CHANNEL);
 export const setInitCurrentChannel = createAction(SET_INIT_CURRENTCHANNEL);
@@ -543,19 +546,23 @@ const channelActionHandlers = handleActions(
 
             // 활성창이지만 새창인경우 --- 본창도 focus가 있을때만 unreadCnt를 증가시키지 않음
             if (
-              action.payload.isMine != 'Y'
+              action.payload.isMine !== 'Y'
               // channel.newWin &&
             ) {
               // 추후 삭제 필요 ( 현재 api에서 unreadCnt 값을 안 넘겨주는 상태이기 때문에)
-              if (!channel.unreadCnt) channel.unreadCnt = 0;
+              if (!channel.unreadCnt) {
+                channel.unreadCnt = 0;
+              }
               channel.unreadCnt = channel.unreadCnt + 1;
             }
 
             action.payload.isCurrentChannel = true;
           } else {
-            if (action.payload.isMine != 'Y') {
+            if (action.payload.isMine !== 'Y') {
               // 추후 삭제 필요 ( 현재 api에서 unreadCnt 값을 안 넘겨주는 상태이기 때문에)
-              if (!channel.unreadCnt) channel.unreadCnt = 0;
+              if (!channel.unreadCnt) {
+                channel.unreadCnt = 0;
+              }
               channel.unreadCnt = channel.unreadCnt + 1;
             }
           }
@@ -1202,6 +1209,15 @@ const channelActionHandlers = handleActions(
             }
           }
         }
+      });
+    },
+    [CLOSE_CHANNEL]: (state, action) => {
+      return produce(state, draft => {
+        draft.selectId = -1;
+        draft.currentChannel = null;
+        draft.messages = [];
+        draft.makeInfo = null;
+        draft.makeChannel = false;
       });
     },
   },

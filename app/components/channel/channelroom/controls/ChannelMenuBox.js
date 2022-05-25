@@ -42,7 +42,7 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
   const initRoomNoti = async () => {
     try {
       const params = { pushID: await messaging().getToken() };
-      const result = await getRoomNotification(roomInfo.roomID, params);
+      const result = await getRoomNotification(roomInfo.roomId, params);
       if (result?.data?.status === 'SUCCESS') {
         setNotification(result?.data?.result);
       }
