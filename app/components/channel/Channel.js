@@ -6,6 +6,7 @@ import { getBackgroundColor, makeMessageText, isJSONStr } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { isBlockCheck } from '@/lib/api/orgchart';
+import { makeDateTime } from '@/lib/util/dateUtil';
 
 const Channel = ({
   room,
@@ -145,7 +146,9 @@ const Channel = ({
           </Text>
         </View>
         <View style={styles.info}>
-          <Text style={styles.dateText}>{lastMessageText}</Text>
+          <Text style={styles.dateText}>
+            {room.lastMessageDate ? makeDateTime(room.lastMessageDate) : ''}
+          </Text>
           {room.unreadCnt > 0 ? (
             <View style={styles.count}>
               <Text style={styles.countTxt}>{room.unreadCnt}</Text>
