@@ -8,8 +8,9 @@ import {
   newChannel,
   changeOpenChannel,
   resetUnreadCount,
+  readMessageFocus,
 } from '@/modules/channel';
-import { changeOpenRoom, readMessageFocus } from '@/modules/room';
+import { changeOpenRoom } from '@/modules/room';
 import { removeChannelTempMessage, setMoveView } from '@/modules/message';
 import { setCurrentChannel } from '@/modules/app';
 import { exceptionHandler } from './createRequestSaga';
@@ -110,11 +111,7 @@ export function createReceiveMessageSaga() {
 
         yield put(channelMessageAdd(action.payload));
 
-        if (
-          action.payload.isCurrentChannel &&
-          window.document.hasFocus() &&
-          action.payload.isMine != 'Y'
-        ) {
+        if (action.payload.isCurrentChannel && action.payload.isMine !== 'Y') {
           // 자기가 보낸 메시지가 아닌경우 창의 focus 를 체크하여 읽음처리
           /*
             const response = yield call(messageApi.readChannelMessage, {
@@ -131,7 +128,7 @@ export function createReceiveMessageSaga() {
               }
             }
             */
-          yield put(readMessageFocus(action.payload.roomID));
+          yield put(readMessageFocus(action.payload));
         }
       } catch (e) {
         yield put({
