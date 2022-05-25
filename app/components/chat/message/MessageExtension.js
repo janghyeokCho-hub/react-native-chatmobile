@@ -120,6 +120,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
 
     // notice
     isChannel &&
+      !isBlock &&
       modalBtn.push({
         type: 'notice',
         title: getDic('Notice'),
