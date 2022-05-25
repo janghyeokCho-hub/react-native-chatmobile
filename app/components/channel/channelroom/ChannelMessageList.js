@@ -240,6 +240,7 @@ const ChannelMessageList = React.forwardRef(
               isMine={message.isMine === 'Y'}
               nameBox={nameBox}
               timeBox={timeBox}
+              isBlock={isBlock}
             />
           );
         } else if (message.messageType !== 'S') {

@@ -273,6 +273,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
               isMine={message.isMine === 'Y'}
               nameBox={nameBox}
               timeBox={timeBox}
+              isBlock={isBlock}
             />
           );
         } else {
