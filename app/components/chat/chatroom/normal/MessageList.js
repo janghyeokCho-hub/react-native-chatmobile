@@ -26,6 +26,7 @@ import MessageSync from '../controls/MessageSync';
 import * as dbAction from '@/lib/appData/action';
 import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { getConfig } from '@/config';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
@@ -65,7 +66,12 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
     if (userChineseWall?.length) {
       setChineseWallState(userChineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {

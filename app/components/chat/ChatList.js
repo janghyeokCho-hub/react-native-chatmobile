@@ -12,6 +12,7 @@ import NewChatIcon from '../common/icons/NewChatIcon';
 import SearchBar from '../common/SearchBar';
 import { getDic } from '@/config';
 import { getChineseWall } from '@/lib/api/orgchart';
+import { getConfig } from '@/config';
 
 const ChatList = ({ navigation, route }) => {
   const roomList = useSelector(({ room }) => room.rooms);
@@ -51,7 +52,12 @@ const ChatList = ({ navigation, route }) => {
     if (chineseWall?.length) {
       setChineseWallState(chineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {

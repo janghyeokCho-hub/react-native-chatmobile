@@ -59,7 +59,12 @@ const ChatMenuBox = ({
     if (userChineseWall?.length) {
       setChineseWallState(userChineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {

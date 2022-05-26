@@ -12,6 +12,7 @@ import * as messageApi from '@/lib/api/message';
 import { setSearchKeyword } from '@/modules/channel';
 import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { getConfig } from '@/config';
 
 const SearchView = ({ onSearchBox, navigation }) => {
   const myInfo = useSelector(({ login }) => login.userInfo);
@@ -46,7 +47,12 @@ const SearchView = ({ onSearchBox, navigation }) => {
     if (chineseWall?.length) {
       setChineseWallState(chineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {

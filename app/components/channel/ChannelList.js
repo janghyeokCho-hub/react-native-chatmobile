@@ -52,7 +52,12 @@ const ChannelList = ({ navigation }) => {
     if (chineseWall?.length) {
       setChineseWallState(chineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {

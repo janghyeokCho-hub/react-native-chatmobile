@@ -1,6 +1,5 @@
 import { managesvr } from '@API/api';
 import { getJobInfo } from '@/lib/userSettingUtil';
-import { getConfig } from '@/config';
 
 export const getOrgChart = ({ deptID, companyCode }) => {
   if (companyCode) return managesvr('get', `/org/${deptID}/gr/${companyCode}`);
@@ -19,10 +18,6 @@ export const searchOrgChart = async ({ userID, value, type }) => {
 
 export const getChineseWall = async ({ userId, myInfo }) => {
   try {
-    const useChineseWall = getConfig('UseChineseWall', false);
-    if (!useChineseWall) {
-      return { result: [], status: 'SUCCESS' };
-    }
     const { data } = await managesvr('get', `/org/block/${userId}`);
     const { result, status } = data;
     let blockList = [];

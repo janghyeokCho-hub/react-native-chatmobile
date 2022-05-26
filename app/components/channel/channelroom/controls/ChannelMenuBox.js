@@ -67,7 +67,12 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
     if (userChineseWall?.length) {
       setChineseWallState(userChineseWall);
     } else {
-      getChineseWallList();
+      const useChineseWall = getConfig('UseChineseWall', false);
+      if (useChineseWall) {
+        getChineseWallList();
+      } else {
+        setChineseWallState([]);
+      }
     }
 
     return () => {
