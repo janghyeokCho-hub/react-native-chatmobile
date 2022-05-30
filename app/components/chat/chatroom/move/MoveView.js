@@ -15,6 +15,7 @@ import { useTheme } from '@react-navigation/native';
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
 const MoveView = ({ route, navigation }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { sizes } = useTheme();
   const { isRoom, isChannel } = useSelector(({ room, channel }) => ({
     isRoom: !!room.currentRoom,
@@ -22,13 +23,17 @@ const MoveView = ({ route, navigation }) => {
   }));
   let roomID;
   let messageID;
-  if (route.params && route.params.roomID)
+  if (route.params && route.params.roomID) {
     roomID = parseInt(route.params.roomID);
-  else roomID = null;
+  } else {
+    roomID = null;
+  }
 
-  if (route.params && route.params.messageID)
+  if (route.params && route.params.messageID) {
     messageID = parseInt(route.params.messageID);
-  else messageID = null;
+  } else {
+    messageID = null;
+  }
 
   const [moveData, setMoveData] = useState(null);
 
@@ -62,11 +67,9 @@ const MoveView = ({ route, navigation }) => {
           response = await getChannelMessage(roomID, messageID, 'CENTER');
         }
 
-        if (response.data.status == 'SUCCESS') {
+        if (response.data.status === 'SUCCESS') {
           const data = response.data.result;
-
           const findId = messageID;
-
           setMoveData({
             firstPage: data,
             moveId: findId,
@@ -116,12 +119,14 @@ const MoveView = ({ route, navigation }) => {
             moveData={moveData}
             roomID={roomID}
             navigation={navigation}
+            chineseWall={chineseWall}
           />
         ) : (
           <ChannelSearchList
             moveData={moveData}
             roomID={roomID}
             navigation={navigation}
+            chineseWall={chineseWall}
           />
         )}
 
