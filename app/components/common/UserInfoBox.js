@@ -330,23 +330,37 @@ const UserInfoBox = ({
         code: 'startChat',
         title: getDic('StartChat', '대화시작'),
         onPress: () => {
-          if (userInfo.pChat == 'Y')
-            openChatRoomView(
-              dispatch,
-              viewType,
-              rooms,
-              selectId,
-              userInfo,
-              myInfo,
-              navigation,
-            );
-          else
-            Alert.alert(
-              null,
-              getDic('Msg_GroupInviteError'),
-              [{ text: getDic('Ok') }],
-              { cancelable: true },
-            );
+          let isBlock = false;
+          if (chineseWall?.length) {
+            const { blockChat, blockFile } = isBlockCheck({
+              targetInfo: userInfo,
+              chineseWall,
+            });
+            if (blockChat && blockFile) {
+              isBlock = true;
+            }
+          }
+          if (isBlock) {
+          } else {
+            if (userInfo.pChat === 'Y') {
+              openChatRoomView(
+                dispatch,
+                viewType,
+                rooms,
+                selectId,
+                userInfo,
+                myInfo,
+                navigation,
+              );
+            } else {
+              Alert.alert(
+                null,
+                getDic('Msg_GroupInviteError'),
+                [{ text: getDic('Ok') }],
+                { cancelable: true },
+              );
+            }
+          }
         },
       });
     }
