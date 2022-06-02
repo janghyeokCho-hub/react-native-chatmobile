@@ -11,20 +11,16 @@ import RoomItems from './RoomItems';
 import NewChatIcon from '../common/icons/NewChatIcon';
 import SearchBar from '../common/SearchBar';
 import { getDic } from '@/config';
-import { getChineseWall } from '@/lib/api/orgchart';
-import { getConfig } from '@/config';
 
-const ChatList = ({ navigation, route }) => {
+const ChatList = ({ navigation }) => {
   const roomList = useSelector(({ room }) => room.rooms);
   const loading = useSelector(({ loading }) => loading['room/GET_ROOMS']);
   const userId = useSelector(({ login }) => login.id);
   const myInfo = useSelector(({ login }) => login.userInfo);
-  const chineseWall = useSelector(({ login }) => login.chineseWall);
 
   const [searchText, setSearchText] = useState('');
   const [listMode, setListMode] = useState('N'); //Normal, Search
   const [searchList, setSearchList] = useState([]);
-  const [chineseWallState, setChineseWallState] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -37,36 +33,7 @@ const ChatList = ({ navigation, route }) => {
   );
 
   useEffect(() => {
-    const getChineseWallList = async () => {
-      const { result, status } = await getChineseWall({
-        userId: myInfo?.id,
-        myInfo,
-      });
-      if (status === 'SUCCESS') {
-        setChineseWallState(result);
-      } else {
-        setChineseWallState([]);
-      }
-    };
-
-    if (chineseWall?.length) {
-      setChineseWallState(chineseWall);
-    } else {
-      const useChineseWall = getConfig('UseChineseWall', false);
-      if (useChineseWall) {
-        getChineseWallList();
-      } else {
-        setChineseWallState([]);
-      }
-    }
-
-    return () => {
-      setChineseWallState([]);
-    };
-  }, [myInfo, chineseWall]);
-
-  useEffect(() => {
-    if (listMode == 'S') {
+    if (listMode === 'S') {
       handleSearch(searchText);
     }
   }, [handleSearch, listMode, searchText]);
@@ -75,7 +42,7 @@ const ChatList = ({ navigation, route }) => {
     changeVal => {
       setSearchText(changeVal);
 
-      if (changeVal == '') {
+      if (changeVal === '') {
         setListMode('N');
       } else {
         const filterList = roomList.filter(item => {
@@ -87,7 +54,7 @@ const ChatList = ({ navigation, route }) => {
             if (item.members) {
               item.members.forEach(member => {
                 if (
-                  member.id != userId &&
+                  member.id !== userId &&
                   member.name.indexOf(changeVal) > -1
                 ) {
                   returnVal = true;
@@ -106,7 +73,7 @@ const ChatList = ({ navigation, route }) => {
         setListMode('S');
       }
     },
-    [roomList],
+    [userId, roomList],
   );
 
   useEffect(() => {
@@ -114,17 +81,21 @@ const ChatList = ({ navigation, route }) => {
     let updateList = [];
     if (roomList) {
       roomList.forEach(r => {
-        if (r.updateDate === null) updateList.push(r.roomID);
+        if (r.updateDate === null) {
+          updateList.push(r.roomID);
+        }
       });
     }
-    if (updateList.length > 0) {
+    if (updateList?.length) {
       dispatch(updateRooms({ updateList }));
     }
-  }, [roomList]);
+  }, [roomList, dispatch]);
 
   useEffect(() => {
-    if (roomList == null || roomList.length == 0) dispatch(getRooms());
-  }, []);
+    if (!roomList?.length) {
+      dispatch(getRooms());
+    }
+  }, [roomList, dispatch]);
 
   return (
     <View style={styles.container}>
@@ -138,7 +109,7 @@ const ChatList = ({ navigation, route }) => {
               code: 'startChat',
               onPress: () => {
                 navigation.navigate('InviteMember', {
-                  headerName: getDic('StartChat'),
+                  headerName: getDic('StartChat', '대화시작'),
                   isNewRoom: true,
                 });
               },
@@ -157,7 +128,7 @@ const ChatList = ({ navigation, route }) => {
           searchText={searchText}
         />
         <View style={styles.contents}>
-          {listMode == 'N' && (
+          {listMode === 'N' && (
             <>
               {roomList && roomList.length > 0 && (
                 <RoomItems
@@ -165,7 +136,6 @@ const ChatList = ({ navigation, route }) => {
                   loading={loading}
                   onRoomChange={handleRoomChange}
                   navigation={navigation}
-                  chineseWall={chineseWallState}
                 />
               )}
               {(!roomList || roomList.length === 0) && (
@@ -177,13 +147,12 @@ const ChatList = ({ navigation, route }) => {
               )}
             </>
           )}
-          {listMode == 'S' && (
+          {listMode === 'S' && (
             <RoomItems
               rooms={searchList}
               loading={false}
               onRoomChange={handleRoomChange}
               navigation={navigation}
-              chineseWall={chineseWallState}
             />
           )}
         </View>

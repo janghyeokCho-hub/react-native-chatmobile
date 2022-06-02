@@ -22,7 +22,6 @@ import Svg, { G, Path, Rect } from 'react-native-svg';
 import { getConfig, getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { getRoomNotification, modifyRoomNotification } from '@/lib/api/setting';
-import { getChineseWall } from '@/lib/api/orgchart';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -31,13 +30,10 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
   const { id } = useSelector(({ login }) => ({
     id: login.id,
   }));
-  const userInfo = useSelector(({ login }) => login.userInfo);
-  const userChineseWall = useSelector(({ login }) => login.chineseWall);
   const enabledExtUser = getConfig('EnabledExtUser', 'N');
   const [channelAuth, setChannelAuth] = useState(false);
   const [channelAdminMembers, setChannelAdminMembers] = useState(false);
   const [notification, setNotification] = useState(true);
-  const [chineseWallState, setChineseWallState] = useState([]);
 
   const initRoomNoti = async () => {
     try {
@@ -50,35 +46,6 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
       console.error('initRoomNoti Error: '.err);
     }
   };
-
-  useEffect(() => {
-    const getChineseWallList = async () => {
-      const { result, status } = await getChineseWall({
-        userId: userInfo.id,
-        myInfo: userInfo,
-      });
-      if (status === 'SUCCESS') {
-        setChineseWallState(result);
-      } else {
-        setChineseWallState([]);
-      }
-    };
-
-    if (userChineseWall?.length) {
-      setChineseWallState(userChineseWall);
-    } else {
-      const useChineseWall = getConfig('UseChineseWall', false);
-      if (useChineseWall) {
-        getChineseWallList();
-      } else {
-        setChineseWallState([]);
-      }
-    }
-
-    return () => {
-      setChineseWallState([]);
-    };
-  }, [userChineseWall, userInfo]);
 
   useEffect(() => {
     if (roomInfo && roomInfo.members) {
@@ -141,7 +108,6 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
     handleClose();
     navigation.navigate('PhotoSummary', {
       roomID: roomInfo.roomId,
-      chineseWall: chineseWallState,
     });
   };
 
@@ -149,7 +115,6 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
     handleClose();
     navigation.navigate('FileSummary', {
       roomID: roomInfo.roomId,
-      chineseWall: chineseWallState,
     });
   };
 

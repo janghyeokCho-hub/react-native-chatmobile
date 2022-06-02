@@ -33,13 +33,11 @@ const ChannelItems = ({
   onRoomChange,
   navigation,
   onChannelJoin,
-  chineseWall = [],
 }) => {
-  const { id, selectId } = useSelector(({ login, channel }) => ({
+  const { selectId } = useSelector(({ login, channel }) => ({
     id: login.id,
     selectId: channel.selectId,
   }));
-
   const pageSize = 13;
   const [pageNum, setPageNum] = useState(1);
   const [pageEnd, setPageEnd] = useState(false);
@@ -214,7 +212,6 @@ const ChannelItems = ({
                     showModalMenu={showModalMenu}
                     getRoomSettings={getRoomSettings}
                     isEmptyObj={isEmptyObj}
-                    chineseWall={chineseWall}
                   />
                 );
               }

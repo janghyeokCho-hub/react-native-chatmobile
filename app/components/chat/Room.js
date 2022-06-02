@@ -48,10 +48,10 @@ const Room = ({
   showModalMenu,
   getRoomSettings,
   isEmptyObj,
-  chineseWall = [],
 }) => {
   const { sizes } = useTheme();
   const id = useSelector(({ login }) => login.id);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const filterMember = useMemo(
     () => getFilterMember(room.members, id, room.roomType),
     [room.members, id, room.roomType],
@@ -61,7 +61,7 @@ const Room = ({
   const [lastMessageText, setLastMessageText] = useState('');
 
   useEffect(() => {
-    if (room?.lastMessage && chineseWall.length) {
+    if (room?.lastMessage && chineseWall?.length) {
       const lastMessageInfo = isJSONStr(room.lastMessage)
         ? JSON.parse(room.lastMessage)
         : room.lastMessage;

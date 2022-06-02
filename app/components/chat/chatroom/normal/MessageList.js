@@ -24,15 +24,13 @@ import {
 } from 'react-native';
 import MessageSync from '../controls/MessageSync';
 import * as dbAction from '@/lib/appData/action';
-import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
-import { getConfig } from '@/config';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
 const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
-  const userInfo = useSelector(({ login }) => login.userInfo);
-  const userChineseWall = useSelector(({ login }) => login.chineseWall);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { tempMessage, messages, currentRoom } = useSelector(
     ({ message, room }) => ({
       tempMessage: message.tempMessage,
@@ -47,37 +45,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   const [refresh, setRefresh] = useState(false);
   const [useScroll, setUseScroll] = useState(false);
   const [topEnd, setTopEnd] = useState(false);
-  const [chineseWallState, setChineseWallState] = useState([]);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const getChineseWallList = async () => {
-      const { result, status } = await getChineseWall({
-        userId: userInfo.id,
-        myInfo: userInfo,
-      });
-      if (status === 'SUCCESS') {
-        setChineseWallState(result);
-      } else {
-        setChineseWallState([]);
-      }
-    };
-
-    if (userChineseWall?.length) {
-      setChineseWallState(userChineseWall);
-    } else {
-      const useChineseWall = getConfig('UseChineseWall', false);
-      if (useChineseWall) {
-        getChineseWallList();
-      } else {
-        setChineseWallState([]);
-      }
-    }
-
-    return () => {
-      setChineseWallState([]);
-    };
-  }, [userChineseWall, userInfo]);
 
   useEffect(() => {
     const messageData = [
@@ -112,9 +80,9 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   }, [messages, tempMessage]);
 
   useEffect(() => {
-    const failMsg = tempMessage.filter(item => item.status == 'fail');
+    const failMsg = tempMessage.filter(item => item.status === 'fail');
 
-    if (currentRoom.roomID && (failMsg.length > 0 || tempMessage.length == 0)) {
+    if (currentRoom.roomID && (failMsg?.length || !tempMessage?.length)) {
       dbAction.saveFailMessages({
         roomId: currentRoom.roomID,
         failMsg,
@@ -130,9 +98,9 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   );
 
   const syncMessages = useCallback(() => {
-    if (currentRoom && currentRoom.roomID) {
+    if (currentRoom?.roomID) {
       const roomID = currentRoom.roomID;
-      const isNotice = currentRoom.roomType == 'A';
+      const isNotice = currentRoom.roomType === 'A';
 
       const callback = async () => {
         const response = await dbAction.getMessages({
@@ -158,13 +126,14 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
           }),
         );
         // }
-        if (!tempMessages || messages.length == 0)
+        if (!tempMessages || !messages?.length) {
           dispatch(
             readMessage({
               roomID,
               isNotice,
             }),
           );
+        }
       };
       dbAction.unreadCountSync(
         { roomID, roomType: currentRoom.roomType },
@@ -184,11 +153,11 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         param => {
           dispatch(setUnreadCountForSync(param));
         },
-        currentRoom.roomType == 'A',
+        currentRoom.roomType === 'A',
       );
-      if (response.data.status == 'SUCCESS') {
+      if (response.data.status === 'SUCCESS') {
         const data = response.data.result;
-        if (data.length > 0) {
+        if (data?.length) {
           dispatch(setMessages({ messages: data, dist: 'NEXT' }));
         } else {
           setTopEnd(true);
@@ -211,7 +180,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
     (item, index) => {
       let isBlock = false;
       const message = item;
-      if (message?.isMine === 'N' && chineseWallState.length) {
+      if (message?.isMine === 'N' && chineseWall?.length) {
         const senderInfo = isJSONStr(message?.senderInfo)
           ? JSON.parse(message.senderInfo)
           : message.senderInfo;
@@ -220,7 +189,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
             ...senderInfo,
             id: message.sender,
           },
-          chineseWall: chineseWallState,
+          chineseWall,
         });
         const isFile = !!message.fileInfos;
         isBlock = isFile ? blockFile : blockChat;

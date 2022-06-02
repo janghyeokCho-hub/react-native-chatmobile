@@ -18,9 +18,8 @@ import {
   Image,
 } from 'react-native';
 import ChannelMessageSync from '@C/channel/channelroom/controls/ChannelMessageSync';
-import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
-import { getConfig } from '@/config';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
@@ -33,8 +32,7 @@ const ChannelMessageList = React.forwardRef(
         currentChannel: channel.currentChannel,
       }),
     );
-    const userInfo = useSelector(({ login }) => login.userInfo);
-    const userChineseWall = useSelector(({ login }) => login.chineseWall);
+    const chineseWall = useSelector(({ login }) => login.chineseWall);
 
     let _listener = null;
 
@@ -44,38 +42,8 @@ const ChannelMessageList = React.forwardRef(
 
     const [useScroll, setUseScroll] = useState(false);
     const [topEnd, setTopEnd] = useState(false);
-    const [chineseWallState, setChineseWallState] = useState([]);
 
     const dispatch = useDispatch();
-
-    useEffect(() => {
-      const getChineseWallList = async () => {
-        const { result, status } = await getChineseWall({
-          userId: userInfo.id,
-          myInfo: userInfo,
-        });
-        if (status === 'SUCCESS') {
-          setChineseWallState(result);
-        } else {
-          setChineseWallState([]);
-        }
-      };
-
-      if (userChineseWall?.length) {
-        setChineseWallState(userChineseWall);
-      } else {
-        const useChineseWall = getConfig('UseChineseWall', false);
-        if (useChineseWall) {
-          getChineseWallList();
-        } else {
-          setChineseWallState([]);
-        }
-      }
-
-      return () => {
-        setChineseWallState([]);
-      };
-    }, [userChineseWall, userInfo]);
 
     useEffect(() => {
       const messageData = [
@@ -151,7 +119,7 @@ const ChannelMessageList = React.forwardRef(
       (item, index) => {
         let isBlock = false;
         const message = item;
-        if (message?.isMine === 'N' && chineseWallState.length) {
+        if (message?.isMine === 'N' && chineseWall?.length) {
           const senderInfo = isJSONStr(message?.senderInfo)
             ? JSON.parse(message.senderInfo)
             : message.senderInfo;
@@ -161,7 +129,7 @@ const ChannelMessageList = React.forwardRef(
               ...senderInfo,
               id: message.sender,
             },
-            chineseWall: chineseWallState,
+            chineseWall,
           });
           const isFile = !!message.fileInfos;
           isBlock = isFile ? blockFile : blockChat;

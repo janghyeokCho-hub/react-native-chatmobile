@@ -53,8 +53,12 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
           companyCode: companyCode,
         }).then(({ data }) => {
           //그룹데이터 제외 필터링
-          if(group)
-            data.result.sub = filterSearchGroupMember(data.result.sub, group, userID);
+          if (group)
+            data.result.sub = filterSearchGroupMember(
+              data.result.sub,
+              group,
+              userID,
+            );
           setDeptProfileList([]);
           setDeptProfileList(data.result.path);
           setOrgpathList([]);
@@ -75,9 +79,9 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
           type: 'O',
         }).then(({ data }) => {
           //그룹데이터 제외 필터링
-          if(group)
+          if (group)
             data.result = filterSearchGroupMember(data.result, group, userID);
-          
+
           setDeptProfileList([]);
           setOrgpathList([]);
           setOrgpathList(data.result);
@@ -95,18 +99,17 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
 
   useEffect(() => {
     setTimeout(() => {
-      if(flatlist.current)
-        flatlist.current.scrollToEnd({ animated: true });
+      if (flatlist.current) flatlist.current.scrollToEnd({ animated: true });
     }, 200);
   }, [deptProfileList]);
 
   useEffect(() => {
-    if(group?.sub){
-      if(oldGroupMember.length != group.sub.length){
-        setOldGroupMember(group.sub)
+    if (group?.sub) {
+      if (oldGroupMember.length != group.sub.length) {
+        setOldGroupMember(group.sub);
         handleDept(userInfo.DeptCode, userInfo.CompanyCode);
-      }else{
-        setOldGroupMember(group.sub)
+      } else {
+        setOldGroupMember(group.sub);
       }
     }
   }, [group, oldGroupMember]);
@@ -123,7 +126,7 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
                 code: 'startChat',
                 onPress: () => {
                   navigation.navigate('InviteMember', {
-                    headerName: getDic('StartChat'),
+                    headerName: getDic('StartChat', '대화시작'),
                     isNewRoom: true,
                   });
                 },

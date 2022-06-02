@@ -349,7 +349,7 @@ const ProfilePopup = ({ route, navigation }) => {
                           fontSize: sizes.default,
                         }}
                       >
-                        {getDic('StartChat')}
+                        {getDic('StartChat', '대화시작')}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -400,7 +400,7 @@ const ProfilePopup = ({ route, navigation }) => {
                     <Text
                       style={{ ...styles.textChat, fontSize: sizes.default }}
                     >
-                      {getDic('StartChat')}
+                      {getDic('StartChat', '대화시작')}
                     </Text>
                   </View>
                 </TouchableOpacity>

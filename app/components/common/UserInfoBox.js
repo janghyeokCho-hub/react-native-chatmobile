@@ -2,28 +2,23 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
-  Image,
   Text,
   StyleSheet,
   Platform,
   Alert,
-  Dimensions,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import ProfileBox from './ProfileBox';
 import ToggleButton from './buttons/ToggleButton';
 import { changeModal, openModal } from '@/modules/modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { addContact, addFavorite } from '@/lib/contactUtil';
-import { getContactList } from '@/lib/api/contact';
 import { openChatRoomView } from '@/lib/roomUtil';
 import Svg, { G, Path, Rect, Circle } from 'react-native-svg';
 import { getJobInfo, getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const UserInfoBox = ({
   userInfo,
@@ -35,6 +30,7 @@ const UserInfoBox = ({
   navigation,
 }) => {
   const { colors, sizes } = useTheme();
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const contacts = useSelector(({ contact }) => contact.contacts);
   const viewType = useSelector(({ room }) => room.viewType);
   const rooms = useSelector(({ room }) => room.rooms);
@@ -293,31 +289,46 @@ const UserInfoBox = ({
 
       buttons.push({
         code: 'startChat',
-        title: getDic('StartChat'),
+        title: getDic('StartChat', '대화시작'),
         onPress: () => {
-          if (userInfo.pChat == 'Y')
-            openChatRoomView(
-              dispatch,
-              viewType,
-              rooms,
-              selectId,
-              userInfo,
-              myInfo,
-              navigation,
-            );
-          else
-            Alert.alert(
-              null,
-              getDic('Msg_GroupInviteError'),
-              [{ text: getDic('Ok') }],
-              { cancelable: true },
-            );
+          let isBlock = false;
+          if (chineseWall?.length) {
+            const { blockChat, blockFile } = isBlockCheck({
+              targetInfo: userInfo,
+              chineseWall,
+            });
+            if (blockChat && blockFile) {
+              isBlock = true;
+            }
+          }
+          if (isBlock) {
+            Alert.alert(null, getDic('Msg_BlockTarget', '차단된 대상입니다.'));
+          } else {
+            if (userInfo.pChat === 'Y') {
+              openChatRoomView(
+                dispatch,
+                viewType,
+                rooms,
+                selectId,
+                userInfo,
+                myInfo,
+                navigation,
+              );
+            } else {
+              Alert.alert(
+                null,
+                getDic('Msg_GroupInviteError'),
+                [{ text: getDic('Ok') }],
+                { cancelable: true },
+              );
+            }
+          }
         },
       });
     } else {
       buttons.push({
         code: 'startChat',
-        title: getDic('StartChat'),
+        title: getDic('StartChat', '대화시작'),
         onPress: () => {
           if (userInfo.pChat == 'Y')
             openChatRoomView(

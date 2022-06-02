@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { View, StyleSheet, Alert } from 'react-native';
-import Svg, { Path, G } from 'react-native-svg';
 import { getTopPadding } from '@/lib/device/common';
 import { getMessage } from '@/lib/messageUtil';
 import { setUnreadCountForSync } from '@/modules/room';
@@ -11,13 +10,11 @@ import SearchIndexBox from '@C/chat/chatroom/search/SearchIndexBox';
 import * as dbAction from '@/lib/appData/action';
 import { setSearchKeywordRoom } from '@/modules/room';
 import { getDic } from '@/config';
-import { getChineseWall, isBlockCheck } from '@/lib/api/orgchart';
+import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
-import { getConfig } from '@/config';
 
 const SearchView = ({ onSearchBox, navigation }) => {
-  const myInfo = useSelector(({ login }) => login.userInfo);
-  const { chineseWall } = useSelector(({ login }) => login.chineseWall);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const roomID = useSelector(({ room }) => room.currentRoom.roomID);
   const currentRoom = useSelector(({ room }) => room.currentRoom);
 
@@ -25,38 +22,8 @@ const SearchView = ({ onSearchBox, navigation }) => {
   const [moveData, setMoveData] = useState(null);
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [chineseWallState, setChineseWallState] = useState([]);
 
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const getChineseWallList = async () => {
-      const { result, status } = await getChineseWall({
-        userId: myInfo?.id,
-        myInfo,
-      });
-      if (status === 'SUCCESS') {
-        setChineseWallState(result);
-      } else {
-        setChineseWallState([]);
-      }
-    };
-
-    if (chineseWall?.length) {
-      setChineseWallState(chineseWall);
-    } else {
-      const useChineseWall = getConfig('UseChineseWall', false);
-      if (useChineseWall) {
-        getChineseWallList();
-      } else {
-        setChineseWallState([]);
-      }
-    }
-
-    return () => {
-      setChineseWallState([]);
-    };
-  }, [myInfo, chineseWall]);
 
   const handleSearchBox = useCallback(() => {
     setMoveData(null);
@@ -83,7 +50,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
       if (data.status === 'SUCCESS') {
         // 차이니즈월 적용
         let { firstPage, search } = data;
-        if (chineseWallState?.length) {
+        if (chineseWall?.length) {
           const blockList = firstPage?.map(item => {
             const senderInfo = isJSONStr(item.senderInfo)
               ? JSON.parse(item.senderInfo)
@@ -95,7 +62,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
 
             const { blockChat } = isBlockCheck({
               targetInfo,
-              chineseWall: chineseWallState,
+              chineseWall,
             });
             return blockChat && item.messageID;
           });
@@ -119,7 +86,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
 
       setLoading(false);
     },
-    [chineseWallState],
+    [chineseWall],
   );
 
   const handleSearch = useCallback(
@@ -157,7 +124,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
         setLoading(false);
       }
     },
-    [roomID, searchText, chineseWallState],
+    [roomID, searchText, chineseWall],
   );
 
   const handleIndex = useCallback(
@@ -230,7 +197,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
           markingText={searchText}
           roomID={roomID}
           navigation={navigation}
-          chineseWall={chineseWallState}
+          chineseWall={chineseWall}
         />
 
         <SearchIndexBox length={searchResult.length} onChange={handleIndex} />

@@ -128,7 +128,7 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
 
         buttons.push({
           code: 'startChat',
-          title: getDic('StartChat'),
+          title: getDic('StartChat', '대화시작'),
           onPress: () => {
             if (subItem.pChat == 'Y')
               openChatRoomView(
@@ -152,7 +152,7 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
       } else {
         buttons.push({
           code: 'startChat',
-          title: getDic('StartChat'),
+          title: getDic('StartChat', '대화시작'),
           onPress: () => {
             if (subItem.pChat == 'Y')
               openChatRoomView(
@@ -212,7 +212,7 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
               code: 'startChat',
               onPress: () => {
                 navigation.navigate('InviteMember', {
-                  headerName: getDic('StartChat'),
+                  headerName: getDic('StartChat', '대화시작'),
                   isNewRoom: true,
                 });
               },
