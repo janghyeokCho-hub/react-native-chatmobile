@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { View, FlatList, StyleSheet, Alert } from 'react-native';
 import * as OrgChart from '@API/orgchart';
@@ -7,18 +7,18 @@ import Header from '@COMMON/Header';
 import ContactItem from './ContactItem';
 import AddContactIcon from '@COMMON/icons/AddContactIcon';
 import NewChatIcon from '@COMMON/icons/NewChatIcon';
-import { changeModal, openModal, closeModal } from '@/modules/modal';
+import { changeModal, openModal } from '@/modules/modal';
 import SearchBar from '@COMMON/SearchBar';
 import { addFavorite, deleteContact } from '@/lib/contactUtil';
 import { openChatRoomView } from '@/lib/roomUtil';
 import NetworkError from '../common/NetworkError';
 import { getDic } from '@/config';
 import { getAbsence } from '@/modules/absence';
-import * as contactApi from '@API/contact';
-import { restartApp } from '@/lib/device/common.android';
+import { isBlockCheck } from '@/lib/api/orgchart';
 import { getContacts } from '@/modules/contact';
 
 const ContactList = ({ viewType, checkObj, navigation }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const contactList = useSelector(({ contact }) => contact.contacts);
   const oViewType = useSelector(({ room }) => room.viewType);
   const rooms = useSelector(({ room }) => room.rooms);
@@ -130,23 +130,42 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
           code: 'startChat',
           title: getDic('StartChat', '대화시작'),
           onPress: () => {
-            if (subItem.pChat == 'Y')
-              openChatRoomView(
-                dispatch,
-                oViewType,
-                rooms,
-                selectId,
-                subItem,
-                myInfo,
-                navigation,
-              );
-            else
+            let isBlock = false;
+            if (chineseWall?.length) {
+              const { blockChat, blockFile } = isBlockCheck({
+                targetInfo: subItem,
+                chineseWall,
+              });
+              if (blockChat && blockFile) {
+                isBlock = true;
+              }
+            }
+
+            if (isBlock) {
               Alert.alert(
                 null,
-                getDic('Msg_GroupInviteError'),
-                [{ text: getDic('Ok') }],
-                { cancelable: true },
+                getDic('Msg_BlockTarget', '차단된 대상입니다.'),
               );
+            } else {
+              if (subItem.pChat === 'Y') {
+                openChatRoomView(
+                  dispatch,
+                  oViewType,
+                  rooms,
+                  selectId,
+                  subItem,
+                  myInfo,
+                  navigation,
+                );
+              } else {
+                Alert.alert(
+                  null,
+                  getDic('Msg_GroupInviteError'),
+                  [{ text: getDic('Ok') }],
+                  { cancelable: true },
+                );
+              }
+            }
           },
         });
       } else {
@@ -154,23 +173,42 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
           code: 'startChat',
           title: getDic('StartChat', '대화시작'),
           onPress: () => {
-            if (subItem.pChat == 'Y')
-              openChatRoomView(
-                dispatch,
-                oViewType,
-                rooms,
-                selectId,
-                subItem,
-                myInfo,
-                navigation,
-              );
-            else
+            let isBlock = false;
+            if (chineseWall?.length) {
+              const { blockChat, blockFile } = isBlockCheck({
+                targetInfo: subItem,
+                chineseWall,
+              });
+              if (blockChat && blockFile) {
+                isBlock = true;
+              }
+            }
+
+            if (isBlock) {
               Alert.alert(
                 null,
-                getDic('Msg_GroupInviteError'),
-                [{ text: getDic('Ok') }],
-                { cancelable: true },
+                getDic('Msg_BlockTarget', '차단된 대상입니다.'),
               );
+            } else {
+              if (subItem.pChat === 'Y') {
+                openChatRoomView(
+                  dispatch,
+                  oViewType,
+                  rooms,
+                  selectId,
+                  subItem,
+                  myInfo,
+                  navigation,
+                );
+              } else {
+                Alert.alert(
+                  null,
+                  getDic('Msg_GroupInviteError'),
+                  [{ text: getDic('Ok') }],
+                  { cancelable: true },
+                );
+              }
+            }
           },
         });
       }
@@ -192,7 +230,7 @@ const ContactList = ({ viewType, checkObj, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {type == 'list' && (
+      {type === 'list' && (
         <Header
           title={getDic('Contact')}
           topButton={[

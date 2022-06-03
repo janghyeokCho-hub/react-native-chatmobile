@@ -41,8 +41,9 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
     if (
       (deptProfileList == null || deptProfileList.length == 0) &&
       userInfo.DeptCode != null
-    )
+    ) {
       handleDept(userInfo.DeptCode, userInfo.CompanyCode);
+    }
   }, [networkState]);
 
   const handleDept = useCallback(
@@ -53,12 +54,13 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
           companyCode: companyCode,
         }).then(({ data }) => {
           //그룹데이터 제외 필터링
-          if (group)
+          if (group) {
             data.result.sub = filterSearchGroupMember(
               data.result.sub,
               group,
               userID,
             );
+          }
           setDeptProfileList([]);
           setDeptProfileList(data.result.path);
           setOrgpathList([]);
@@ -79,8 +81,9 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
           type: 'O',
         }).then(({ data }) => {
           //그룹데이터 제외 필터링
-          if (group)
+          if (group) {
             data.result = filterSearchGroupMember(data.result, group, userID);
+          }
 
           setDeptProfileList([]);
           setOrgpathList([]);
@@ -99,13 +102,15 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
 
   useEffect(() => {
     setTimeout(() => {
-      if (flatlist.current) flatlist.current.scrollToEnd({ animated: true });
+      if (flatlist.current) {
+        flatlist.current.scrollToEnd({ animated: true });
+      }
     }, 200);
   }, [deptProfileList]);
 
   useEffect(() => {
     if (group?.sub) {
-      if (oldGroupMember.length != group.sub.length) {
+      if (oldGroupMember.length !== group.sub.length) {
         setOldGroupMember(group.sub);
         handleDept(userInfo.DeptCode, userInfo.CompanyCode);
       } else {
@@ -117,7 +122,7 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
   return (
     <>
       <View style={styles.container}>
-        {type == 'list' && (
+        {type === 'list' && (
           <Header
             title={getDic('OrgChart')}
             style={styles.header}
@@ -219,7 +224,7 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
                   data={orgpathList}
                   keyExtractor={item => item.id}
                   renderItem={({ item }) => {
-                    if (item.type == 'G') {
+                    if (item.type === 'G') {
                       return (
                         <View style={styles.userBoxContainer}>
                           <UserInfoBox
@@ -228,23 +233,23 @@ const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
                             onPress={() => {
                               handleDept(item.id, item.companyCode);
                             }}
-                            onLongPress={type == 'list' ? null : false}
-                            checkObj={type == 'checklist' ? checkObj : null}
-                            disableMessage={type == 'checklist'}
+                            onLongPress={type === 'list' ? null : false}
+                            checkObj={type === 'checklist' ? checkObj : null}
+                            disableMessage={type === 'checklist'}
                             navigation={navigation}
                           />
                         </View>
                       );
-                    } else if (item.type == 'U') {
+                    } else if (item.type === 'U') {
                       return (
                         <View style={styles.userBoxContainer}>
                           <UserInfoBox
                             userInfo={item}
                             isInherit={false}
-                            onPress={type == 'list' ? null : false}
-                            onLongPress={type == 'list' ? null : false}
-                            checkObj={type == 'checklist' ? checkObj : null}
-                            disableMessage={type == 'checklist'}
+                            onPress={type === 'list' ? null : false}
+                            onLongPress={type === 'list' ? null : false}
+                            checkObj={type === 'checklist' ? checkObj : null}
+                            disableMessage={type === 'checklist'}
                             navigation={navigation}
                           />
                         </View>

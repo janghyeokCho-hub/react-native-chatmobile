@@ -18,6 +18,7 @@ import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { removeCustomGroup } from '@/modules/contact';
 import { openChatRoomView } from '@/lib/roomUtil';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const groupBtnUpImg = require('@C/assets/group_button_up.png');
 const groupBtnDownImg = require('@C/assets/group_button_down.png');
@@ -31,6 +32,7 @@ const GroupItem = ({
   navigation,
 }) => {
   const { colors, sizes } = useTheme();
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const oViewType = useSelector(({ room }) => room.viewType);
   const rooms = useSelector(({ room }) => room.rooms);
   const selectId = useSelector(({ room }) => room.selectId);
@@ -120,23 +122,42 @@ const GroupItem = ({
         onPress: () => {
           //그룹멤버
           if (item) {
-            if (contact.pChat == 'Y')
-              openChatRoomView(
-                dispatch,
-                oViewType,
-                rooms,
-                selectId,
-                item,
-                myInfo,
-                navigation,
-              );
-            else
+            let isBlock = false;
+            if (chineseWall?.length) {
+              const { blockChat, blockFile } = isBlockCheck({
+                targetInfo: item,
+                chineseWall,
+              });
+              if (blockChat && blockFile) {
+                isBlock = true;
+              }
+            }
+
+            if (isBlock) {
               Alert.alert(
                 null,
-                getDic('Msg_GroupInviteError'),
-                [{ text: getDic('Ok') }],
-                { cancelable: true },
+                getDic('Msg_BlockTarget', '차단된 대상입니다.'),
               );
+            } else {
+              if (contact.pChat === 'Y') {
+                openChatRoomView(
+                  dispatch,
+                  oViewType,
+                  rooms,
+                  selectId,
+                  item,
+                  myInfo,
+                  navigation,
+                );
+              } else {
+                Alert.alert(
+                  null,
+                  getDic('Msg_GroupInviteError'),
+                  [{ text: getDic('Ok') }],
+                  { cancelable: true },
+                );
+              }
+            }
           } else {
             //일반채팅
             //그룹채팅구현

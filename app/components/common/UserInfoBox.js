@@ -341,6 +341,7 @@ const UserInfoBox = ({
             }
           }
           if (isBlock) {
+            Alert.alert(null, getDic('Msg_BlockTarget', '차단된 대상입니다.'));
           } else {
             if (userInfo.pChat === 'Y') {
               openChatRoomView(
