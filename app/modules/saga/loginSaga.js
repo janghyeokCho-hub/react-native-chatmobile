@@ -108,13 +108,16 @@ export function createLoginRequestSaga(loginType, syncType) {
             }
 
             // 차이니즈 월
-            const chineseWall = yield call(getChineseWall, {
-              userId: response.data.result.id,
-              myInfo: response.data.result,
-            });
+            const useChineseWall = getConfig('UseChineseWall', false);
+            if (useChineseWall) {
+              const chineseWall = yield call(getChineseWall, {
+                userId: response.data.result.id,
+                myInfo: response.data.result,
+              });
 
-            if (chineseWall.status === 'SUCCESS') {
-              yield put(setChineseWall(chineseWall.result));
+              if (chineseWall.status === 'SUCCESS') {
+                yield put(setChineseWall(chineseWall.result));
+              }
             }
           } else {
             yield put({
@@ -221,12 +224,15 @@ export function createExtLoginRequestSaga(loginType, syncType) {
             }
 
             // 차이니즈 월
-            const chineseWall = yield call(getChineseWall, {
-              userId: response.data.result.id,
-              myInfo: response.data.result,
-            });
-            if (chineseWall.status === 'SUCCESS') {
-              yield put(setChineseWall(chineseWall.result));
+            const useChineseWall = getConfig('UseChineseWall', false);
+            if (useChineseWall) {
+              const chineseWall = yield call(getChineseWall, {
+                userId: response.data.result.id,
+                myInfo: response.data.result,
+              });
+              if (chineseWall.status === 'SUCCESS') {
+                yield put(setChineseWall(chineseWall.result));
+              }
             }
           } else {
             yield put({
@@ -407,12 +413,15 @@ export function createSyncTokenRequestSaga(type) {
           }
 
           // 차이니즈 월
-          const chineseWall = yield call(getChineseWall, {
-            userId: authData.id,
-            myInfo: authData,
-          });
-          if (chineseWall.status === 'SUCCESS') {
-            yield put(setChineseWall(chineseWall.result));
+          const useChineseWall = getConfig('UseChineseWall', false);
+          if (useChineseWall) {
+            const chineseWall = yield call(getChineseWall, {
+              userId: authData.id,
+              myInfo: authData,
+            });
+            if (chineseWall.status === 'SUCCESS') {
+              yield put(setChineseWall(chineseWall.result));
+            }
           }
         } else {
           yield put(loginTokenAuth(result));

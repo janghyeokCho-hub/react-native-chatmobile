@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { getServer } from '@/config';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import LockIcon from '@COMMON/icons/LockIcon';
@@ -14,15 +15,15 @@ const Channel = ({
   showModalMenu,
   getRoomSettings,
   isEmptyObj,
-  chineseWall = [],
 }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { sizes } = useTheme();
   const [pinnedTop, setPinnedTop] = useState(false);
   const setting = useMemo(() => getRoomSettings(room), [room, getRoomSettings]);
   const [lastMessageText, setLastMessageText] = useState('');
 
   useEffect(() => {
-    if (room?.lastMessage && chineseWall.length) {
+    if (room?.lastMessage && chineseWall?.length) {
       const lastMessageInfo = isJSONStr(room.lastMessage)
         ? JSON.parse(room.lastMessage)
         : room.lastMessage;
@@ -99,7 +100,7 @@ const Channel = ({
         )}
         <View style={styles.content}>
           <View style={styles.title}>
-            {room.openType == 'L' || room.openType == 'P' ? (
+            {room.openType === 'L' || room.openType === 'P' ? (
               <View
                 style={{
                   flexDirection: 'row',

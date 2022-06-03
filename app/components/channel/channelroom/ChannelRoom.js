@@ -26,6 +26,7 @@ const ChannelRoom = ({ navigation, route }) => {
   } else {
     roomID = null;
   }
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const channel = useSelector(state => state?.channel?.currentChannel);
   const loading = useSelector(
     state => state?.loading?.['channel/GET_CHANNEL_INFO'],
@@ -147,6 +148,7 @@ const ChannelRoom = ({ navigation, route }) => {
                   postAction={handleMessage}
                   onRead={handleReadMessage}
                   navigation={navigation}
+                  chineseWall={chineseWall}
                 />
               )}
             </>

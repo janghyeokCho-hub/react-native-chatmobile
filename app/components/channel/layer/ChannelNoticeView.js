@@ -30,6 +30,7 @@ const upBtnIcon = require('@C/assets/group_button_up.png');
 const downBtnIcon = require('@C/assets/group_button_down.png');
 
 const ChannelNoticeView = ({
+  isBlock,
   noticeInfo,
   open,
   flip,
@@ -63,8 +64,11 @@ const ChannelNoticeView = ({
   };
 
   const context = useMemo(() => {
-    return convertURLMessage(noticeInfo.context);
-  }, [noticeInfo.context]);
+    const text = isBlock
+      ? getDic('BlockChat', '차단된 메시지 입니다.')
+      : noticeInfo.context;
+    return convertURLMessage(text);
+  }, [noticeInfo.context, isBlock]);
 
   const { findMemberInfo } = useMemberInfo('channel');
   const [processedContext, setProcessedContext] = useState([]);
@@ -223,10 +227,7 @@ const ChannelNoticeView = ({
               {flip ? (
                 <Image source={upBtnIcon} style={{ width: 24, height: 24 }} />
               ) : (
-                <Image
-                  source={downBtnIcon}
-                  style={{ width: 24, height: 24 }}
-                />
+                <Image source={downBtnIcon} style={{ width: 24, height: 24 }} />
               )}
             </TouchableOpacity>
           </View>

@@ -30,13 +30,7 @@ const getRoomSettings = (room = {}) => {
   return setting;
 };
 
-const RoomItems = ({
-  rooms,
-  loading,
-  onRoomChange,
-  navigation,
-  chineseWall = [],
-}) => {
+const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
   const { id, selectId } = useSelector(({ login, room }) => ({
     id: login.id,
     selectId: room.selectId,
@@ -149,12 +143,6 @@ const RoomItems = ({
         if (notiInfo.status == 200) {
           onNoti = notiInfo.data.result;
         }
-        // .then(({ data }) => {
-        //   if (data.status === 'SUCCESS') {
-        //     console.log(data);
-        //     setOnNoti(data.result);
-        //   }
-        // });
       }
 
       const pinToTop = {
@@ -255,7 +243,6 @@ const RoomItems = ({
                   showModalMenu={showModalMenu}
                   getRoomSettings={getRoomSettings}
                   isEmptyObj={isEmptyObj}
-                  chineseWall={chineseWall}
                 />
               );
             }}

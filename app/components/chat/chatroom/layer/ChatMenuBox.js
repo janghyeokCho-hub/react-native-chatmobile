@@ -22,7 +22,6 @@ import { useTheme } from '@react-navigation/native';
 import { downloadMessageData } from '@/lib/fileUtil';
 import { getDictionary } from '@/lib/common';
 import { getConfig } from '@/config';
-import { getChineseWall } from '@/lib/api/orgchart';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -38,34 +37,8 @@ const ChatMenuBox = ({
     id: login.id,
   }));
   const myInfo = useSelector(({ login }) => login.userInfo);
-  const userChineseWall = useSelector(({ login }) => login.chineseWall);
 
   const [notification, setNotification] = useState(true);
-  const [chineseWallState, setChineseWallState] = useState([]);
-
-  useEffect(() => {
-    const getChineseWallList = async () => {
-      const { result, status } = await getChineseWall({
-        userId: myInfo.id,
-        myInfo,
-      });
-      if (status === 'SUCCESS') {
-        setChineseWallState(result);
-      } else {
-        setChineseWallState([]);
-      }
-    };
-
-    if (userChineseWall?.length) {
-      setChineseWallState(userChineseWall);
-    } else {
-      getChineseWallList();
-    }
-
-    return () => {
-      setChineseWallState([]);
-    };
-  }, [userChineseWall, myInfo]);
 
   useEffect(() => {
     getRoomNoti();
@@ -123,7 +96,6 @@ const ChatMenuBox = ({
     handleClose();
     navigation.navigate('PhotoSummary', {
       roomID: roomInfo.roomID,
-      chineseWall: chineseWallState,
     });
   };
 
@@ -131,7 +103,6 @@ const ChatMenuBox = ({
     handleClose();
     navigation.navigate('FileSummary', {
       roomID: roomInfo.roomID,
-      chineseWall: chineseWallState,
     });
   };
 

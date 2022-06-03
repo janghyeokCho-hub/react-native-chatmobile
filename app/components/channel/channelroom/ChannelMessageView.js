@@ -1,4 +1,10 @@
-import React, { useRef, useState, useCallback, useLayoutEffect } from 'react';
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useLayoutEffect,
+  useEffect,
+} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import ChatRoomHeader from '@C/chat/chatroom/normal/ChatRoomHeader';
 import MessagePostBox from '@C/chat/chatroom/normal/MessagePostBox';
@@ -13,6 +19,8 @@ import ChannelNoticeView from '../layer/ChannelNoticeView';
 import ChannelNoticeIcon from '@/components/common/icons/ChannelNoticeIcon';
 import { removeChannelNotice } from '@/modules/channel';
 import { getDic } from '@/config';
+import { isJSONStr } from '@/lib/common';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const ChannelMessageView = ({
   roomInfo,
@@ -20,6 +28,7 @@ const ChannelMessageView = ({
   onRead,
   postAction,
   navigation,
+  chineseWall,
 }) => {
   const isBackLock = useSelector(({ app }) => app.backHandler.ChatMenuBox);
   const userInfo = useSelector(({ login }) => login.userInfo);
@@ -27,11 +36,33 @@ const ChannelMessageView = ({
   const [flip, setFlip] = useState(false);
   const [noticeFlip, setNoticeFlip] = useState(false);
   const [noticeDisable, setNoticeDisable] = useState(false);
+  const [isBlock, setIsBlock] = useState(false);
 
   const listBox = useRef(null);
   const _drawer = useRef(null);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (roomInfo?.notice) {
+      const notice = roomInfo.notice;
+      if (chineseWall?.length) {
+        const senderInfo = isJSONStr(notice.senderInfo)
+          ? JSON.parse(notice.senderInfo)
+          : notice.senderInfo;
+        const targetInfo = {
+          ...senderInfo,
+          id: senderInfo.sender,
+        };
+        const { blockChat } = isBlockCheck({ targetInfo, chineseWall });
+        setIsBlock(blockChat);
+      } else {
+        setIsBlock(false);
+      }
+    } else {
+      setIsBlock(false);
+    }
+  }, [roomInfo, chineseWall, isBlock]);
 
   useLayoutEffect(() => {
     AsyncStorage.getItem(':channel_notice_' + roomInfo.roomId).then(data => {
@@ -108,6 +139,7 @@ const ChannelMessageView = ({
           />
           {roomInfo.notice && !noticeFlip && !noticeDisable ? (
             <ChannelNoticeView
+              isBlock={isBlock}
               noticeInfo={roomInfo.notice}
               open
               flip={flip}

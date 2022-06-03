@@ -8,7 +8,7 @@ import { changeModal, openModal, closeModal } from '@/modules/modal';
 import { getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
-import GroupItem from "./GroupItem"
+import GroupItem from './GroupItem';
 
 const groupBtnUpImg = require('@C/assets/group_button_up.png');
 const groupBtnDownImg = require('@C/assets/group_button_down.png');
@@ -22,16 +22,20 @@ const ContactItem = ({
 }) => {
   const { colors, sizes } = useTheme();
   const jobKeys = useSelector(({ absence }) => absence.jobKey);
-  const contactSub = useMemo(() => contact.sub?.map(item => {
-    if(!item.folderID && item.jobKey) {
-      return item;
-    }
-    // 쪽지 발송 대상 검색을 위한 jobKey 추가
-    return {
-      ...item,
-      jobKey: jobKeys.get(item?.id)
-    }
-  }), [contact, jobKeys]);
+  const contactSub = useMemo(
+    () =>
+      contact.sub?.map(item => {
+        if (!item.folderID && item.jobKey) {
+          return item;
+        }
+        // 쪽지 발송 대상 검색을 위한 jobKey 추가
+        return {
+          ...item,
+          jobKey: jobKeys.get(item?.id),
+        };
+      }),
+    [contact, jobKeys],
+  );
   const [isopen, setIsopen] = useState(true);
   const [isload, setIsload] = useState(false);
 
@@ -87,7 +91,7 @@ const ContactItem = ({
               }),
             );
             dispatch(openModal());
-          }else if(contact.folderType == 'R'){
+          } else if (contact.folderType == 'R') {
             dispatch(
               changeModal({
                 modalData: {
@@ -99,7 +103,7 @@ const ContactItem = ({
                       title: getDic('Create_Group', '그룹 생성'),
                       onPress: () => {
                         navigation.navigate('AddContact', {
-                          useGroup: true
+                          useGroup: true,
                         });
                       },
                     },
@@ -113,7 +117,9 @@ const ContactItem = ({
       >
         <Text style={{ ...styles.header, fontSize: sizes.default }}>
           {getDictionary(contact.folderName)}{' '}
-          {(contact.folderType == 'F' || contact.folderType == 'C' || contact.folderType == 'R') &&
+          {(contact.folderType == 'F' ||
+            contact.folderType == 'C' ||
+            contact.folderType == 'R') &&
             (contact.sub ? `(${contact.sub.length})` : `(0)`)}
         </Text>
         {isopen ? (
@@ -126,9 +132,7 @@ const ContactItem = ({
         <View>
           {contactSub.map(sub => {
             return sub.folderType && sub.folderType == 'R' ? (
-              <View
-                key={contact.folderID + '_' + sub.folderID}
-              >
+              <View key={contact.folderID + '_' + sub.folderID}>
                 <GroupItem
                   root={contact}
                   contact={sub}
@@ -138,7 +142,7 @@ const ContactItem = ({
                   navigation={navigation}
                 />
               </View>
-            ):(
+            ) : (
               <View
                 key={contact.folderID + '_' + sub.id}
                 style={styles.userBoxContainer}
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
   },
   userBoxContainer: {
     marginBottom: 20,
-  }
+  },
 });
 
 export default ContactItem;

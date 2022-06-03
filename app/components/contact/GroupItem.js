@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import UserInfoBox from '@COMMON/UserInfoBox';
-import { 
+import {
   View,
   Text,
   Image,
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Alert
+  Alert,
 } from 'react-native';
 import { getItemGroup } from '@/modules/contact';
 import { deleteContacts } from '@/modules/contact';
@@ -16,21 +16,23 @@ import { changeModal, openModal, closeModal } from '@/modules/modal';
 import { getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
-import { removeCustomGroup } from "@/modules/contact";
+import { removeCustomGroup } from '@/modules/contact';
 import { openChatRoomView } from '@/lib/roomUtil';
+import { isBlockCheck } from '@/lib/api/orgchart';
 
 const groupBtnUpImg = require('@C/assets/group_button_up.png');
 const groupBtnDownImg = require('@C/assets/group_button_down.png');
 
 const GroupItem = ({
-    root,
-    contact,
-    onLongPress,
-    viewType,
-    checkObj,
-    navigation
+  root,
+  contact,
+  onLongPress,
+  viewType,
+  checkObj,
+  navigation,
 }) => {
   const { colors, sizes } = useTheme();
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const oViewType = useSelector(({ room }) => room.viewType);
   const rooms = useSelector(({ room }) => room.rooms);
   const selectId = useSelector(({ room }) => room.selectId);
@@ -50,20 +52,21 @@ const GroupItem = ({
     setIsopen(!isopen);
   }, [isopen]);
 
-  const showContactMenu = useCallback((contact, item) => {
+  const showContactMenu = useCallback(
+    (contact, item) => {
       let buttons = [];
-      
+
       /* 그룹 헤더 longClick */
-      if(!item){
+      if (!item) {
         buttons.push({
           code: 'modifyCustomGroup',
           title: getDic('Chg_Group_Info', '그룹정보 변경'),
           onPress: () => {
-            navigation.navigate('EditGroup',{
+            navigation.navigate('EditGroup', {
               headerName: getDic('Chg_Group_Info', '그룹정보 변경'),
-              folderID: contact.folderID
+              folderID: contact.folderID,
             });
-          }
+          },
         });
 
         buttons.push({
@@ -79,69 +82,95 @@ const GroupItem = ({
                   text: getDic('Ok'),
                   onPress: () => {
                     //사용자 그룹단위 삭제
-                    dispatch(removeCustomGroup({
-                      folderId: contact.folderID, 
-                      folderType: contact.folderType
-                    }));
+                    dispatch(
+                      removeCustomGroup({
+                        folderId: contact.folderID,
+                        folderType: contact.folderType,
+                      }),
+                    );
                   },
                 },
               ],
               { cancelable: true },
             );
-          }
+          },
         });
-      }else{
+      } else {
         buttons.push({
           code: 'deleteMember',
           title: getDic('Delete_Group_Member', '그룹멤버삭제'),
           onPress: () => {
-            const member = item.type == 'U' ? {contactId: item.id}:{ contactId: item.id, companyCode: item.companyCode };
+            const member =
+              item.type == 'U'
+                ? { contactId: item.id }
+                : { contactId: item.id, companyCode: item.companyCode };
             //그룹 멤버/조직 단위 삭제 action
-            dispatch(removeCustomGroup({
+            dispatch(
+              removeCustomGroup({
                 folderId: contact.folderID,
                 folderType: contact.folderType,
-                ...member
-            }));
-          }
+                ...member,
+              }),
+            );
+          },
         });
-
       }
 
       buttons.push({
         code: 'startChat',
-        title: getDic('StartChat'),
+        title: getDic('StartChat', '대화시작'),
         onPress: () => {
-          //그룹멤버 
-          if(item){
-              if (contact.pChat == 'Y')
+          //그룹멤버
+          if (item) {
+            let isBlock = false;
+            if (chineseWall?.length) {
+              const { blockChat, blockFile } = isBlockCheck({
+                targetInfo: item,
+                chineseWall,
+              });
+              if (blockChat && blockFile) {
+                isBlock = true;
+              }
+            }
+
+            if (isBlock) {
+              Alert.alert(
+                null,
+                getDic('Msg_BlockTarget', '차단된 대상입니다.'),
+              );
+            } else {
+              if (contact.pChat === 'Y') {
                 openChatRoomView(
-                    dispatch,
-                    oViewType,
-                    rooms,
-                    selectId,
-                    item,
-                    myInfo,
-                    navigation,
-                  );
-              else
+                  dispatch,
+                  oViewType,
+                  rooms,
+                  selectId,
+                  item,
+                  myInfo,
+                  navigation,
+                );
+              } else {
                 Alert.alert(
                   null,
                   getDic('Msg_GroupInviteError'),
                   [{ text: getDic('Ok') }],
-                  { cancelable: true }
+                  { cancelable: true },
                 );
-          }else{//일반채팅
-              //그룹채팅구현
-              let groupInfos = { id: contact.folderID, type: contact.folderType };
-              openChatRoomView(
-                dispatch,
-                oViewType,
-                rooms,
-                selectId,
-                groupInfos,
-                myInfo,
-                navigation,
-              );
+              }
+            }
+          } else {
+            //일반채팅
+            //그룹채팅구현
+            let groupInfos = { id: contact.folderID, type: contact.folderType };
+            openChatRoomView(
+              dispatch,
+              oViewType,
+              rooms,
+              selectId,
+              groupInfos,
+              myInfo,
+              navigation,
+            );
           }
         },
       });
@@ -158,53 +187,56 @@ const GroupItem = ({
         );
         dispatch(openModal());
       }
-    }, 
-    [dispatch, rooms, groups, contact]
+    },
+    [dispatch, rooms, groups, contact],
   );
 
   return (
-    <View style={{ marginBottom: 5 }}>        
-        <TouchableOpacity
-            style={{ flexDirection: 'row' }}
-            onPress={handleIsOpen}
-            onLongPress={() => {
-              showContactMenu(contact);
-            }}
-        >
+    <View style={{ marginBottom: 5 }}>
+      <TouchableOpacity
+        style={{ flexDirection: 'row' }}
+        onPress={handleIsOpen}
+        onLongPress={() => {
+          showContactMenu(contact);
+        }}
+      >
         <Text style={{ ...styles.header, fontSize: sizes.default }}>
-            { "┗ "+ getDictionary(contact.folderName)}{' '}
-            {(contact.sub ? `(${contact.sub.length})` : `(0)`)}
+          {'┗ ' + getDictionary(contact.folderName)}{' '}
+          {contact.sub ? `(${contact.sub.length})` : `(0)`}
         </Text>
         {isopen ? (
-        <Image style={styles.toggleBtn} source={groupBtnUpImg} />
+          <Image style={styles.toggleBtn} source={groupBtnUpImg} />
         ) : (
-        <Image style={styles.toggleBtn} source={groupBtnDownImg} />
+          <Image style={styles.toggleBtn} source={groupBtnDownImg} />
         )}
-        </TouchableOpacity>
-        {isopen && groups ? (
-          <View>
+      </TouchableOpacity>
+      {isopen && groups ? (
+        <View>
           {groups.map(item => {
             return (
-            <View key={root.folderID + '_' + contact.folderID + '_' + item.id} style={styles.userBoxContainer}>
+              <View
+                key={root.folderID + '_' + contact.folderID + '_' + item.id}
+                style={styles.userBoxContainer}
+              >
                 <UserInfoBox
-                userInfo={item}
-                isInherit={true}
-                onPress={viewType == 'list' ? null : false}
-                onLongPress={
+                  userInfo={item}
+                  isInherit={true}
+                  onPress={viewType == 'list' ? null : false}
+                  onLongPress={
                     viewType == 'list'
-                    ? () => {
-                        showContactMenu(contact, item);
-                      }
-                    : false
-                }
-                checkObj={viewType == 'checklist' ? checkObj : null}
-                disableMessage={viewType == 'checklist'}
-                navigation={navigation}
+                      ? () => {
+                          showContactMenu(contact, item);
+                        }
+                      : false
+                  }
+                  checkObj={viewType == 'checklist' ? checkObj : null}
+                  disableMessage={viewType == 'checklist'}
+                  navigation={navigation}
                 />
-            </View>
+              </View>
             );
           })}
-          </View>
+        </View>
       ) : (
         <></>
       )}

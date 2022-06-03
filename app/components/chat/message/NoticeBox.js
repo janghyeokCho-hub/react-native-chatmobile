@@ -26,6 +26,7 @@ const NoticeBox = ({
   nameBox,
   timeBox,
   navigation,
+  isBlock,
 }) => {
   const { colors, sizes } = useTheme();
   const drawMessage = useMemo(() => {
@@ -33,7 +34,9 @@ const NoticeBox = ({
 
     let isJSONData = isJSONStr(drawData);
     let drawText = '';
-    if (isJSONData) {
+    if (isBlock) {
+      drawText = getDic('BlockChat', '차단된 메시지 입니다.');
+    } else if (isJSONData) {
       try {
         drawData = JSON.parse(drawData);
       } catch {
@@ -43,12 +46,13 @@ const NoticeBox = ({
     } else {
       drawText = drawData;
     }
+
     let senderInfo = null;
 
     let messageType = 'message';
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
-    if (common.eumTalkRegularExp.test(drawText)) {
+    if (!isBlock && common.eumTalkRegularExp.test(drawText)) {
       const processMsg = common.convertEumTalkProtocol(drawText, {
         messageType: 'channel',
       });
@@ -86,14 +90,16 @@ const NoticeBox = ({
       senderInfo = message.senderInfo;
     }
 
-    if (messageType == 'message') {
+    if (messageType === 'message') {
       drawText = common.convertURLMessage(drawText);
 
       // NEW LINE 처리
       drawText = drawText.replace(/\n/gi, '<NEWLINE />');
     }
 
-    if (drawText == '') return;
+    if (drawText === '') {
+      return;
+    }
 
     if (!isMine) {
       return (
@@ -292,7 +298,7 @@ const NoticeBox = ({
         </>
       );
     }
-  }, [message]);
+  }, [message, isBlock]);
 
   return (
     <>

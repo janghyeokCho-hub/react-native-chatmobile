@@ -267,8 +267,8 @@ const FileSummary = ({ route, navigation }) => {
   const { sizes, colors } = useTheme();
   const networkState = useSelector(({ app }) => app.networkState);
 
-  const { roomID, chineseWall } = route.params;
-  console.log(chineseWall);
+  const { roomID } = route.params;
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
 
   const loadCnt = 30;
   const [select, setSelect] = useState(false);

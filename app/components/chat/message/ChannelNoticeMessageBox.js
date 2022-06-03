@@ -25,12 +25,12 @@ const ChannelNoticeMessageBox = ({
   id,
   marking,
   navigation,
+  isBlock,
 }) => {
   const currMember = useSelector(
     ({ channel }) => channel.currentChannel.members,
   );
   const [linkData, setLinkData] = useState(null);
-  const dispatch = useDispatch();
   const { colors, sizes } = useTheme();
   const isOldMember = useMemo(() => {
     return (
@@ -39,8 +39,11 @@ const ChannelNoticeMessageBox = ({
     );
   }, [currMember]);
   const context = useMemo(() => {
-    return common.convertURLMessage(message.context);
-  }, [message.context]);
+    const text = isBlock
+      ? getDic('BlockChat', '차단된 메시지 입니다.')
+      : message.context;
+    return common.convertURLMessage(text);
+  }, [message, isBlock]);
   const [processedContext, setProcessedContext] = useState([]);
   const { findMemberInfo } = useMemberInfo('channel');
 
