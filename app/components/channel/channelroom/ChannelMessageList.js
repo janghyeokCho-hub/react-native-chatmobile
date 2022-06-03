@@ -36,7 +36,7 @@ const ChannelMessageList = React.forwardRef(
 
     let _listener = null;
 
-    const [messageData, setMessageData] = useState(null);
+    const [messageData, setMessageData] = useState([]);
     const [bottomView, setBottomView] = useState(false);
     const [refresh, setRefresh] = useState(false);
 
@@ -383,7 +383,7 @@ const ChannelMessageList = React.forwardRef(
         <ChannelMessageSync
           roomID={currentChannel.roomID}
           messageID={
-            messageData ? messageData[messageData.length - 1].messageID : null
+            messageData ? messageData[messageData.length - 1]?.messageID : null
           }
         />
       </>
