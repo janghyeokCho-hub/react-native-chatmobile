@@ -37,6 +37,7 @@ const ChatMenuBox = ({
     id: login.id,
   }));
   const myInfo = useSelector(({ login }) => login.userInfo);
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
 
   const [notification, setNotification] = useState(true);
 
@@ -144,20 +145,26 @@ const ChatMenuBox = ({
     Alert.alert(null, getDic('Msg_SaveChat'), [
       {
         text: getDic('Ok'),
-        onPress: () => {
+        onPress: async () => {
           let fileName = roomInfo.roomName;
 
-          if (fileName == '') {
-            if (roomInfo.roomType == 'G') {
+          if (fileName === '') {
+            if (roomInfo.roomType === 'G') {
               fileName = `groupchat_(${roomInfo.members.length})`;
-            } else if (roomInfo.roomType == 'M') {
+            } else if (roomInfo.roomType === 'M') {
               const userName = roomInfo.members.find(item => item.id !== id)
                 ?.name;
               fileName = getDictionary(userName) || userName;
             }
           }
+          const roomName = fileName;
           fileName = fileName + '_chat.txt';
-          downloadMessageData(roomInfo.roomID, fileName);
+          const result = await downloadMessageData({
+            roomID: roomInfo.roomID,
+            fileName,
+            roomName,
+            chineseWall,
+          });
         },
       },
       { text: getDic('Cancel'), onPress: () => {} },

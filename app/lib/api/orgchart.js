@@ -31,8 +31,9 @@ const stringArrToArray = str => {
 };
 
 export const getChineseWall = async ({ userId }) => {
+  const { data } = await managesvr('get', `/org/block/${userId}`);
+  console.log('data : ', data);
   try {
-    const { data } = await managesvr('get', `/org/block/${userId}`);
     const { result, status } = data;
     let blockList = [];
     if (status === 'SUCCESS' && result?.length) {
