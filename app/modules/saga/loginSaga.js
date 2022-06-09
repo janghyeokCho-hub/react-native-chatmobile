@@ -112,7 +112,6 @@ export function createLoginRequestSaga(loginType, syncType) {
             if (useChineseWall) {
               const chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
-                myInfo: response.data.result,
               });
 
               if (chineseWall.status === 'SUCCESS') {
@@ -228,7 +227,6 @@ export function createExtLoginRequestSaga(loginType, syncType) {
             if (useChineseWall) {
               const chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
-                myInfo: response.data.result,
               });
               if (chineseWall.status === 'SUCCESS') {
                 yield put(setChineseWall(chineseWall.result));
@@ -417,7 +415,6 @@ export function createSyncTokenRequestSaga(type) {
           if (useChineseWall) {
             const chineseWall = yield call(getChineseWall, {
               userId: authData.id,
-              myInfo: authData,
             });
             if (chineseWall.status === 'SUCCESS') {
               yield put(setChineseWall(chineseWall.result));

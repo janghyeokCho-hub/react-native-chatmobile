@@ -1312,6 +1312,27 @@ export const getMessages = async param => {
   return { data: returnObj };
 };
 
+export const getAllMessages = async param => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+
+  const messages = await new Promise((resolve, reject) => {
+    const commonQuery =
+      'SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo ' +
+      'FROM message as m ' +
+      `WHERE roomId = ${param.roomID}`;
+
+    dbCon.transaction(tx => {
+      db.tx(tx)
+        .query(`SELECT * FROM (${commonQuery}) AS a ORDER BY a.messageId`)
+        .execute((tx, result) => {
+          resolve(result.rows.raw());
+        });
+    });
+  });
+
+  return messages;
+};
+
 const getBetweenMessages = async param => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
 

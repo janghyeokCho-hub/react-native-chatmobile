@@ -1,15 +1,18 @@
 import * as RNFS from 'react-native-fs';
 import * as roomApi from '@API/room';
-import { getConfig } from '@/config';
+import { getConfig, getDic } from '@/config';
 import ImageResizer from 'react-native-image-resizer';
-import Exif from 'react-native-exif';
 import imageExtensions from 'image-extensions';
 import videoExtensions from 'video-extensions';
-import { fi } from 'date-fns/locale';
-import { Platform } from 'react-native';
 import { creteContentFile } from '@/lib/device/file';
-import { getSysMsgFormatStr } from '@/lib/common';
-import { getDic } from '@/config';
+import { format } from 'date-fns';
+import * as dbAction from '@/lib/appData/action';
+import {
+  convertEumTalkProtocolPreview,
+  eumTalkRegularExp,
+  isJSONStr,
+} from './common';
+import { isBlockCheck } from './api/orgchart';
 
 const extensionImage = new Set(imageExtensions);
 const extensionVideo = new Set(videoExtensions);
@@ -336,9 +339,55 @@ export const getInstance = () => {
   }
 };
 
-export const downloadMessageData = async (roomID, fileName) => {
-  const response = await roomApi.getMessageDataFile(roomID);
-  creteContentFile(response.data, fileName);
+export const downloadMessageData = async ({
+  roomID,
+  fileName,
+  roomName,
+  chineseWall = [],
+}) => {
+  const result = await dbAction.getAllMessages({ roomID });
+  if (!result?.length) {
+    // 대화내용없음
+    return 'NONE';
+  } else {
+    let txt = `${roomName}\n`;
+    txt += `저장한 날짜 : ${format(new Date(), 'yyyy년 MM월 dd일 HH:mm')}\n`;
+    // 파일 대화내용 지우기
+    const items = result.filter(item => !item.fileInfos);
+    // 동기 처리를 위해 forEach 대신 for 사용
+    for (const item of items) {
+      if (item.messageType === 'N') {
+        const sendDate = format(item.sendDate, 'yyyy년 MM월 dd일 HH:mm:ss');
+        const senderInfo = isJSONStr(item.senderInfo)
+          ? JSON.parse(item.senderInfo)
+          : item.senderInfo;
+        const name = senderInfo.name?.split(';')[0];
+        let isBlock = false;
+
+        if (item.isMine !== 'Y' && chineseWall.length) {
+          const { blockChat } = isBlockCheck({
+            targetInfo: {
+              ...senderInfo,
+              id: item.sender,
+            },
+            chineseWall,
+          });
+          isBlock = blockChat;
+        }
+
+        let context = isBlock
+          ? getDic('BlockChat', '차단된 메시지입니다.')
+          : item.context;
+
+        if (eumTalkRegularExp.test(context)) {
+          const messageObj = convertEumTalkProtocolPreview(context);
+          context = messageObj.message;
+        }
+        txt += `\n${sendDate} ${name} : ${context}`;
+      }
+    }
+    creteContentFile(txt, fileName);
+  }
 };
 
 export const convertFileSize = size => {
