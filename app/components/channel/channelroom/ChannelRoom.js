@@ -10,7 +10,7 @@ import {
   getChannelInfo,
   getChannelNotice,
   readMessage,
-  closeChannel
+  closeChannel,
 } from '@/modules/channel';
 import { clearFiles, sendChannelMessage } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
@@ -18,6 +18,7 @@ import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
 import * as fileUtil from '@/lib/fileUtil';
 import SearchView from '@C/channel/search/SearchView';
 import { Text } from 'react-native';
+import { blockUsers } from '@/lib/api/orgchart';
 
 const ChannelRoom = ({ navigation, route }) => {
   let roomID;
@@ -93,7 +94,11 @@ const ChannelRoom = ({ navigation, route }) => {
   //   // };
   // }, [channel]);
 
-  const handleMessage = (message, filesObj, linkObj, mentionArr) => {
+  const handleMessage = async (message, filesObj, linkObj, mentionArr) => {
+    let blockList = [];
+    if (chineseWall?.length) {
+      blockList = await blockUsers(chineseWall);
+    }
     const data = {
       roomID: roomID,
       context: message,
@@ -101,6 +106,7 @@ const ChannelRoom = ({ navigation, route }) => {
       sendFileInfo: filesObj,
       linkInfo: linkObj,
       mentionInfo: mentionArr,
+      blockList,
     };
 
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.

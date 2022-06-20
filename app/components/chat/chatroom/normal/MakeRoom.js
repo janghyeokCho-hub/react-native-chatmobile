@@ -14,8 +14,10 @@ import ChatMenuBox from '../layer/ChatMenuBox';
 import Drawer from 'react-native-drawer';
 import { getTopPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
+import { blockUsers } from '@/lib/api/orgchart';
 
 const MakeRoom = ({ route, navigation }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { makeInfo, sender } = useSelector(({ room, login }) => ({
     makeInfo: room.makeInfo,
     sender: login.id,
@@ -77,7 +79,7 @@ const MakeRoom = ({ route, navigation }) => {
   };
 
   // TODO: 메시지 전송 실패 여부 처리
-  const handleMessage = (message, filesObj, linkObj) => {
+  const handleMessage = async (message, filesObj, linkObj) => {
     // 방생성 api 호출
     // 호출 결과에 따라 ChatRoom으로 화면 전환
     // -- MultiView의 경우 dispatch
@@ -87,7 +89,15 @@ const MakeRoom = ({ route, navigation }) => {
     let invites = [];
     makeInfo.members.forEach(item => invites.push(item.id));
 
-    if (invites.indexOf(sender) == -1) invites.push(sender);
+    if (invites.indexOf(sender) === -1) {
+      invites.push(sender);
+    }
+
+    let blockList = [];
+    if (chineseWall?.length) {
+      // Mobile push block
+      blockList = await blockUsers(chineseWall);
+    }
 
     const data = {
       roomType: makeInfo.roomType,
@@ -97,6 +107,7 @@ const MakeRoom = ({ route, navigation }) => {
       message: message,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      blockList,
     };
 
     if (filesObj) {
@@ -109,6 +120,7 @@ const MakeRoom = ({ route, navigation }) => {
               sender: sender,
               roomType: makeInfo.roomType,
               fileInfos: JSON.stringify(data.result),
+              blockList,
             };
 
             sendMessage(messageParams)

@@ -1,5 +1,6 @@
 import { managesvr } from '@API/api';
 import { getJobInfo } from '@/lib/userSettingUtil';
+import { getAllUserWithGroup } from '@API/room';
 
 export const getOrgChart = ({ deptID, companyCode }) => {
   if (companyCode) return managesvr('get', `/org/${deptID}/gr/${companyCode}`);
@@ -95,4 +96,31 @@ export const isBlockCheck = ({ targetInfo, chineseWall = [] }) => {
     }
   }
   return result;
+};
+
+/**
+ *
+ * @param {Array} chineseWall
+ * @returns 부서에 속한 유저ID를 합한 유저ID 목록
+ */
+export const blockUsers = async (chineseWall = []) => {
+  let groupList = [];
+  let userList = [];
+  for (const item of chineseWall) {
+    if (item.targetType === 'G') {
+      groupList = groupList.concat(item.target);
+    } else if (item.targetType === 'U') {
+      userList = userList.concat(item.target);
+    }
+  }
+
+  for (const group of groupList) {
+    await getAllUserWithGroup(group).then(({ data }) => {
+      if (data.status === 'SUCCESS') {
+        const { result } = data;
+        userList = userList.concat(result.map(item => item.id));
+      }
+    });
+  }
+  return [...new Set(userList)];
 };

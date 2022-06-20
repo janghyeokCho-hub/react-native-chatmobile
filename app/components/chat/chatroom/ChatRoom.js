@@ -13,8 +13,10 @@ import MessageView from '@C/chat/chatroom/normal/MessageView';
 import SearchView from '@C/chat/chatroom/search/SearchView';
 import * as fileUtil from '@/lib/fileUtil';
 import { Text } from 'react-native';
+import { blockUsers } from '@/lib/api/orgchart';
 
 const ChatRoom = ({ navigation, route }) => {
+  const chineseWall = useSelector(({ login }) => login.chineseWall);
   let roomID;
   if (route.params && route.params.roomID)
     roomID = parseInt(route.params.roomID);
@@ -63,13 +65,19 @@ const ChatRoom = ({ navigation, route }) => {
     };
   }, [room]);
 
-  const handleMessage = (message, filesObj, linkObj) => {
+  const handleMessage = async (message, filesObj, linkObj) => {
+    let blockList = [];
+    if (chineseWall?.length) {
+      // Mobile push block
+      blockList = await blockUsers(chineseWall);
+    }
     const data = {
       roomID: roomID,
       context: message,
       roomType: room.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      blockList,
       onSubmitCancelToken: token => {
         setCancelToken(token);
       },
