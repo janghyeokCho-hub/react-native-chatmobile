@@ -13,9 +13,9 @@ import MessageView from '@C/chat/chatroom/normal/MessageView';
 import SearchView from '@C/chat/chatroom/search/SearchView';
 import * as fileUtil from '@/lib/fileUtil';
 import { Text } from 'react-native';
-import { blockUsers } from '@/lib/api/orgchart';
 
 const ChatRoom = ({ navigation, route }) => {
+  const userId = useSelector(({ login }) => login.id);
   const blockUser = useSelector(({ login }) => login.blockList);
   let roomID;
   if (route.params && route.params.roomID) {
@@ -55,31 +55,40 @@ const ChatRoom = ({ navigation, route }) => {
 
   useEffect(() => {
     // presence - room members
-    if (room && room.roomType != 'A' && room.members)
+    if (room && room.roomType != 'A' && room.members) {
       dispatch(
         addTargetUserList(
           room.members.map(item => ({ userId: item.id, state: item.presence })),
         ),
       );
+    }
     return () => {
-      if (room && room.roomType != 'A' && room.members)
+      if (room && room.roomType != 'A' && room.members) {
         dispatch(delTargetUserList(room.members.map(item => item.presence)));
+      }
     };
   }, [room]);
 
   const handleMessage = async (message, filesObj, linkObj) => {
+    const members = room?.members?.map(item => item.id !== userId && item.id);
+    let blockList = [];
+    if (members?.length && blockUser) {
+      blockList = blockUser.filter(
+        item => item !== userId && members.includes(item),
+      );
+    }
     const data = {
       roomID: roomID,
       context: message,
       roomType: room.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
-      blockList: blockUser,
+      blockList: blockList,
       onSubmitCancelToken: token => {
         setCancelToken(token);
       },
     };
-
+    console.log(data);
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
     if (room.roomType === 'M' && room.realMemberCnt === 1) {
       dispatch(rematchingMember(data));

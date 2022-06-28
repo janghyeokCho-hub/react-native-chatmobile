@@ -26,6 +26,7 @@ const ChannelRoom = ({ navigation, route }) => {
   } else {
     roomID = null;
   }
+  const userId = useSelector(({ login }) => login.id);
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const blockUser = useSelector(({ login }) => login.blockList);
   const channel = useSelector(state => state?.channel?.currentChannel);
@@ -95,6 +96,15 @@ const ChannelRoom = ({ navigation, route }) => {
   // }, [channel]);
 
   const handleMessage = async (message, filesObj, linkObj, mentionArr) => {
+    const members = channel?.members?.map(
+      item => item.id !== userId && item.id,
+    );
+    let blockList = [];
+    if (members?.length && blockUser) {
+      blockList = blockUser.filter(
+        item => item !== userId && members.includes(item),
+      );
+    }
     const data = {
       roomID: roomID,
       context: message,
@@ -102,7 +112,7 @@ const ChannelRoom = ({ navigation, route }) => {
       sendFileInfo: filesObj,
       linkInfo: linkObj,
       mentionInfo: mentionArr,
-      blockList: blockUser,
+      blockList: blockList,
     };
 
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.

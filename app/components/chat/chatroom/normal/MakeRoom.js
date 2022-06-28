@@ -88,6 +88,13 @@ const MakeRoom = ({ route, navigation }) => {
     let invites = [];
     makeInfo.members.forEach(item => invites.push(item.id));
 
+    let blockList = [];
+    if (invites?.length && blockUser) {
+      blockList = blockUser.filter(
+        item => item !== sender && invites.includes(item),
+      );
+    }
+
     if (invites.indexOf(sender) === -1) {
       invites.push(sender);
     }
@@ -100,7 +107,7 @@ const MakeRoom = ({ route, navigation }) => {
       message: message,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
-      blockList: blockUser,
+      blockList: blockList,
     };
 
     if (filesObj) {
@@ -113,7 +120,7 @@ const MakeRoom = ({ route, navigation }) => {
               sender: sender,
               roomType: makeInfo.roomType,
               fileInfos: JSON.stringify(data.result),
-              blockList: blockUser,
+              blockList: blockList,
             };
 
             sendMessage(messageParams)
