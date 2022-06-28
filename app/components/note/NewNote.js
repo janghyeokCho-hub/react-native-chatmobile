@@ -55,7 +55,6 @@ import {
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
 import NoteFile from '@/components/note/NoteFile';
-import { blockUsers } from '@/lib/api/orgchart';
 
 const styles = StyleSheet.create({
   contanier: {
@@ -372,7 +371,7 @@ const _actions = [
 
 function NewNote({ navigation, route }) {
   const myInfo = useSelector(({ login }) => login.userInfo);
-  const chineseWall = useSelector(({ login }) => login.chineseWall);
+  const blockUser = useSelector(({ login }) => login.blockList);
   const { MOBILE } = getConfig('FileAttachMode', {});
   const { emergency: useEmergencyNote } = getConfig('UseNote', {});
   const [tempFile, setTempFile] = useState([]);
@@ -571,11 +570,6 @@ function NewNote({ navigation, route }) {
 
     const fileCtrl = getInstance();
 
-    let blockList = [];
-    if (chineseWall?.length) {
-      blockList = await blockUsers(chineseWall);
-    }
-
     const sendData = {
       sender: myInfo.id,
       receiveUser,
@@ -585,7 +579,7 @@ function NewNote({ navigation, route }) {
       isEmergency: isEmergency ? 'Y' : 'N',
       files: fileCtrl.getFiles() || [],
       fileInfos: fileCtrl.getFileInfos() || [],
-      blockList,
+      blockList: blockUser,
     };
     try {
       const { data } = await sendNote(sendData);

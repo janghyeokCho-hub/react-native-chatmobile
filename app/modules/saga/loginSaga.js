@@ -8,6 +8,7 @@ import {
   sync,
   preLoginSuccess,
   setChineseWall,
+  setBlockList,
 } from '@/modules/login';
 import * as loginApi from '@API/login';
 import * as channelApi from '@API/channel';
@@ -109,17 +110,20 @@ export function createLoginRequestSaga(loginType, syncType) {
 
             // 차이니즈 월
             let chineseWallResult = [];
+            let blockListResult = [];
             const useChineseWall = getConfig('UseChineseWall', false);
             if (useChineseWall) {
-              const chineseWall = yield call(getChineseWall, {
+              const { result, status, blockList } = yield call(getChineseWall, {
                 userId: response.data.result.id,
               });
 
-              if (chineseWall.status === 'SUCCESS') {
-                chineseWallResult = chineseWall.result;
+              if (status === 'SUCCESS') {
+                chineseWallResult = result;
+                blockListResult = blockList;
               }
             }
             yield put(setChineseWall(chineseWallResult));
+            yield put(setBlockList(blockListResult));
           } else {
             yield put({
               type: FAILURE,
@@ -226,16 +230,20 @@ export function createExtLoginRequestSaga(loginType, syncType) {
 
             // 차이니즈 월
             let chineseWallResult = [];
+            let blockListResult = [];
             const useChineseWall = getConfig('UseChineseWall', false);
             if (useChineseWall) {
-              const chineseWall = yield call(getChineseWall, {
+              const { result, status, blockList } = yield call(getChineseWall, {
                 userId: response.data.result.id,
               });
-              if (chineseWall.status === 'SUCCESS') {
-                chineseWallResult = chineseWall.result;
+
+              if (status === 'SUCCESS') {
+                chineseWallResult = result;
+                blockListResult = blockList;
               }
             }
             yield put(setChineseWall(chineseWallResult));
+            yield put(setBlockList(blockListResult));
           } else {
             yield put({
               type: FAILURE,
@@ -416,16 +424,20 @@ export function createSyncTokenRequestSaga(type) {
 
           // 차이니즈 월
           let chineseWallResult = [];
+          let blockListResult = [];
           const useChineseWall = getConfig('UseChineseWall', false);
           if (useChineseWall) {
-            const chineseWall = yield call(getChineseWall, {
+            const { result, status, blockList } = yield call(getChineseWall, {
               userId: authData.id,
             });
-            if (chineseWall.status === 'SUCCESS') {
-              chineseWallResult = chineseWall.result;
+
+            if (status === 'SUCCESS') {
+              chineseWallResult = result;
+              blockListResult = blockList;
             }
           }
           yield put(setChineseWall(chineseWallResult));
+          yield put(setBlockList(blockListResult));
         } else {
           yield put(loginTokenAuth(result));
         }

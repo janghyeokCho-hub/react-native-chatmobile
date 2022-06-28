@@ -14,10 +14,9 @@ import ChatMenuBox from '../layer/ChatMenuBox';
 import Drawer from 'react-native-drawer';
 import { getTopPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
-import { blockUsers } from '@/lib/api/orgchart';
 
 const MakeRoom = ({ route, navigation }) => {
-  const chineseWall = useSelector(({ login }) => login.chineseWall);
+  const blockUser = useSelector(({ login }) => login.blockList);
   const { makeInfo, sender } = useSelector(({ room, login }) => ({
     makeInfo: room.makeInfo,
     sender: login.id,
@@ -93,12 +92,6 @@ const MakeRoom = ({ route, navigation }) => {
       invites.push(sender);
     }
 
-    let blockList = [];
-    if (chineseWall?.length) {
-      // Mobile push block
-      blockList = await blockUsers(chineseWall);
-    }
-
     const data = {
       roomType: makeInfo.roomType,
       name: '',
@@ -107,7 +100,7 @@ const MakeRoom = ({ route, navigation }) => {
       message: message,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
-      blockList,
+      blockList: blockUser,
     };
 
     if (filesObj) {
@@ -120,7 +113,7 @@ const MakeRoom = ({ route, navigation }) => {
               sender: sender,
               roomType: makeInfo.roomType,
               fileInfos: JSON.stringify(data.result),
-              blockList,
+              blockList: blockUser,
             };
 
             sendMessage(messageParams)

@@ -16,11 +16,13 @@ import { Text } from 'react-native';
 import { blockUsers } from '@/lib/api/orgchart';
 
 const ChatRoom = ({ navigation, route }) => {
-  const chineseWall = useSelector(({ login }) => login.chineseWall);
+  const blockUser = useSelector(({ login }) => login.blockList);
   let roomID;
-  if (route.params && route.params.roomID)
+  if (route.params && route.params.roomID) {
     roomID = parseInt(route.params.roomID);
-  else roomID = null;
+  } else {
+    roomID = null;
+  }
 
   const { room, moveVisible, loading } = useSelector(
     ({ room, loading, message }) => ({
@@ -66,18 +68,13 @@ const ChatRoom = ({ navigation, route }) => {
   }, [room]);
 
   const handleMessage = async (message, filesObj, linkObj) => {
-    let blockList = [];
-    if (chineseWall?.length) {
-      // Mobile push block
-      blockList = await blockUsers(chineseWall);
-    }
     const data = {
       roomID: roomID,
       context: message,
       roomType: room.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
-      blockList,
+      blockList: blockUser,
       onSubmitCancelToken: token => {
         setCancelToken(token);
       },

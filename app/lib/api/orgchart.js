@@ -32,11 +32,10 @@ const stringArrToArray = str => {
 };
 
 export const getChineseWall = async ({ userId }) => {
-  const { data } = await managesvr('get', `/org/block/${userId}`);
-  console.log('data : ', data);
   try {
-    const { result, status } = data;
-    let blockList = [];
+    const { data } = await managesvr('get', `/org/block/${userId}`);
+    const { result, status, blockList } = data;
+    let chineseWall = [];
     if (status === 'SUCCESS' && result?.length) {
       for (const item of result) {
         const jsonData = {
@@ -45,10 +44,10 @@ export const getChineseWall = async ({ userId }) => {
           blockChat: item.blockChat,
           blockFile: item.blockFile,
         };
-        blockList.push(jsonData);
+        chineseWall.push(jsonData);
       }
     }
-    return { result: blockList, status };
+    return { result: chineseWall, status, blockList };
   } catch (e) {
     console.error(e);
     return { result: [], status: 'ERROR' };

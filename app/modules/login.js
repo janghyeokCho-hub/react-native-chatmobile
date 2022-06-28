@@ -51,6 +51,7 @@ const [
 
 const CHANGE_SOCKETCONNECT = 'login/CHANGE_SOCKETCONNECT';
 const SET_CHINESEWALL = 'login/SET_CHINESEWALL';
+const SET_BLOCKLIST = 'login/SET_BLOCKLIST';
 
 const PRE_LOGIN_SUCCESS = 'login/PRE_LOGIN_SUCCESS';
 
@@ -74,6 +75,7 @@ export const changeMyInfo = createAction(CHANGE_MYINFO);
 
 export const sync = createAction(SYNC);
 export const setChineseWall = createAction(SET_CHINESEWALL);
+export const setBlockList = createAction(SET_BLOCKLIST);
 
 export const preLoginSuccess = createAction(PRE_LOGIN_SUCCESS);
 
@@ -222,6 +224,11 @@ const login = handleActions(
     [SET_CHINESEWALL]: (state, action) => {
       return produce(state, draft => {
         draft.chineseWall = action.payload;
+      });
+    },
+    [SET_BLOCKLIST]: (state, action) => {
+      return produce(state, draft => {
+        draft.blockList = action.payload;
       });
     },
   },

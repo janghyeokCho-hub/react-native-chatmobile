@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateRooms, getRooms, rematchingMember } from '@/modules/room';
+import { getRooms, rematchingMember } from '@/modules/room';
 import { useTheme } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { CommonActions } from '@react-navigation/native';
@@ -34,7 +28,6 @@ import OrgChartList from '@C/orgchart/OrgChartList';
 import ChatList from '@C/share/chat/ChatList';
 import ChannelList from '@C/share/channel/ChannelList';
 import { makeParams, handleMessage, handleShareFile } from '@C/share/share';
-import { blockUsers } from '@/lib/api/orgchart';
 
 const ShareContainer = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -42,7 +35,7 @@ const ShareContainer = ({ navigation, route }) => {
   const { id: userId } = useSelector(({ login }) => ({
     id: login.id,
   }));
-  const chineseWall = useSelector(({ login }) => login.chineseWall);
+  const blockUser = useSelector(({ login }) => login.blockList);
 
   const headerName = getDic('Msg_Note_Forward');
   const { messageData, messageType } = route.params;
@@ -298,12 +291,7 @@ const ShareContainer = ({ navigation, route }) => {
         return;
       }
 
-      let blockList = [];
-      if (chineseWall?.length) {
-        // Mobile push block
-        blockList = await blockUsers(chineseWall);
-      }
-      params.blockList = blockList;
+      params.blockList = blockUser;
 
       if (
         params.targetType === 'CHAT' &&
@@ -352,6 +340,7 @@ const ShareContainer = ({ navigation, route }) => {
     roomList,
     userId,
     handleClose,
+    blockUser,
   ]);
 
   return (
