@@ -223,12 +223,13 @@ const login = handleActions(
     }),
     [SET_CHINESEWALL]: (state, action) => {
       return produce(state, draft => {
-        draft.chineseWall = action.payload;
-      });
-    },
-    [SET_BLOCKLIST]: (state, action) => {
-      return produce(state, draft => {
-        draft.blockList = action.payload;
+        if (action.payload.status === 'SUCCESS') {
+          draft.chineseWall = action.payload.result;
+          draft.blockList = action.payload.blockList;
+        } else {
+          draft.chineseWall = [];
+          draft.blockList = [];
+        }
       });
     },
   },
