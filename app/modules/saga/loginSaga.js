@@ -108,16 +108,14 @@ export function createLoginRequestSaga(loginType, syncType) {
             }
 
             // 차이니즈 월
+            let chineseWall = [];
             const useChineseWall = getConfig('UseChineseWall', false);
             if (useChineseWall) {
-              const chineseWall = yield call(getChineseWall, {
+              chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
               });
-
-              if (chineseWall.status === 'SUCCESS') {
-                yield put(setChineseWall(chineseWall.result));
-              }
             }
+            yield put(setChineseWall(chineseWall));
           } else {
             yield put({
               type: FAILURE,
@@ -223,15 +221,14 @@ export function createExtLoginRequestSaga(loginType, syncType) {
             }
 
             // 차이니즈 월
+            let chineseWall = [];
             const useChineseWall = getConfig('UseChineseWall', false);
             if (useChineseWall) {
-              const chineseWall = yield call(getChineseWall, {
+              chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
               });
-              if (chineseWall.status === 'SUCCESS') {
-                yield put(setChineseWall(chineseWall.result));
-              }
             }
+            yield put(setChineseWall(chineseWall));
           } else {
             yield put({
               type: FAILURE,
@@ -411,15 +408,14 @@ export function createSyncTokenRequestSaga(type) {
           }
 
           // 차이니즈 월
+          let chineseWall = [];
           const useChineseWall = getConfig('UseChineseWall', false);
           if (useChineseWall) {
-            const chineseWall = yield call(getChineseWall, {
+            chineseWall = yield call(getChineseWall, {
               userId: authData.id,
             });
-            if (chineseWall.status === 'SUCCESS') {
-              yield put(setChineseWall(chineseWall.result));
-            }
           }
+          yield put(setChineseWall(chineseWall));
         } else {
           yield put(loginTokenAuth(result));
         }

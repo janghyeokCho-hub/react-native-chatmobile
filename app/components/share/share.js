@@ -207,6 +207,7 @@ export const handleShareFile = async params => {
     formData.append('roomType', params.roomType);
     formData.append('fileInfos', params.fileInfos);
     formData.append('targets', params.targets);
+    formData.append('blockList', JSON.stringify(params.blockList));
     const { data } = await shareFile(formData);
     if (data.state !== 'SUCCESS') {
       msg = getDic('Msg_ForwardingWasFailed', '전달에 실패 하였습니다.');

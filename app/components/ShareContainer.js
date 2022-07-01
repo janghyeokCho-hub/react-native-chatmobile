@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateRooms, getRooms, rematchingMember } from '@/modules/room';
+import { getRooms, rematchingMember } from '@/modules/room';
 import { useTheme } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { CommonActions } from '@react-navigation/native';
@@ -41,6 +35,7 @@ const ShareContainer = ({ navigation, route }) => {
   const { id: userId } = useSelector(({ login }) => ({
     id: login.id,
   }));
+  const blockUser = useSelector(({ login }) => login.blockList);
 
   const headerName = getDic('Msg_Note_Forward');
   const { messageData, messageType } = route.params;
@@ -296,6 +291,8 @@ const ShareContainer = ({ navigation, route }) => {
         return;
       }
 
+      params.blockList = blockUser;
+
       if (
         params.targetType === 'CHAT' &&
         params.roomType === 'M' &&
@@ -343,6 +340,7 @@ const ShareContainer = ({ navigation, route }) => {
     roomList,
     userId,
     handleClose,
+    blockUser,
   ]);
 
   return (

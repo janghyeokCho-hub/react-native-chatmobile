@@ -15,10 +15,14 @@ import * as fileUtil from '@/lib/fileUtil';
 import { Text } from 'react-native';
 
 const ChatRoom = ({ navigation, route }) => {
+  const userId = useSelector(({ login }) => login.id);
+  const blockUser = useSelector(({ login }) => login.blockList);
   let roomID;
-  if (route.params && route.params.roomID)
+  if (route.params && route.params.roomID) {
     roomID = parseInt(route.params.roomID);
-  else roomID = null;
+  } else {
+    roomID = null;
+  }
 
   const { room, moveVisible, loading } = useSelector(
     ({ room, loading, message }) => ({
@@ -51,25 +55,35 @@ const ChatRoom = ({ navigation, route }) => {
 
   useEffect(() => {
     // presence - room members
-    if (room && room.roomType != 'A' && room.members)
+    if (room && room.roomType != 'A' && room.members) {
       dispatch(
         addTargetUserList(
           room.members.map(item => ({ userId: item.id, state: item.presence })),
         ),
       );
+    }
     return () => {
-      if (room && room.roomType != 'A' && room.members)
+      if (room && room.roomType != 'A' && room.members) {
         dispatch(delTargetUserList(room.members.map(item => item.presence)));
+      }
     };
   }, [room]);
 
-  const handleMessage = (message, filesObj, linkObj) => {
+  const handleMessage = async (message, filesObj, linkObj) => {
+    const members = room?.members?.map(item => item.id !== userId && item.id);
+    let blockList = [];
+    if (members?.length && blockUser) {
+      blockList = blockUser.filter(
+        item => item !== userId && members.includes(item),
+      );
+    }
     const data = {
       roomID: roomID,
       context: message,
       roomType: room.roomType,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      blockList: blockList,
       onSubmitCancelToken: token => {
         setCancelToken(token);
       },
