@@ -9,6 +9,7 @@ import Share from 'react-native-share';
 import * as RootNavigation from '@/components/RootNavigation';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { isBlockCheck } from '@/lib/api/orgchart';
+import {  managesvr } from '@API/api';
 
 const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
@@ -18,6 +19,31 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     ? getConfig('UseChannelDeleteMessage', false) === true
     : getConfig('UseChatroomDeleteMessage', false) === true;
   const useForwardFile = getConfig('UseForwardFile') || false;
+
+
+  const handleAddBookmark = async(messageData) =>{
+    try {
+      const sendData = {
+        roomId: currentRoom.roomID.toString(),
+        messageId: messageData.messageID.toString()
+      };
+
+      const { data } =  await managesvr('post', '/bookmark', sendData);
+      
+      if (data?.status == "SUCCESS") {
+        Alert.alert('', getDic('Msg_Bookmark_Registeration', '책갈피가 등록되었습니다.'));
+      }else if(data?.status ==="DUPLICATE"){
+        Alert.alert('', getDic('Msg_Bookmark_Registeration_duplicate', '이미 등록된 책갈피 입니다.'));
+      }
+      else{
+        Alert.alert('', getDic('Msg_Bookmark_Registeration_fail', '책갈피가 등록에 실패했습니다.'));
+      } 
+    } catch (error) {
+      console.log('Send Error   ', error);
+    }
+  }
+
+
   const buttons = useMemo(() => {
     let modalBtn = [];
     let isBlock = false;
@@ -37,6 +63,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       isBlock = isFile ? blockFile : blockChat;
     }
 
+  
     if (!messageData.fileInfos) {
       // copy
       !isBlock &&
@@ -45,6 +72,18 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
           title: getDic('Copy'),
           onPress: () => {
             Clipboard.setString(getPlainText(messageData.context));
+          },
+        });
+    }
+
+    if (!messageData.fileInfos) {
+      // bookmark
+      !isBlock &&
+        modalBtn.push({
+          type: 'AddBookmark',
+          title: getDic('AddBookmark', '책갈피등록'),
+          onPress: () => {
+            handleAddBookmark(messageData)
           },
         });
     }
