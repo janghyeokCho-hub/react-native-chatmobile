@@ -37,6 +37,7 @@ import {
 import {
   PhotoSummary,
   FileSummary,
+  BookmarkSummary,
   ChangeRoomInfo,
   ChatSettingBox,
   InviteMember,
@@ -139,6 +140,8 @@ const Root = ({ stack, theme }) => {
               />
               <Stack.Screen name="PhotoSummary" component={PhotoSummary} />
               <Stack.Screen name="FileSummary" component={FileSummary} />
+              <Stack.Screen name="BookmarkSummary" component={BookmarkSummary} />
+
               <Stack.Screen name="ImageList" component={ImageList} />
               <Stack.Screen name="ChangeRoomInfo" component={ChangeRoomInfo} />
               <Stack.Screen name="ChatSettingBox" component={ChatSettingBox} />

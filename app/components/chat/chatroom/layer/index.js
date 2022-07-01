@@ -6,6 +6,7 @@ export {
   default as ChatSettingBox,
 } from '@/components/chat/chatroom/layer/ChatSettingBox';
 export { default as FileSummary } from '@C/chat/chatroom/layer/FileSummary';
+export { default as BookmarkSummary } from '@C/chat/chatroom/layer/BookmarkSummary';
 export { default as InviteMember } from '@C/chat/chatroom/layer/InviteMember';
 export { default as MenuBoxBack } from '@C/chat/chatroom/layer/MenuBoxBack';
 export { default as PhotoSummary } from '@C/chat/chatroom/layer/PhotoSummary';
