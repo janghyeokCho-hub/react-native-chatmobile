@@ -88,7 +88,7 @@ const ChatRoom = ({ navigation, route }) => {
         setCancelToken(token);
       },
     };
-    console.log(data);
+
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
     if (room.roomType === 'M' && room.realMemberCnt === 1) {
       dispatch(rematchingMember(data));
