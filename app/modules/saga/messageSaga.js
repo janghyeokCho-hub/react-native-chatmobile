@@ -21,6 +21,7 @@ export function createSendMessageSaga(request, fileRequest, linkRequest) {
         roomType: action.payload.roomType,
         status: action.payload.status,
         tempId: action.payload.tempId,
+        blockList: action.payload.blockList,
       };
       if (action.payload.sendFileInfo) {
         const responseFile = yield call(fileRequest, action.payload);
@@ -86,11 +87,10 @@ export function createSendChannelMessageSaga(
         roomType: action.payload.roomType,
         status: action.payload.status,
         tempId: action.payload.tempId,
+        blockList: action.payload.blockList,
       };
       if (action.payload.sendFileInfo) {
-        console.log('================111');
         const responseFile = yield call(fileRequest, action.payload);
-        console.log('================222', responseFile);
 
         if (responseFile.data.state == 'SUCCESS') {
           messageParams.fileInfos = JSON.stringify(responseFile.data.result);
@@ -115,9 +115,7 @@ export function createSendChannelMessageSaga(
       } else {
         messageParams.targetArr = [];
       }
-      console.log('================1');
       const response = yield call(request, messageParams);
-      console.log('================2 ', response);
 
       if (response.data.status == 'SUCCESS') {
         /*

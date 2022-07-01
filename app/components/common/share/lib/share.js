@@ -109,6 +109,7 @@ export const shareFactory = async shareData => {
     formData.append('type', shareData.type);
     formData.append('targets', shareData.targets);
     formData.append('roomType', shareData.roomType);
+    formData.append('blockList', shareData.blockList);
     return server.postRestful(url, formData, {
       'Content-Type': 'multipart/form-data',
     });

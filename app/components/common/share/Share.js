@@ -34,6 +34,7 @@ import {
 import { accessTokenCheck } from '@API/login';
 import { initConfig, getServerConfigs, getServer, getDic } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
+import { getChineseWall } from '@/lib/api/orgchart';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
@@ -56,10 +57,10 @@ const Share = () => {
   // postBox
   const [context, setContext] = useState('');
 
-  const getShareData = useCallback(async () => {
+  const getShareData = async () => {
     const shareDatas = await ShareExtension.data();
     return shareDatas;
-  }, []);
+  };
 
   const getTokenInfo = useCallback(async () => {
     const parentAuthData = await getData('loginInfo');
@@ -240,33 +241,41 @@ const Share = () => {
     return true;
   }, []);
 
-  const shareMessage = useCallback(async (shareInfo, message, files) => {
-    let shareFlag = false;
-    // share file & room info
-    const shareFileAndRoom = {
-      type: shareInfo.type,
-      targets:
-        (Array.isArray(shareInfo.targets) && shareInfo.targets.join(';')) || '',
-      fileInfos: await getFileStat(files),
-      roomType: shareInfo.roomType,
-    };
+  const shareMessage = useCallback(
+    async (shareInfo, message, files) => {
+      const { blockList } = await getChineseWall({
+        userId: loginInfo.id,
+      });
 
-    const { data: shareResult } = await shareFactory(shareFileAndRoom);
+      let shareFlag = false;
+      // share file & room info
+      const shareFileAndRoom = {
+        type: shareInfo.type,
+        targets:
+          (Array.isArray(shareInfo.targets) && shareInfo.targets.join(';')) ||
+          '',
+        fileInfos: await getFileStat(files),
+        roomType: shareInfo.roomType,
+        blockList: blockList || [],
+      };
+      const { data: shareResult } = await shareFactory(shareFileAndRoom);
 
-    if (shareResult.state === 'SUCCESS') {
-      const messageDatas = shareResult.result.map(item => ({
-        ...item,
-        context: message,
-        fileInfos: getFileInfoStr(item.fileInfos),
-      }));
+      if (shareResult.state === 'SUCCESS') {
+        const messageDatas = shareResult.result.map(item => ({
+          ...item,
+          context: message,
+          fileInfos: getFileInfoStr(item.fileInfos),
+        }));
 
-      await messageFactory(messageDatas);
+        await messageFactory(messageDatas);
 
-      shareFlag = true;
-    }
+        shareFlag = true;
+      }
 
-    return shareFlag;
-  }, []);
+      return shareFlag;
+    },
+    [loginInfo],
+  );
 
   const handleSendMessage = useCallback((target, message, data) => {
     if (validationSend(target, message, data)) {
