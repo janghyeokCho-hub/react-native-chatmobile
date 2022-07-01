@@ -1,10 +1,12 @@
 import { managesvr } from '@API/api';
 import { getJobInfo } from '@/lib/userSettingUtil';
-import { getAllUserWithGroup } from '@API/room';
 
 export const getOrgChart = ({ deptID, companyCode }) => {
-  if (companyCode) return managesvr('get', `/org/${deptID}/gr/${companyCode}`);
-  else return managesvr('get', `/org/${deptID}/gr/GENERAL`);
+  if (companyCode) {
+    return managesvr('get', `/org/${deptID}/gr/${companyCode}`);
+  } else {
+    return managesvr('get', `/org/${deptID}/gr/GENERAL`);
+  }
 };
 
 export const searchOrgChart = async ({ userID, value, type }) => {

@@ -54,7 +54,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       !isBlock &&
         modalBtn.push({
           type: 'share',
-          title: getDic('Share'),
+          title: getDic('Share', '공유하기'),
           onPress: () => {
             const plainText = getPlainText(messageData.context);
             // plainText 와 images 공유?

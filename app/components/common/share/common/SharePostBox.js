@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, TextInput, FlatList, Image } from 'react-native';
+
 const SharePostBox = ({ context, shareData, onChangeText }) => {
   // send message view
   const postBox = useRef(null);
   const [type, setType] = useState('text');
+
   useEffect(() => {
     if (Array.isArray(shareData)) {
       const shareType = shareData[0].type;
@@ -15,7 +17,7 @@ const SharePostBox = ({ context, shareData, onChangeText }) => {
     }
 
     postBox && postBox.current && postBox.current.focus();
-  }, []);
+  }, [shareData]);
 
   return (
     <View style={{ flex: 1 }}>
