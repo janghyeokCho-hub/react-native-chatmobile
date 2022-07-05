@@ -19,12 +19,15 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     ? getConfig('UseChannelDeleteMessage', false) === true
     : getConfig('UseChatroomDeleteMessage', false) === true;
   const useForwardFile = getConfig('UseForwardFile') || false;
+  const { currentChannel } = useSelector(({ channel }) => ({
+    currentChannel: channel.currentChannel,
+  }));
 
 
   const handleAddBookmark = async(messageData) =>{
     try {
       const sendData = {
-        roomId: currentRoom.roomID.toString(),
+        roomId: currentRoom ? currentRoom.roomID.toString() :  currentChannel.roomId.toString(),
         messageId: messageData.messageID.toString()
       };
 
@@ -76,7 +79,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         });
     }
 
-    if (!messageData.fileInfos) {
       // bookmark
       !isBlock &&
         modalBtn.push({
@@ -86,7 +88,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
             handleAddBookmark(messageData)
           },
         });
-    }
 
     // share
     if (!messageData.fileInfos) {
