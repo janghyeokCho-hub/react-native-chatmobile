@@ -13,7 +13,7 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
 import Svg, { Path } from 'react-native-svg';
 import { isBlockCheck } from '@/lib/api/orgchart';
-import { isJSONStr, getJobInfo } from '@/lib/common';
+import { isJSONStr, getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { managesvr } from '@API/api';
 
 const BookmarkSummary = ({ route, navigation }) => {
@@ -28,6 +28,16 @@ const BookmarkSummary = ({ route, navigation }) => {
 
   const handleClose = () => {
     navigation.dispatch(CommonActions.goBack());
+  };
+
+  const getOtherCases = bookmark => {
+    let returnText = '';
+    if (bookmark.fileCnt > 1) {
+      returnText = getSysMsgFormatStr(getDic('Tmp_andCnt', '외 %s건'), [
+        { type: 'Plain', data: bookmark.fileCnt },
+      ]);
+    }
+    return returnText;
   };
 
   const getList = async () => {
@@ -89,7 +99,10 @@ const BookmarkSummary = ({ route, navigation }) => {
           onPress={() => handleMoveChat(item.roomId, item.messageId)}
         >
           <View style={styles.contents}>
-            <Text style={styles.context}>{item.context}</Text>
+            <Text style={styles.context}>
+              {item.context}
+              {`${item.fileName} ${getOtherCases(item)}`}
+            </Text>
             <Text style={styles.sendProfile}>
               {`${getJobInfo(item.senderInfo)} ·  ${format(
                 new Date(item.sendDate),
@@ -141,9 +154,13 @@ const BookmarkSummary = ({ route, navigation }) => {
           <View style={styles.editView}>
             <TouchableOpacity
               style={styles.editBtn}
-              onPress={()=> setEdit(!edit)}
+              onPress={() => setEdit(!edit)}
             >
-              {edit ? <Text>{getDic('Completion', '완료')}</Text> : <Text>{getDic('Modify', '수정')}</Text>}
+              {edit ? (
+                <Text>{getDic('Completion', '완료')}</Text>
+              ) : (
+                <Text>{getDic('Modify', '수정')}</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
