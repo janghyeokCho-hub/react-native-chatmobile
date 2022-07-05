@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import {
   View,
@@ -10,18 +10,17 @@ import {
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
-import { getConfig, getDic } from '@/config';
+import { getDic } from '@/config';
 import Svg, { Path } from 'react-native-svg';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr, getJobInfo } from '@/lib/common';
 import { managesvr } from '@API/api';
-import { changeModal, openModal } from '@/modules/modal';
 
 const BookmarkSummary = ({ route, navigation }) => {
   const { roomID } = route.params;
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const [bookmarkList, setBookmarkList] = useState([]);
-  const dispatch = useDispatch();
+  const [edit, setEdit] = useState(false);
 
   const handleMoveChat = (roomID, messageID) => {
     navigation.navigate('MoveChat', { roomID, messageID });
@@ -82,82 +81,34 @@ const BookmarkSummary = ({ route, navigation }) => {
     }
   };
 
-  const getDate = idx => {
-    let returnDate = '';
-
-    if (idx === 0) {
-      returnDate = format(new Date(bookmarkList[idx].sendDate), 'yyyy.MM.dd');
-    } else {
-      let preDate = format(
-        new Date(bookmarkList[idx - 1].sendDate),
-        'yyyy.MM.dd',
-      );
-      let currDate = format(new Date(bookmarkList[idx].sendDate), 'yyyy.MM.dd');
-
-      if (preDate !== currDate)
-        returnDate = format(new Date(bookmarkList[idx].sendDate), 'yyyy.MM.dd');
-    }
-    return returnDate;
-  };
-
-  const renderItem = ({ item, index }) => {
+  const renderItem = ({ item }) => {
     return (
       <View style={styles.bookmarkList}>
-        <Text style={getDate(index) && styles.datetxt}>{getDate(index)} </Text>
-
         <TouchableOpacity
           style={styles.bookmark}
-          onPress={() => handleMoreOptins(item)}
+          onPress={() => handleMoveChat(item.roomId, item.messageId)}
         >
           <View style={styles.contents}>
             <Text style={styles.context}>{item.context}</Text>
-            <Text style={styles.profile}>{getJobInfo(item.senderInfo)}</Text>
+            <Text style={styles.sendProfile}>
+              {`${getJobInfo(item.senderInfo)} ·  ${format(
+                new Date(item.sendDate),
+                'M월dd일 HH:mm ',
+              )}`}
+            </Text>
           </View>
-
-          <TouchableOpacity onPress={() => handleDeleteBookmark(item)} style={styles.delIcon}>
-            <Svg
-              width="20px"
-              height="20px"
-              viewBox="0 0 200 200"
-              data-name="Layer 1"
-              id="Layer_1"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="#222"
+          {edit && (
+            <TouchableOpacity
+              onPress={() => handleDeleteBookmark(item)}
+              style={styles.delView}
             >
-              <Path d="M170,47.5H30a10,10,0,0,0,0,20h5.5l9,88a29.91,29.91,0,0,0,30,27h51c15.5,0,28-11.5,30-27l9-88H170a10,10,0,0,0,0-20Zm-34.5,106a10.23,10.23,0,0,1-10,9h-51a10.23,10.23,0,0,1-10-9l-9-86h89l-9,86Zm-50.5-6a10,10,0,0,0,10-10V90a10,10,0,0,0-20,0v47.5A10,10,0,0,0,85,147.5Zm30,0a10,10,0,0,0,10-10V90a10,10,0,0,0-20,0v47.5A10,10,0,0,0,115,147.5ZM85,37.5h27.5a10,10,0,0,0,0-20H85a10,10,0,0,0,0,20Z" />
-            </Svg>
-          </TouchableOpacity>
+              <Text style={styles.delBtn}>삭제</Text>
+            </TouchableOpacity>
+          )}
         </TouchableOpacity>
       </View>
     );
   };
-
-  const handleMoreOptins = useCallback(
-    item => {
-      var modalBtn = [];
-      modalBtn = [
-        {
-          code: 'showContent',
-          title: getDic('ShowChat'),
-          onPress: () => {
-            handleMoveChat(item.roomId, item.messageId);
-          },
-        },
-      ];
-
-      dispatch(
-        changeModal({
-          modalData: {
-            closeOnTouchOutside: true,
-            type: 'normal',
-            buttonList: modalBtn,
-          },
-        }),
-      );
-      dispatch(openModal());
-    },
-    [dispatch],
-  );
 
   useEffect(() => {
     getList();
@@ -187,6 +138,14 @@ const BookmarkSummary = ({ route, navigation }) => {
               {getDic('BookmarkSummary', '책갈피 모아보기')}
             </Text>
           </View>
+          <View style={styles.editView}>
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={()=> setEdit(!edit)}
+            >
+              {edit ? <Text>{getDic('Completion', '완료')}</Text> : <Text>{getDic('Modify', '수정')}</Text>}
+            </TouchableOpacity>
+          </View>
         </View>
         <FlatList
           data={bookmarkList}
@@ -213,10 +172,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  exitBtnView: { width: '20%', alignItems: 'flex-start' },
-  titleView: { width: '60%', alignItems: 'center' },
+  exitBtnView: { flex: 1, alignItems: 'flex-start' },
+  titleView: { flex: 2, alignItems: 'center' },
   modaltit: {
     fontSize: 18,
+  },
+  editView: {
+    alignItems: 'flex-end',
+    flex: 1,
+  },
+  editBtn: {
+    alignItems: 'flex-end',
+    marginRight: 20,
   },
   topBtn: {
     marginLeft: 10,
@@ -228,24 +195,37 @@ const styles = StyleSheet.create({
   },
   bookmarkList: {
     paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   bookmark: {
+    marginVertical: 5,
+    marginHorizontal: 4,
     flexDirection: 'row',
   },
   contents: {
     flex: 4,
   },
-  datetxt: { marginVertical: 15, flex: 1 },
-  profile: {
-    color: 'grey',
+  context: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 3,
   },
-  fileBox: {
-    width: '100%',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    flexDirection: 'row',
-    alignItems: 'center',
+  sendProfile: {
+    color: 'grey',
+    marginRight: 10,
+    fontSize: 13,
+  },
+  delView: {
+    alignSelf: 'center',
+  },
+  delBtn: {
+    borderColor: '#D0D0D0',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 13,
+    textAlign: 'center',
+    fontSize: 13,
   },
 });
 
