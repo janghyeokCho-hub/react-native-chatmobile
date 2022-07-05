@@ -40,6 +40,14 @@ const BookmarkSummary = ({ route, navigation }) => {
     return returnText;
   };
 
+  const substrTxt = str => {
+    if (str.length >= 15) {
+      return str.substr(0, 12) + '......';
+    } else {
+      return str;
+    }
+  };
+
   const getList = async () => {
     try {
       const response = await managesvr('get', `/bookmark/${roomID}`);
@@ -100,8 +108,8 @@ const BookmarkSummary = ({ route, navigation }) => {
         >
           <View style={styles.contents}>
             <Text style={styles.context}>
-              {item.context}
-              {`${item.fileName} ${getOtherCases(item)}`}
+              {substrTxt(item.context)}
+              {`${substrTxt(item.fileName)} ${getOtherCases(item)}`}
             </Text>
             <Text style={styles.sendProfile}>
               {`${getJobInfo(item.senderInfo)} ·  ${format(
