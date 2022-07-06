@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { format } from 'date-fns';
+import useSWR from 'swr';
+
 import ProfileBox from '@COMMON/ProfileBox';
 import Message from '@C/chat/message/Message';
-
-import { format } from 'date-fns';
 import * as common from '@/lib/common';
 import LinkMessageBox from '@C/chat/message/LinkMessageBox';
 import FileMessageBox from '@C/chat/message/FileMessageBox';
-
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { linkPreview } from '@/lib/api/api';
 import { getScreenWidth } from '@/lib/device/common';
 import Svg, { Rect, G, Circle } from 'react-native-svg';
@@ -33,6 +33,7 @@ const ChannelMessageBox = ({
   );
   const [linkData, setLinkData] = useState(null);
   const dispatch = useDispatch();
+  const { data: searchOptionState } = useSWR('message/search', null);
 
   const msgUtilBox = useCallback(() => {
     openMsgUtilBox(message, dispatch);
@@ -59,14 +60,11 @@ const ChannelMessageBox = ({
       ? getDic('BlockChat', '차단된 메시지 입니다.')
       : message.context || '';
     let nameBoxVisible = nameBox;
-
     let senderInfo = null;
-
     let urlInfoJSX = null;
     let fileInfoJSX = null;
-
     let messageType = 'message';
-
+    let _marking = null;
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (!isBlock && common.eumTalkRegularExp.test(drawText)) {
       const processMsg = common.convertEumTalkProtocol(drawText, {
@@ -81,6 +79,18 @@ const ChannelMessageBox = ({
         senderInfo = JSON.parse(message.senderInfo);
       } else {
         senderInfo = message.senderInfo;
+      }
+    }
+
+    if (searchOptionState?.type === 'Context') {
+      _marking = marking;
+    } else if (
+      searchOptionState?.type === 'Name' &&
+      searchOptionState?.value &&
+      message?.sender
+    ) {
+      if (message.sender === searchOptionState.value) {
+        _marking = '.*';
       }
     }
 
@@ -363,7 +373,7 @@ const ChannelMessageBox = ({
                             navigation={navigation}
                             styleType={'sentText'}
                             longPressEvt={msgUtilBox}
-                            marking={marking}
+                            marking={_marking}
                           >
                             {drawText}
                           </Message>
@@ -397,7 +407,7 @@ const ChannelMessageBox = ({
                         ]}
                         styleType={'sentText'}
                         longPressEvt={msgUtilBox}
-                        marking={marking}
+                        marking={_marking}
                       >
                         {drawText}
                       </Message>
@@ -459,7 +469,7 @@ const ChannelMessageBox = ({
                       messageType !== 'message' && styles[messageType],
                     ]}
                     eleId={id}
-                    marking={marking}
+                    marking={_marking}
                     roomInfo={roomInfo}
                     navigation={navigation}
                     styleType={'repliseText'}

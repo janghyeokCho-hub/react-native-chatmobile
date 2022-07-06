@@ -31,6 +31,8 @@ const Plain = ({ marking, text, style, longPressEvt }) => {
   const regex = new RegExp('(' + marking + ')', 'gi');
   if (regex.test(text)) {
     const parts = text.split(regex);
+    // reset lastIndex for reuse
+    regex.lastIndex = 0;
     return (
       <View
         style={{
@@ -41,23 +43,28 @@ const Plain = ({ marking, text, style, longPressEvt }) => {
         <LongPressWrapper longPressEvt={longPressEvt}>
           {parts
             .filter(part => part)
-            .map((part, i) =>
-              marking && part.toLowerCase() === marking.toLowerCase() ? (
-                <Text
-                  key={i}
-                  style={{
-                    backgroundColor: '#222',
-                    color: '#fff',
-                  }}
-                >
-                  {part}
-                </Text>
-              ) : (
-                <Text key={i} style={style}>
-                  {part}
-                </Text>
-              ),
-            )}
+            .map((part, i) => {
+              const render = regex.test(part.toLowerCase());
+              if (render) {
+                return (
+                  <Text
+                    key={i}
+                    style={{
+                      backgroundColor: '#222',
+                      color: '#fff',
+                    }}
+                  >
+                    {part}
+                  </Text>
+                );
+              } else {
+                return (
+                  <Text key={i} style={style}>
+                    {part}
+                  </Text>
+                );
+              }
+            })}
         </LongPressWrapper>
       </View>
     );

@@ -148,13 +148,25 @@ export const sendChannelMessage = params => {
   return chatsvr('post', '/channel/message', params);
 };
 
-export const searchChannelMessage = params => {
-  return managesvr(
-    'get',
-    `/channel/messages/search/${params.search}?roomID=${
-      params.roomId
-    }&loadCnt=${params.loadCnt}`,
-  );
+export const searchChannelMessage = (params, { searchByName }) => {
+  const searchText = encodeURIComponent(params.search);
+  let requestMethod = 'get';
+  let requestURL;
+  let requestBody = {};
+  if (searchByName) {
+    requestMethod = 'post';
+    requestURL = '/channel/sender/search';
+    requestBody = {
+      roomId: params.roomId,
+      loadCnt: params.loadCnt,
+      searchId: params.search,
+    };
+  } else {
+    requestURL = `/channel/messages/search?roomID=${params.roomId}&loadCnt=${
+      params.loadCnt
+    }&searchText=${searchText}`;
+  }
+  return managesvr(requestMethod, requestURL, requestBody);
 };
 
 export const getNotice = params => {

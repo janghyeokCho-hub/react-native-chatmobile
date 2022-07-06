@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { getBottomPadding } from '@/lib/device/common';
-import KeySpacer from '@C/common/layout/KeySpacer';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@react-navigation/native';
+import useSWR from 'swr';
 
-const SearchIndexBox = ({ length, onChange }) => {
+import { getBottomPadding } from '@/lib/device/common';
+import KeySpacer from '@C/common/layout/KeySpacer';
+import { getDic } from '@/config';
+
+const SearchIndexBox = ({ length, onChange, handleNext }) => {
   const { sizes } = useTheme();
   const [index, setIndex] = useState(0);
+  const { data: searchOptionState } = useSWR('message/search', null);
 
-  const handleSearchIndex = index => {
-    onChange(index);
-    setIndex(index);
+  const handleSearchIndex = changedIndex => {
+    onChange(changedIndex);
+    setIndex(changedIndex);
   };
 
   useEffect(() => {
@@ -28,10 +32,21 @@ const SearchIndexBox = ({ length, onChange }) => {
                 {index + 1} / {length}
               </Text>
             </View>
+            {searchOptionState?.type === 'Name' &&
+              typeof handleNext === 'function' && (
+                <TouchableOpacity
+                  onPress={handleNext}
+                  style={styles.showMoreBtn}
+                >
+                  <Text style={{ color: '#444' }}>{getDic('SeeMore')}</Text>
+                </TouchableOpacity>
+              )}
             <View style={styles.indexArrowBox}>
               <TouchableOpacity
                 onPress={() => {
-                  if (index < length - 1) handleSearchIndex(index + 1);
+                  if (index < length - 1) {
+                    handleSearchIndex(index + 1);
+                  }
                 }}
               >
                 <View style={styles.indexArrowBtnWrap}>
@@ -51,7 +66,9 @@ const SearchIndexBox = ({ length, onChange }) => {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  if (index > 0) handleSearchIndex(index - 1);
+                  if (index > 0) {
+                    handleSearchIndex(index - 1);
+                  }
                 }}
               >
                 <View style={styles.indexArrowBtnWrap}>
@@ -119,6 +136,13 @@ const styles = StyleSheet.create({
     width: 30,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  showMoreBtn: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#AAA',
+    paddingHorizontal: 16,
+    paddingVertical: 4,
   },
 });
 

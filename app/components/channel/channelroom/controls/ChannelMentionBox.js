@@ -5,8 +5,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
-  Platform,
 } from 'react-native';
 import ProfileBox from '@C/common/ProfileBox';
 import { getJobInfo, getDictionary } from '@/lib/common';
@@ -19,16 +17,12 @@ const ChannelMentionBox = ({ members, onPress }) => {
         keyExtractor={item => item.id}
         renderItem={({ item }) => {
           return (
-            <TouchableOpacity
-              onPress={() => {
-                onPress(`@${getJobInfo(item, true)}`);
-              }}
-            >
+            <TouchableOpacity onPress={() => onPress(item)}>
               <View style={styles.selectItem}>
                 <ProfileBox
                   userId={item.id}
                   img={item.photoPath}
-                  presence={item.type == 'G' ? item.presence : null}
+                  presence={item.type === 'G' ? item.presence : null}
                   isInherit={false}
                   userName={item.name}
                   handleClick={false}

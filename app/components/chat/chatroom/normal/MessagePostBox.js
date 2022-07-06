@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeFiles, clearFiles, deleteFile } from '@/modules/message';
-import * as fileUtil from '@/lib/fileUtil';
-import * as imageUtil from '@/lib/imagePickUtil';
-import * as dbAction from '@/lib/appData/action';
-
+import { changeFiles } from '@/modules/message';
+import Svg, { G, Path, Circle } from 'react-native-svg';
+import DocumentPicker from 'react-native-document-picker';
+import { useTheme } from '@react-navigation/native';
+import FastImage from 'react-native-fast-image';
 import {
   View,
   Platform,
@@ -16,8 +16,7 @@ import {
   Image,
   PermissionsAndroid,
 } from 'react-native';
-import Svg, { G, Rect, Polygon, Path, Circle } from 'react-native-svg';
-import DocumentPicker from 'react-native-document-picker';
+
 import ChannelMentionBox from '@C/channel/channelroom/controls/ChannelMentionBox';
 import KeySpacer from '@C/common/layout/KeySpacer';
 import StickerLayer from '@C/chat/chatroom/controls/StickerLayer';
@@ -25,9 +24,9 @@ import ExtensionLayer from '@C/chat/chatroom/controls/ExtensionLayer';
 import { getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { getBottomPadding, resetInput } from '@/lib/device/common';
 import { getConfig, getDic } from '@/config';
-import { useTheme } from '@react-navigation/native';
-
-import FastImage from 'react-native-fast-image';
+import * as fileUtil from '@/lib/fileUtil';
+import * as imageUtil from '@/lib/imagePickUtil';
+import * as dbAction from '@/lib/appData/action';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 const ico_send = require('@C/assets/m-send-btn.png');
@@ -61,11 +60,11 @@ const MessagePostBox = ({
   const { MOBILE } = getConfig('FileAttachMode', {});
 
   const handleTextChange = useCallback(
-    text => {
-      let textArr = text.split(' ');
-      if (textArr.length > 0) {
-        textArr.map(text => {
-          if (text.search('@') == 0) {
+    changedText => {
+      const textArr = changedText?.split(' ');
+      if (Array.isArray(textArr)) {
+        textArr.forEach(text => {
+          if (text.search('@') === 0) {
             const target = text.substring(1, text.length);
             setOpenMentionList(false);
             setSuggestMember([]);
@@ -77,7 +76,9 @@ const MessagePostBox = ({
               }
             });
             setSuggestMember(result);
-          } else if (openMentionList) setOpenMentionList(false);
+          } else if (openMentionList) {
+            setOpenMentionList(false);
+          }
         });
       }
     },
@@ -132,7 +133,7 @@ const MessagePostBox = ({
           //files.length > 0 ? { files, fileInfos } : null,
           null,
           null,
-          mentionArr
+          mentionArr,
         );
       } else {
       }
@@ -151,11 +152,13 @@ const MessagePostBox = ({
   }, [isLock]);
 
   const handleSendFile = () => {
-    if (scrollToStart) scrollToStart();
+    if (scrollToStart) {
+      scrollToStart();
+    }
     const fileCtrl = fileUtil.getInstance();
     const files = fileCtrl.getFiles();
     const fileInfos = fileCtrl.getRealFileInfos();
-    if (context != '' || files.length > 0) {
+    if (context !== '' || files.length > 0) {
       try {
         postAction('', files.length > 0 ? { files, fileInfos } : null, null);
       } catch (err) {
@@ -165,7 +168,9 @@ const MessagePostBox = ({
   };
 
   const handleEmoticon = emoticon => {
-    if (scrollToStart) scrollToStart();
+    if (scrollToStart) {
+      scrollToStart();
+    }
     // emoticon만 전송
     postAction(emoticon, null, null);
     // emoticon은 바로 발송
@@ -219,9 +224,12 @@ const MessagePostBox = ({
   const handleImageChange = file => {
     // console.log('handleImageChange=====');
     // console.log(file);
-    if (file != undefined) {
-      if (Platform.OS === 'ios') handleImageChangeForiOS(file);
-      else handleImageChangeForAndroid(file);
+    if (file) {
+      if (Platform.OS === 'ios') {
+        handleImageChangeForiOS(file);
+      } else {
+        handleImageChangeForAndroid(file);
+      }
     }
   };
 
@@ -276,7 +284,7 @@ const MessagePostBox = ({
 
     if (files.length > 0) {
       const appendResult = fileCtrl.appendFiles(files);
-      if (appendResult.result == 'SUCCESS') {
+      if (appendResult.result === 'SUCCESS') {
         await fileCtrl.setThumbDataiOSURL();
         dispatch(changeFiles({ files: fileCtrl.getFileInfos() }));
         // setSelectImage({
@@ -355,7 +363,7 @@ const MessagePostBox = ({
     const fileCtrl = fileUtil.getInstance();
     if (files.length > 0) {
       const appendResult = fileCtrl.appendFiles(files);
-      if (appendResult.result == 'SUCCESS') {
+      if (appendResult.result === 'SUCCESS') {
         await fileCtrl.setThumbDataURL();
         dispatch(changeFiles({ files: fileCtrl.getFileInfos() }));
         handleSendFile();
@@ -396,9 +404,9 @@ const MessagePostBox = ({
 
   const extensionCallback = type => {
     Keyboard.dismiss();
-    if (type == 'file') {
+    if (type === 'file') {
       showDocumentPicker();
-    } else if (type == 'camera') {
+    } else if (type === 'camera') {
       imageUtil.selectImageWithCamera(
         data => {
           if (data.error) {
@@ -414,7 +422,7 @@ const MessagePostBox = ({
         },
         () => {},
       );
-    } else if (type == 'album') {
+    } else if (type === 'album') {
       if (Platform.OS === 'android') {
         const { PERMISSIONS, check, request } = PermissionsAndroid;
         check(PERMISSIONS.READ_EXTERNAL_STORAGE).then(result => {
@@ -428,8 +436,8 @@ const MessagePostBox = ({
             });
           } else {
             // ====REQUEST PERMISSION====
-            request(PERMISSIONS.READ_EXTERNAL_STORAGE).then(result => {
-              if (result === 'granted') {
+            request(PERMISSIONS.READ_EXTERNAL_STORAGE).then(response => {
+              if (response === 'granted') {
                 //====REQUEST GRANTED====
                 navigation.navigate('ImageList', {
                   postAction: postAction,
@@ -460,7 +468,7 @@ const MessagePostBox = ({
       //   },
       //   () => {},
       // );
-    } else if (type == 'video') {
+    } else if (type === 'video') {
       if (Platform.OS === 'android') {
         const { PERMISSIONS, check, request } = PermissionsAndroid;
         check(PERMISSIONS.READ_EXTERNAL_STORAGE).then(result => {
@@ -474,8 +482,8 @@ const MessagePostBox = ({
             });
           } else {
             // ====REQUEST PERMISSION====
-            request(PERMISSIONS.READ_EXTERNAL_STORAGE).then(result => {
-              if (result === 'granted') {
+            request(PERMISSIONS.READ_EXTERNAL_STORAGE).then(response => {
+              if (response === 'granted') {
                 //====REQUEST GRANTED====
                 navigation.navigate('ImageList', {
                   postAction: postAction,
@@ -506,10 +514,10 @@ const MessagePostBox = ({
       //   },
       //   () => {},
       // );
-    } else if (type == 'image') {
+    } else if (type === 'image') {
       postAction('', selectImage.files.length > 0 ? selectImage : null, null);
       setSelectImage({ files: [], fileInfos: [] });
-    } else if (type == 'test') {
+    } else if (type === 'test') {
       dbAction.updateUnreadCount({
         roomID: currentRoom.roomID,
         messageId: 12589,
@@ -540,16 +548,19 @@ const MessagePostBox = ({
       {openMentionList && (
         <ChannelMentionBox
           members={suggestMember}
-          onPress={data => {
+          onPress={user => {
+            const name = `@${getJobInfo(user, true)}`;
             let tempContext = context.split(' ');
             let result = '';
-            tempContext[tempContext.length - 1] = data;
+            tempContext[tempContext.length - 1] = name;
             tempContext.map(t => {
               result += t + ' ';
             });
             setContext(result);
             setOpenMentionList(false);
-            if (postInputBox) postInputBox.focus();
+            if (postInputBox) {
+              postInputBox.focus();
+            }
           }}
         />
       )}
@@ -560,8 +571,11 @@ const MessagePostBox = ({
             <TouchableOpacity
               onPress={e => {
                 if (!disabled && !inputLock) {
-                  if (extension == 'E') onExtension('');
-                  else onExtension('E');
+                  if (extension === 'E') {
+                    onExtension('');
+                  } else {
+                    onExtension('E');
+                  }
                   Keyboard.dismiss();
                   //handleStickerControl();
                   e.stopPropagation();
@@ -636,7 +650,7 @@ const MessagePostBox = ({
             ref={input => {
               setPostInputBox(input);
             }}
-            value={context == '' ? null : context}
+            value={context === '' ? null : context}
             style={{ ...styles.messagePostBox, fontSize: sizes.default }}
             placeholder={getPlaceholder}
           />
@@ -678,14 +692,15 @@ const MessagePostBox = ({
             </TouchableOpacity>
           )) || (
             <TouchableOpacity
-              disabled={disabled || context == '' || clear}
+              disabled={disabled || context === '' || clear}
               onPress={() => {
                 if (!disabled && !inputLock) {
                   let inputContext = context;
                   let inputImage = selectImage;
                   setContext('');
-                  if (Platform.OS == 'android') resetInput(postInputBox);
-                  else {
+                  if (Platform.OS === 'android') {
+                    resetInput(postInputBox);
+                  } else {
                     resetInput(postInputBox);
 
                     // ios 저성능 device에서 textinput 밀림현상 처리
@@ -701,6 +716,7 @@ const MessagePostBox = ({
               <View
                 style={[
                   styles.sendBtn,
+                  // ??
                   { backgroundColor: !context == '' ? colors.primary : '#999' },
                 ]}
               >
@@ -711,7 +727,7 @@ const MessagePostBox = ({
         </View>
       </View>
       <KeySpacer
-        spacing={extension == '' ? getBottomPadding() : 0}
+        spacing={extension === '' ? getBottomPadding() : 0}
         style={{ backgroundColor: '#F9F9F9' }}
       />
       {selectImage &&
@@ -768,8 +784,8 @@ const MessagePostBox = ({
             </TouchableOpacity>
           </View>
         )}
-      {extension == 'S' && <StickerLayer onClick={handleEmoticon} />}
-      {extension == 'E' && (
+      {extension === 'S' && <StickerLayer onClick={handleEmoticon} />}
+      {extension === 'E' && (
         <ExtensionLayer
           onClick={extensionCallback}
           selectImage={selectImage}

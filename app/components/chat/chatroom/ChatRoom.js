@@ -10,7 +10,7 @@ import { addTargetUserList, delTargetUserList } from '@/modules/presence';
 import { sendMessage, clearFiles } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import MessageView from '@C/chat/chatroom/normal/MessageView';
-import SearchView from '@C/chat/chatroom/search/SearchView';
+import SearchView from '@C/common/search/SearchView';
 import * as fileUtil from '@/lib/fileUtil';
 import { Text } from 'react-native';
 

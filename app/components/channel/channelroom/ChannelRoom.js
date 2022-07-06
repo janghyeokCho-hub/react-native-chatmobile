@@ -16,7 +16,7 @@ import { clearFiles, sendChannelMessage } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
 import * as fileUtil from '@/lib/fileUtil';
-import SearchView from '@C/channel/search/SearchView';
+import SearchView from '@C/common/search/SearchView';
 import { Text } from 'react-native';
 
 const ChannelRoom = ({ navigation, route }) => {

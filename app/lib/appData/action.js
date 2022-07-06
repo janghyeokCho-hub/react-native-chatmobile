@@ -1946,8 +1946,13 @@ export const refreshAppData = async () => {
   });
 };
 
-export const reqGetSearchMessages = async param => {
-  let search = await searchMessages(param);
+export const reqGetSearchMessages = async (param, { searchByName }) => {
+  let search = [];
+  if (searchByName) {
+    search = await searchMessagesByName(param);
+  } else {
+    search = await searchMessages(param);
+  }
 
   const returnObj = {
     status: 'FAIL',
@@ -1987,6 +1992,27 @@ const searchMessages = async param => {
     });
   });
 
+  return search;
+};
+
+const searchMessagesByName = async param => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  const search = await new Promise((resolve, reject) => {
+    dbCon.transaction(tx => {
+      db.tx(tx)
+        .query(
+          `SELECT messageId FROM message WHERE roomId = ${
+            param.roomID
+          } AND sender = '${param.search}' AND messageId <= ${
+            param?.messageId
+          } AND messageType = 'N' ORDER BY messageId DESC LIMIT ${param?.loadCnt ||
+            50}`,
+        )
+        .execute((tx, result) => {
+          resolve(result.rows.raw());
+        });
+    });
+  });
   return search;
 };
 
