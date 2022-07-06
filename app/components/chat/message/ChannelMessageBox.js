@@ -495,7 +495,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   textOnly: {
-    margin: 5,
+    marginLeft: 10,
+    marginTop: 5,
+    marginRight: 10,
+    marginBottom: 5,
   },
   replies: {
     flexDirection: 'row',
@@ -522,6 +525,7 @@ const styles = StyleSheet.create({
   sentFirstMessageBox: {
     maxWidth: '100%',
     flexDirection: 'row',
+    marginTop: 5,
   },
   sentFirstMessage: {
     padding: 10,
@@ -560,8 +564,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
   profile: {
-    marginLeft: 5,
-    marginTop: 5,
     width: 40,
     height: 40,
   },
