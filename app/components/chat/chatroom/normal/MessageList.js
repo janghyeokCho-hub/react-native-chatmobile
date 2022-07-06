@@ -205,7 +205,6 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         (beforeMessage && Math.floor(beforeMessage.sendDate / 60000)) || 0;
       const beforeSender = (beforeMessage && beforeMessage.sender) || '';
 
-      let nameBox = !(message.sender == nextMessageSender);
       let dateBox = true;
       try {
         if (!Number(message?.sendDate) || !Number(nextMessage?.sendDate)) {
@@ -221,11 +220,23 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         dateBox = true;
       }
 
-      let timeBox = !(beforeSendTime == currentTime);
-      if (!timeBox) {
-        // time은 같지만 다른사용자의 채팅으로 넘어가는경우
-        timeBox = !(message.sender == beforeSender);
-      }
+      /* 메시지 보낸사람 프로필 표시 여부 */
+      const nameBox =
+        // 이전 메시지와 다른 사람의 메시지
+        !(message.sender === nextMessageSender) ||
+        // 메시지 표시 시간이 달라진 경우
+        !(beforeSendTime === currentTime) ||
+        // 날짜가 바뀐 경우
+        dateBox ||
+        // 시스템 메시지
+        nextMessage.messageType === 'S';
+
+      /* 메시지 시간 표시 여부 */
+      const timeBox =
+        // 메시지 표시 시간이 달라진 경우
+        !(beforeSendTime === currentTime) ||
+        // 이전 메시지와 다른 사람의 메시지
+        !(message.sender === beforeSender);
 
       const dateCompareVal = Math.floor(message.sendDate / 86400000);
       if (message.messageType !== 'S') {
