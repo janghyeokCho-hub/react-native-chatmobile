@@ -1,16 +1,18 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import Svg, { G, Rect, Circle } from 'react-native-svg';
+import { useTheme } from '@react-navigation/native';
+import { format } from 'date-fns';
+import useSWR from 'swr';
+
 import ProfileBox from '@COMMON/ProfileBox';
 import Message from '@C/chat/message/Message';
-import { format } from 'date-fns';
 import * as common from '@/lib/common';
 import LinkMessageBox from '@C/chat/message/LinkMessageBox';
 import FileMessageBox from '@C/chat/message/FileMessageBox';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { linkPreview } from '@/lib/api/api';
 import { getScreenWidth } from '@/lib/device/common';
-import Svg, { G, Rect, Circle } from 'react-native-svg';
-import { useTheme } from '@react-navigation/native';
 import { openMsgUtilBox } from '@/lib/messageUtil';
 import { getDic } from '@/config';
 
@@ -28,6 +30,7 @@ const MessageBox = ({
   const { sizes, colors } = useTheme();
   const currMember = useSelector(({ room }) => room.currentRoom.members);
   const [linkData, setLinkData] = useState(null);
+  const { data: searchOptionState } = useSWR('message/search', null);
 
   const isOldMember = useMemo(() => {
     return (
@@ -55,6 +58,7 @@ const MessageBox = ({
     let urlInfoJSX = null;
     let fileInfoJSX = null;
     let messageType = 'message';
+    let _marking = null;
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (!isBlock && common.eumTalkRegularExp.test(drawText)) {
@@ -70,6 +74,18 @@ const MessageBox = ({
         senderInfo = JSON.parse(message.senderInfo);
       } else {
         senderInfo = message.senderInfo;
+      }
+    }
+
+    if (searchOptionState?.type === 'Context') {
+      _marking = marking;
+    } else if (
+      searchOptionState?.type === 'Name' &&
+      searchOptionState?.value &&
+      message?.sender
+    ) {
+      if (message.sender === searchOptionState.value) {
+        _marking = '.*';
       }
     }
 
@@ -367,7 +383,7 @@ const MessageBox = ({
                               ]}
                               navigation={navigation}
                               styleType={'sentText'}
-                              marking={marking}
+                              marking={_marking}
                               longPressEvt={msgUtilBox}
                             >
                               {drawText}
@@ -409,7 +425,7 @@ const MessageBox = ({
                         ]}
                         navigation={navigation}
                         styleType={'sentText'}
-                        marking={marking}
+                        marking={_marking}
                         longPressEvt={msgUtilBox}
                       >
                         {drawText}
@@ -484,7 +500,7 @@ const MessageBox = ({
                     ]}
                     eleId={id}
                     navigation={navigation}
-                    marking={marking}
+                    marking={_marking}
                     styleType={'repliseText'}
                     longPressEvt={msgUtilBox}
                   >
