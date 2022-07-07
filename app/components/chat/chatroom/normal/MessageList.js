@@ -198,7 +198,8 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
       const nextMessage =
         index < messageData.length - 1 ? messageData[index + 1] : null;
       const nextMessageSender = (nextMessage && nextMessage.sender) || '';
-
+      const nextMessagenSendTime =
+        (nextMessage && Math.floor(nextMessage.sendDate / 60000)) || 0;
       const currentTime = Math.floor(message.sendDate / 60000);
 
       const beforeSendTime =
@@ -221,15 +222,17 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
       }
 
       /* 메시지 보낸사람 프로필 표시 여부 */
-      const nameBox =
-        // 이전 메시지와 다른 사람의 메시지
-        !(message.sender === nextMessageSender) ||
-        // 메시지 표시 시간이 달라진 경우
-        !(beforeSendTime === currentTime) ||
-        // 날짜가 바뀐 경우
-        dateBox ||
+      let nameBox;
+      if (message.messageType === 'S') {
         // 시스템 메시지
-        nextMessage.messageType === 'S';
+        nameBox = true;
+      } else if (message.sender === nextMessageSender) {
+        // 이전 메시지와 동일유저 && 이전 메시지로부터 시간이 지남
+        nameBox = !(nextMessagenSendTime === currentTime);
+      } else {
+        // 이전 메시지와 동일 유저가 아닌 경우
+        nameBox = true;
+      }
 
       /* 메시지 시간 표시 여부 */
       const timeBox =
