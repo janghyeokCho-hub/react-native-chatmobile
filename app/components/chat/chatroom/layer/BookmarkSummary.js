@@ -106,7 +106,7 @@ const BookmarkSummary = ({ route, navigation }) => {
             <Text style={styles.sendProfile}>
               {`${getJobInfo(item.senderInfo)} ·  ${format(
                 new Date(item.sendDate),
-                'M월dd일 HH:mm ',
+                'MM.dd  HH:mm ',
               )}`}
             </Text>
           </View>
