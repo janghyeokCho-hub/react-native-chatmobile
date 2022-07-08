@@ -198,3 +198,20 @@ export const shareFile = formData => {
 export const checkFileTokenValidation = async ({ token, serviceType }) => {
   return await filesvr('get', `/check/${serviceType}/${token}`);
 };
+
+//책갈피
+//책갈피 리스트 조회
+export const getBookmarkList = params => {
+  return managesvr('get', `/bookmark/${params}`);
+};
+
+//책갈피 삭제
+export const deleteBookmark = params => {
+  return managesvr('delete', `/bookmark/${params.roomId}/${params.bookmarkId}`);
+};
+
+//책갈피 등록
+
+export const createBookmark = params => {
+  return managesvr('post', `/bookmark`, params);
+};

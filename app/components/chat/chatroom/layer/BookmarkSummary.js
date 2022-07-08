@@ -14,6 +14,7 @@ import { getDic } from '@/config';
 import Svg, { Path } from 'react-native-svg';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr, getJobInfo, getSysMsgFormatStr } from '@/lib/common';
+import { getBookmarkList, deleteBookmark } from '@API/message';
 import { managesvr } from '@API/api';
 
 const BookmarkSummary = ({ route, navigation }) => {
@@ -50,7 +51,7 @@ const BookmarkSummary = ({ route, navigation }) => {
 
   const getList = async () => {
     try {
-      const response = await managesvr('get', `/bookmark/${roomID}`);
+      const response = await getBookmarkList(roomID);
       if (response.data.status === 'SUCCESS') {
         let list = response.data.list;
         list = list.filter((item = {}) => {
@@ -72,28 +73,21 @@ const BookmarkSummary = ({ route, navigation }) => {
         });
         list.sort((a, b) => b.sendDate - a.sendDate);
 
-        console.log('list', list);
         setBookmarkList(list);
-        await console.log('bookmarkList[0]', bookmarkList[0]);
-      } else {
-        return;
       }
     } catch (error) {
       console.log('Send Error   ', error);
     }
   };
 
-  const handleDeleteBookmark = async item => {
+  const handleDeleteBookmark = item => {
     try {
-      const { data } = await managesvr(
-        'delete',
-        `/bookmark/${item.roomId}/${item.bookmarkId}`,
-      );
-
-      if (data.status === 'SUCCESS') {
-        setBookmarkList([]);
-        getList();
-      }
+      deleteBookmark(item).then(({data})=>{
+        if (data.status === 'SUCCESS') {
+          setBookmarkList([]);
+          getList();
+        }
+      })
     } catch (error) {
       console.log('Send Error   ', error);
     }
@@ -123,7 +117,7 @@ const BookmarkSummary = ({ route, navigation }) => {
               onPress={() => handleDeleteBookmark(item)}
               style={styles.delView}
             >
-              <Text style={styles.delBtn}>삭제</Text>
+              <Text style={styles.delBtn}>{getDic('Delete', '삭제')}</Text>
             </TouchableOpacity>
           )}
         </TouchableOpacity>
