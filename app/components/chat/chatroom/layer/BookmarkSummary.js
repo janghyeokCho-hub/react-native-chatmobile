@@ -15,7 +15,6 @@ import Svg, { Path } from 'react-native-svg';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr, getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { getBookmarkList, deleteBookmark } from '@API/message';
-import { managesvr } from '@API/api';
 
 const BookmarkSummary = ({ route, navigation }) => {
   const { roomID } = route.params;
@@ -59,17 +58,18 @@ const BookmarkSummary = ({ route, navigation }) => {
           if (chineseWall?.length) {
             const senderInfo = isJSONStr(item.senderInfo)
               ? JSON.parse(item.senderInfo)
-              : item.senderInfo;
-            const { blockChat } = isBlockCheck({
+              : item?.senderInfo;
+            const { blockChat, blockFile } = isBlockCheck({
               targetInfo: {
                 ...senderInfo,
-                id: item?.sender || senderInfo?.sender,
+                id: senderInfo?.sender,
               },
               chineseWall,
             });
-            isBlock = blockChat;
+            const isFile = item.fileCnt > 0;
+            isBlock = isFile ? blockFile : blockChat;
           }
-          return isBlock === false;
+          return !isBlock && item;
         });
         list.sort((a, b) => b.sendDate - a.sendDate);
 
@@ -82,12 +82,12 @@ const BookmarkSummary = ({ route, navigation }) => {
 
   const handleDeleteBookmark = item => {
     try {
-      deleteBookmark(item).then(({data})=>{
+      deleteBookmark(item).then(({ data }) => {
         if (data.status === 'SUCCESS') {
           setBookmarkList([]);
           getList();
         }
-      })
+      });
     } catch (error) {
       console.log('Send Error   ', error);
     }
