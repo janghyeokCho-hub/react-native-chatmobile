@@ -33,7 +33,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
 
     let popupMsg;
 
-    try {
       messageApi.createBookmark(sendData).then(({ data }) => {
         if (data?.status == 'SUCCESS') {
           popupMsg = getDic(
@@ -52,10 +51,9 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
           ))
         }
         Alert.alert('', popupMsg);
-      });
-    } catch (error) {
-      console.log('Send Error   ', error);
-    }
+      })
+      .catch(error => console.log('Send Error   ', error));
+
   };
 
   const buttons = useMemo(() => {

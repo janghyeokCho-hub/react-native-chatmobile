@@ -81,16 +81,14 @@ const BookmarkSummary = ({ route, navigation }) => {
   };
 
   const handleDeleteBookmark = item => {
-    try {
-      deleteBookmark(item).then(({ data }) => {
+    deleteBookmark(item)
+      .then(({ data }) => {
         if (data.status === 'SUCCESS') {
           setBookmarkList([]);
           getList();
         }
-      });
-    } catch (error) {
-      console.log('Send Error   ', error);
-    }
+      })
+      .catch(error => console.log('Send Error   ', error));
   };
 
   const renderItem = ({ item }) => {
