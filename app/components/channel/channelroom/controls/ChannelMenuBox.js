@@ -376,7 +376,7 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
                 </Text>
               </View>
             </TouchableOpacity>
-            {useBookmark === true && (
+            {useBookmark && (
               <TouchableOpacity onPress={handleBookmarkSummary}>
                 <View style={styles.menuBox}>
                   <Svg

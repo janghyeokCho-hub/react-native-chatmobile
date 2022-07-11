@@ -31,10 +31,14 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
       messageId: messageData.messageID.toString(),
     };
 
-    let popupMsg;
+    messageApi
+      .createBookmark(sendData)
+      .then(({ data }) => {
+        let popupMsg;
 
-      messageApi.createBookmark(sendData).then(({ data }) => {
         if (data?.status == 'SUCCESS') {
+          let popupMsg;
+
           popupMsg = getDic(
             'Msg_Bookmark_Registeration',
             '책갈피가 등록되었습니다.',
@@ -45,15 +49,14 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
             '이미 등록된 책갈피 입니다.',
           );
         } else {
-          (popupMsg = getDic(
+          popupMsg = getDic(
             'Msg_Bookmark_Registeration_fail',
             '책갈피가 등록에 실패했습니다.',
-          ))
+          );
         }
         Alert.alert('', popupMsg);
       })
       .catch(error => console.log('Send Error   ', error));
-
   };
 
   const buttons = useMemo(() => {
@@ -88,7 +91,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     }
 
     // bookmark
-    if (useBookmark === true) {
+    if (useBookmark) {
       !isBlock &&
         modalBtn.push({
           type: 'AddBookmark',

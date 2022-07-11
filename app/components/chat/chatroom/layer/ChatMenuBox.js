@@ -149,7 +149,6 @@ const ChatMenuBox = ({
   const useMsgExport = useMemo(() => getConfig('UseMsgExport') || false, []);
   const useBookmark = getConfig('UseBookmark', 'N') === 'Y';
 
-
   const handleSaveChat = () => {
     Alert.alert(null, getDic('Msg_SaveChat'), [
       {
@@ -266,9 +265,8 @@ const ChatMenuBox = ({
                     </Text>
                   </View>
                 </TouchableOpacity>
-                {
-                  useBookmark === true &&(
-                    <TouchableOpacity onPress={handleBookmarkSummary}>
+                {useBookmark && (
+                  <TouchableOpacity onPress={handleBookmarkSummary}>
                     <View style={styles.menuBox}>
                       <Svg
                         width="15px"
@@ -310,8 +308,7 @@ const ChatMenuBox = ({
                       </Text>
                     </View>
                   </TouchableOpacity>
-                  )
-                }
+                )}
 
                 {useMsgExport && (
                   <TouchableOpacity onPress={handleSaveChat}>
