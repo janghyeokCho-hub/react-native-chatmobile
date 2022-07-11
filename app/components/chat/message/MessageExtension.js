@@ -37,7 +37,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         let popupMsg;
 
         if (data?.status == 'SUCCESS') {
-          let popupMsg;
 
           popupMsg = getDic(
             'Msg_Bookmark_Registeration',
