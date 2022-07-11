@@ -90,8 +90,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     }
 
     // bookmark
-    if (useBookmark) {
-      !isBlock &&
+      if(useBookmark && !isBlock){
         modalBtn.push({
           type: 'AddBookmark',
           title: getDic('AddBookmark', '책갈피등록'),
