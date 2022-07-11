@@ -18,6 +18,46 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     ? getConfig('UseChannelDeleteMessage', false) === true
     : getConfig('UseChatroomDeleteMessage', false) === true;
   const useForwardFile = getConfig('UseForwardFile') || false;
+  const { currentChannel } = useSelector(({ channel }) => ({
+    currentChannel: channel.currentChannel,
+  }));
+  const useBookmark = getConfig('UseBookmark', 'N') === 'Y';
+
+  const handleAddBookmark = messageData => {
+    const sendData = {
+      roomId: currentRoom
+        ? currentRoom.roomID.toString()
+        : currentChannel.roomId.toString(),
+      messageId: messageData.messageID.toString(),
+    };
+
+    messageApi
+      .createBookmark(sendData)
+      .then(({ data }) => {
+        let popupMsg;
+
+        if (data?.status == 'SUCCESS') {
+
+          popupMsg = getDic(
+            'Msg_Bookmark_Registeration',
+            '책갈피가 등록되었습니다.',
+          );
+        } else if (data?.status === 'DUPLICATE') {
+          popupMsg = getDic(
+            'Msg_Bookmark_Registeration_duplicate',
+            '이미 등록된 책갈피 입니다.',
+          );
+        } else {
+          popupMsg = getDic(
+            'Msg_Bookmark_Registeration_fail',
+            '책갈피가 등록에 실패했습니다.',
+          );
+        }
+        Alert.alert('', popupMsg);
+      })
+      .catch(error => console.log('Send Error   ', error));
+  };
+
   const buttons = useMemo(() => {
     let modalBtn = [];
     let isBlock = false;
@@ -45,6 +85,17 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
           title: getDic('Copy'),
           onPress: () => {
             Clipboard.setString(getPlainText(messageData.context));
+          },
+        });
+    }
+
+    // bookmark
+      if(useBookmark && !isBlock){
+        modalBtn.push({
+          type: 'AddBookmark',
+          title: getDic('AddBookmark', '책갈피등록'),
+          onPress: () => {
+            handleAddBookmark(messageData);
           },
         });
     }
