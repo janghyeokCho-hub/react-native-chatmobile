@@ -157,7 +157,6 @@ const ChannelItems = ({
       }
 
       const modalBtn = [
-        pinToTopLimit >= 0 && (isPinTop ? unpinToTop : pinToTop),
         {
           title: getDic('OpenChannel'),
           onPress: () => {
@@ -165,6 +164,10 @@ const ChannelItems = ({
           },
         },
       ];
+      if (pinToTopLimit >= 0) {
+        modalBtn.unshift(isPinTop ? unpinToTop : pinToTop);
+      }
+
       dispatch(
         changeModal({
           modalData: {
