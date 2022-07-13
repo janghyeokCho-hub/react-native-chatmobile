@@ -14,9 +14,7 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const currentRoom = useSelector(({ room }) => room.currentRoom);
   const isChannel = useSelector(({ channel }) => !!channel.currentChannel);
-  const useMessageDelete = isChannel
-    ? getConfig('UseChannelDeleteMessage', 'N') === 'Y'
-    : getConfig('UseChatroomDeleteMessage', 'N') === 'Y';
+  const useMessageDelete = getConfig('UseChatroomDeleteMessage', 'N') === 'Y';
   const useForwardFile = getConfig('UseForwardFile', 'N') === 'Y';
   const { currentChannel } = useSelector(({ channel }) => ({
     currentChannel: channel.currentChannel,
