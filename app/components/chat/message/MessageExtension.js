@@ -15,9 +15,9 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const currentRoom = useSelector(({ room }) => room.currentRoom);
   const isChannel = useSelector(({ channel }) => !!channel.currentChannel);
   const useMessageDelete = isChannel
-    ? getConfig('UseChannelDeleteMessage', false) === true
-    : getConfig('UseChatroomDeleteMessage', false) === true;
-  const useForwardFile = getConfig('UseForwardFile') || false;
+    ? getConfig('UseChannelDeleteMessage', 'N') === 'Y'
+    : getConfig('UseChatroomDeleteMessage', 'N') === 'Y';
+  const useForwardFile = getConfig('UseForwardFile', 'N') === 'Y';
   const { currentChannel } = useSelector(({ channel }) => ({
     currentChannel: channel.currentChannel,
   }));
@@ -37,7 +37,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         let popupMsg;
 
         if (data?.status == 'SUCCESS') {
-
           popupMsg = getDic(
             'Msg_Bookmark_Registeration',
             '책갈피가 등록되었습니다.',
@@ -90,14 +89,14 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     }
 
     // bookmark
-      if(useBookmark && !isBlock){
-        modalBtn.push({
-          type: 'AddBookmark',
-          title: getDic('AddBookmark', '책갈피등록'),
-          onPress: () => {
-            handleAddBookmark(messageData);
-          },
-        });
+    if (useBookmark && !isBlock) {
+      modalBtn.push({
+        type: 'AddBookmark',
+        title: getDic('AddBookmark', '책갈피등록'),
+        onPress: () => {
+          handleAddBookmark(messageData);
+        },
+      });
     }
 
     // share
@@ -121,7 +120,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
     }
 
     //Forward
-    console.log('useForwardFile : ', useForwardFile);
     if (!messageData.fileInfos) {
       !isBlock &&
         modalBtn.push({
