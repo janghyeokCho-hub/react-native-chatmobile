@@ -109,7 +109,7 @@ export function createLoginRequestSaga(loginType, syncType) {
 
             // 차이니즈 월
             let chineseWall = [];
-            const useChineseWall = getConfig('UseChineseWall', false);
+            const useChineseWall = getConfig('UseChineseWall', 'N') === 'Y';
             if (useChineseWall) {
               chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
@@ -222,7 +222,7 @@ export function createExtLoginRequestSaga(loginType, syncType) {
 
             // 차이니즈 월
             let chineseWall = [];
-            const useChineseWall = getConfig('UseChineseWall', false);
+            const useChineseWall = getConfig('UseChineseWall', 'N') === 'Y';
             if (useChineseWall) {
               chineseWall = yield call(getChineseWall, {
                 userId: response.data.result.id,
@@ -409,7 +409,7 @@ export function createSyncTokenRequestSaga(type) {
 
           // 차이니즈 월
           let chineseWall = [];
-          const useChineseWall = getConfig('UseChineseWall', false);
+          const useChineseWall = getConfig('UseChineseWall', 'N') === 'Y';
           if (useChineseWall) {
             chineseWall = yield call(getChineseWall, {
               userId: authData.id,

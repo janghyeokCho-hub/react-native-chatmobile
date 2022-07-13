@@ -146,7 +146,10 @@ const ChatMenuBox = ({
     });
   }, [roomInfo]);
 
-  const useMsgExport = useMemo(() => getConfig('UseMsgExport') || false, []);
+  const useMsgExport = useMemo(
+    () => getConfig('UseMsgExport', 'N') === 'Y',
+    [],
+  );
   const useBookmark = getConfig('UseBookmark', 'N') === 'Y';
 
   const handleSaveChat = () => {
