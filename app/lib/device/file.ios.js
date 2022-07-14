@@ -1,5 +1,5 @@
 import * as RNFS from 'react-native-fs';
-import { getServer, getDic } from '@/config';
+import { getServer, getDic, getConfig } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
 import {
   makeFileName,
@@ -28,7 +28,7 @@ export const loggerInit = () => {
   let filePath = `${RNFS.ExternalStorageDirectoryPath}/KICTalk/`;
   RNFS.exists(filePath).then(async result => {
     if (result) {
-      RNFS.mkdir(filePath).then(result => {
+      RNFS.mkdir(filePath).then(() => {
         FileLogger.configure({
           logLevel: LogLevel.Debug,
           captureConsole: true,
@@ -47,7 +47,7 @@ const fileDownload = (optionObj, callback) => {
       CameraRoll.save(`file://${optionObj.toFile}`, {
         album: 'eumtalk',
       })
-        .then(value => {
+        .then(() => {
           // cache file delete
           RNFS.unlink(optionObj.toFile);
           callback(response);
@@ -62,12 +62,7 @@ const fileDownload = (optionObj, callback) => {
 };
 
 export const downloadByToken = async (
-  {
-    token,
-    fileName,
-    type = 'chat',
-    userId
-  },
+  { token, fileName, type = 'chat', userId },
   callback,
   progressCallback,
 ) => {
@@ -83,10 +78,16 @@ export const downloadByToken = async (
     filePath = `${RNFS.DocumentDirectoryPath}/${directoryName}`;
   }
 
+  const useFilePermission = getConfig('UseFilePermission', 'N') === 'Y';
+
   if (type === 'chat') {
-    downloadPath = `${getServer('MANAGE')}/download/${token}`
+    downloadPath = `${getServer('MANAGE')}/download${
+      useFilePermission ? '/permission' : ''
+    }/${token}`;
   } else if (type === 'note') {
-    downloadPath = `${getServer('MANAGE')}/na/download/CR/${userId}/${token}/NOTE`;
+    downloadPath = `${getServer('MANAGE')}/na/download${
+      useFilePermission ? '/permission' : ''
+    }/CR/${userId}/${token}/NOTE`;
   }
 
   let optionObj = {
@@ -99,20 +100,35 @@ export const downloadByToken = async (
   };
 
   const callbackFn = response => {
-    if (response.statusCode == 204) {
-      callback({ result: 'EXPIRED', message: getDic('Msg_FileExpired') });
-    } else if (response.statusCode == 403) {
-      callback({ result: 'FORBIDDEN', message: getDic('Msg_FilePermission') });
+    let result = '';
+    let message = '';
+    if (response.statusCode === 200) {
+      result = 'SUCCESS';
+      message = getDic('Msg_DownloadSuccess', '다운로드가 완료되었습니다.');
+    } else if (response.statusCode === 204) {
+      result = 'EXPIRED';
+      message = getDic('Msg_FileExpired', '만료된 파일입니다.');
+    } else if (response.statusCode === 403) {
+      result = 'FORBIDDEN';
+      message = getDic(
+        'Block_FileDownload',
+        '파일 다운로드가 금지되어 있습니다.',
+      );
     } else {
-      //fileDownload(response.data, fileName);
-      callback({
-        result: 'SUCCESS',
-        message: getDic('Msg_DownloadSuccess'),
-        path: optionObj.toFile,
-        imageOrVideo: imageOrVideo,
-      });
-      if (progressCallback)
-        progressCallback({ bytesWritten: 100, contentLength: 100 });
+      result = 'ERROR';
+      message = getDic(
+        'Msg_Error',
+        '오류가 발생했습니다.<br/>관리자에게 문의해주세요.',
+      );
+    }
+    callback({
+      result,
+      message,
+      path: result === 'SUCCESS' && optionObj.toFile,
+      imageOrVideo: result === 'SUCCESS' && imageOrVideo,
+    });
+    if (result === 'SUCCESS' && progressCallback) {
+      progressCallback({ bytesWritten: 100, contentLength: 100 });
     }
   };
 
@@ -124,9 +140,10 @@ export const downloadByToken = async (
   }
 
   RNFS.exists(filePath).then(result => {
-    if (result) fileDownload(optionObj, callbackFn);
-    else {
-      RNFS.mkdir(filePath).then(result => {
+    if (result) {
+      fileDownload(optionObj, callbackFn);
+    } else {
+      RNFS.mkdir(filePath).then(() => {
         fileDownload(optionObj, callbackFn);
       });
     }
@@ -143,13 +160,13 @@ export const downloadByTokenAlert = (item, progressCallback) => {
           data.message,
           [
             {
-              text: getDic('Open'),
+              text: getDic('Open', '열기'),
               onPress: () => {
                 RNFetchBlob.ios.openDocument(data.path);
               },
             },
             {
-              text: getDic('Ok'),
+              text: getDic('Ok', '확인'),
             },
           ],
           { cancelable: true },
@@ -160,7 +177,7 @@ export const downloadByTokenAlert = (item, progressCallback) => {
           data.message,
           [
             {
-              text: getDic('Ok'),
+              text: getDic('Ok', '확인'),
             },
           ],
           { cancelable: true },
@@ -179,7 +196,7 @@ export const downloadAndShare = item => {
         data.message,
         [
           {
-            text: getDic('Ok'),
+            text: getDic('Ok', '확인'),
           },
         ],
         { cancelable: true },
@@ -189,13 +206,9 @@ export const downloadAndShare = item => {
         message: '',
         title: '',
         url: `file://${data.savePath}`,
-      })
-        .then(() => {
-          // RNFS.unlink(data.savePath);
-        })
-        .catch(() => {
-          RNFS.unlink(data.savePath);
-        });
+      }).catch(() => {
+        RNFS.unlink(data.savePath);
+      });
     }
   });
 };
@@ -212,23 +225,39 @@ const downloadShareFile = async (token, fileName, callback) => {
   };
 
   const callbackFn = response => {
-    if (response.statusCode == 204) {
-      callback({ result: 'EXPIRED', message: getDic('Msg_FileExpired') });
-    } else if (response.statusCode == 403) {
-      callback({ result: 'FORBIDDEN', message: getDic('Msg_FilePermission') });
-    } else {
-      callback({
-        result: 'SUCCESS',
-        message: '',
-        savePath: optionObj.toFile,
-      });
+    let result = '';
+    let message = '';
+    if (response.statusCode === 200) {
+      result = 'SUCCESS';
     }
+    if (response.statusCode === 204) {
+      result = 'EXPIRED';
+      message = getDic('Msg_FileExpired', '만료된 파일입니다.');
+    } else if (response.statusCode === 403) {
+      result = 'FORBIDDEN';
+      message = getDic(
+        'Block_FileDownload',
+        '파일 다운로드가 금지되어 있습니다.',
+      );
+    } else {
+      result = 'ERROR';
+      message = getDic(
+        'Msg_Error',
+        '오류가 발생했습니다.<br/>관리자에게 문의해주세요.',
+      );
+    }
+    callback({
+      result,
+      message,
+      savePath: result === 'SUCCESS' && optionObj.toFile,
+    });
   };
 
   RNFS.exists(filePath).then(result => {
-    if (result) fileDownload(optionObj, callbackFn);
-    else {
-      RNFS.mkdir(filePath).then(result => {
+    if (result) {
+      fileDownload(optionObj, callbackFn);
+    } else {
+      RNFS.mkdir(filePath).then(() => {
         fileDownload(optionObj, callbackFn);
       });
     }
@@ -240,36 +269,41 @@ export const creteContentFile = async (contents, fileName) => {
   const path = directoryName + fileName;
 
   RNFS.exists(directoryName)
-  .then(result => {
-    if (result) return Promise.resolve();
-    else {
-      return RNFS.mkdir(directoryName)
-    }
-  }).then(() => {
-    return RNFS.writeFile(path, contents, 'utf8')
-  }).then(() => {
-    Alert.alert(
-      null,
-      getSysMsgFormatStr(
-        getDic('Tmp_DownloadSuccess'),
+    .then(result => {
+      if (result) {
+        return Promise.resolve();
+      } else {
+        return RNFS.mkdir(directoryName);
+      }
+    })
+    .then(() => {
+      return RNFS.writeFile(path, contents, 'utf8');
+    })
+    .then(() => {
+      Alert.alert(
+        null,
+        getSysMsgFormatStr(
+          getDic(
+            'Tmp_DownloadSuccess',
+            "다운로드가 완료되었습니다.\n파일 앱에서 경로 '%s' 에서 확인할 수 있습니다.",
+          ),
+          [{ type: 'Plain', data: 'Downloads' }],
+        ),
         [
-          { type: 'Plain', data: 'Downloads' }
-        ]
-      ),
-      [
-        {
-          text: getDic('Open'),
-          onPress: () => {
-            RNFetchBlob.ios.openDocument(path);
+          {
+            text: getDic('Open', '열기'),
+            onPress: () => {
+              RNFetchBlob.ios.openDocument(path);
+            },
           },
-        },
-        {
-          text: getDic('Ok'),
-        },
-      ],
-      { cancelable: true },
-    );
-  }).catch(err => {
-    console.log('Error   ', err);
-  });
+          {
+            text: getDic('Ok', '확인'),
+          },
+        ],
+        { cancelable: true },
+      );
+    })
+    .catch(err => {
+      console.log('Error   ', err);
+    });
 };

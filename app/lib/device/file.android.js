@@ -1,5 +1,5 @@
 import * as RNFS from 'react-native-fs';
-import { getServer, getDic } from '@/config';
+import { getServer, getDic, getConfig } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
 import {
   makeFileName,
@@ -15,6 +15,8 @@ import CameraRoll from '@react-native-community/cameraroll';
 import Share from 'react-native-share';
 import RNFetchBlob from 'rn-fetch-blob';
 import { FileLogger, LogLevel } from 'react-native-file-logger';
+
+const useFilePermission = getConfig('UseFilePermission', 'N') === 'Y';
 
 const getHeaders = async () => {
   return {
@@ -44,7 +46,7 @@ export const loggerInit = () => {
           logsDirectory: filePath,
         });
       } else {
-        RNFS.mkdir(filePath).then(result => {
+        RNFS.mkdir(filePath).then(() => {
           FileLogger.configure({
             logLevel: LogLevel.Debug,
             captureConsole: true,
@@ -57,7 +59,10 @@ export const loggerInit = () => {
     } else {
       Alert.alert(
         null,
-        getDic('Msg_StoragePermissionError')[{ text: getDic('Ok') }],
+        getDic(
+          'Msg_StoragePermissionError',
+          '저장공간 권한이 없어 다운로드가 불가능합니다.\n저장공간 권한을 승인한 뒤 다시 시도하시길바랍니다.',
+        )[{ text: getDic('Ok') }],
       );
     }
   });
@@ -69,7 +74,7 @@ const fileDownload = async (optionObj, callback) => {
       CameraRoll.save(`file://${optionObj.toFile}`, {
         album: 'eumtalk',
       })
-        .then(value => {
+        .then(() => {
           // cache file delete
           RNFS.unlink(optionObj.toFile);
           // image의 경우 앨범의 경로로 경로 변경.
@@ -113,11 +118,13 @@ export const downloadByToken = async (
   }
 
   if (type === 'chat') {
-    downloadPath = `${getServer('MANAGE')}/download/${token}`;
+    downloadPath = `${getServer('MANAGE')}/download${
+      useFilePermission ? '/permission' : ''
+    }/${token}`;
   } else if (type === 'note') {
-    downloadPath = `${getServer(
-      'MANAGE',
-    )}/na/download/CR/${userId}/${token}/NOTE`;
+    downloadPath = `${getServer('MANAGE')}/na/download${
+      useFilePermission ? '/permission' : ''
+    }/CR/${userId}/${token}/NOTE`;
   }
 
   let optionObj = {
@@ -130,22 +137,41 @@ export const downloadByToken = async (
   };
 
   const callbackFn = response => {
-    if (response.statusCode == 204) {
-      callback({ result: 'EXPIRED', message: getDic('Msg_FileExpired') });
-    } else if (response.statusCode == 403) {
-      callback({ result: 'FORBIDDEN', message: getDic('Msg_FilePermission') });
-    } else {
-      //fileDownload(response.data, fileName);
-      callback({
-        result: 'SUCCESS',
-        message: getSysMsgFormatStr(
-          getDic('Tmp_DownloadSuccess'),
-          directoryName,
+    let result = '';
+    let message = '';
+    if (response.statusCode === 200) {
+      result = 'SUCCESS';
+      message = getSysMsgFormatStr(
+        getDic(
+          'Tmp_DownloadSuccess',
+          "다운로드가 완료되었습니다.\n파일 앱에서 경로 '%s' 에서 확인할 수 있습니다.",
         ),
-        path: optionObj.toFile,
-      });
-      if (progressCallback)
-        progressCallback({ bytesWritten: 100, contentLength: 100 });
+        directoryName,
+      );
+    } else if (response.statusCode === 204) {
+      result = 'EXPIRED';
+      message = getDic('Msg_FileExpired', '만료된 파일입니다.');
+    } else if (response.statusCode === 403) {
+      result = 'FORBIDDEN';
+      message = getDic(
+        'Block_FileDownload',
+        '파일 다운로드가 금지되어 있습니다.',
+      );
+    } else {
+      result = 'ERROR';
+      message = getDic(
+        'Msg_Error',
+        '오류가 발생했습니다.<br/>관리자에게 문의해주세요.',
+      );
+    }
+
+    callback({
+      result,
+      message,
+      path: result === 'SUCCESS' && optionObj.toFile,
+    });
+    if (result === 'SUCCESS' && progressCallback) {
+      progressCallback({ bytesWritten: 100, contentLength: 100 });
     }
   };
 
@@ -162,16 +188,20 @@ export const downloadByToken = async (
       null,
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      if (result) fileDownload(optionObj, callbackFn);
-      else {
-        RNFS.mkdir(filePath).then(result => {
+      if (result) {
+        fileDownload(optionObj, callbackFn);
+      } else {
+        RNFS.mkdir(filePath).then(() => {
           fileDownload(optionObj, callbackFn);
         });
       }
     } else {
       Alert.alert(
         null,
-        getDic('Msg_StoragePermissionError')[{ text: getDic('Ok') }],
+        getDic(
+          'Msg_StoragePermissionError',
+          '저장공간 권한이 없어 다운로드가 불가능합니다.\n저장공간 권한을 승인한 뒤 다시 시도하시길바랍니다.',
+        )[{ text: getDic('Ok') }],
       );
     }
   });
@@ -181,54 +211,80 @@ export const downloadByTokenAlert = (item, progressCallback) => {
   downloadByToken(
     item,
     data => {
-      Alert.alert(
-        null,
-        data.message,
-        [
-          {
-            text: getDic('Open'),
-            onPress: () => {
-              RNFetchBlob.android
-                .actionViewIntent(
-                  isVideo(data.path)
-                    ? data.path.replace('Pictures', 'Movies')
-                    : data.path,
-                  getFileMimeByFileName(data.path),
-                )
-                .catch(() => {
-                  let ext = getFileExtensionByFileName(data.path);
-                  let message = '';
-                  if (ext) {
-                    message = getDic('Msg_MobileAndroidNoAvailableApp');
-                  } else {
-                    message = getDic('Msg_MobileFileOpenError');
-                  }
-                  Alert.alert(null, message, [
-                    ext != null && {
-                      text: getDic('Search'),
-                      onPress: () => {
-                        Linking.openURL(`market://search?q=${ext}`).catch(
-                          () => {
-                            Linking.openURL(
-                              `https://play.google.com/store/apps/search?q=${ext}`,
-                            ).catch(() => {});
-                          },
-                        );
+      if (data.result === 'SUCCESS') {
+        Alert.alert(
+          null,
+          data.message,
+          [
+            {
+              text: getDic('Open'),
+              onPress: () => {
+                RNFetchBlob.android
+                  .actionViewIntent(
+                    isVideo(data.path)
+                      ? data.path.replace('Pictures', 'Movies')
+                      : data.path,
+                    getFileMimeByFileName(data.path),
+                  )
+                  .catch(() => {
+                    let ext = getFileExtensionByFileName(data.path);
+                    let message = '';
+                    if (ext) {
+                      message = getDic(
+                        'Msg_MobileAndroidNoAvailableApp',
+                        '현재 기기에 이 파일을 열수 있는 앱이 없습니다.\n PlayStore에서 관련 앱을 검색하시겠습니까?',
+                      );
+                    } else {
+                      message = getDic(
+                        'Msg_MobileFileOpenError',
+                        '파일을 열던 중 오류가 발생하였습니다.',
+                      );
+                    }
+                    Alert.alert(null, message, [
+                      ext != null && {
+                        text: getDic('Search'),
+                        onPress: () => {
+                          Linking.openURL(`market://search?q=${ext}`).catch(
+                            () => {
+                              Linking.openURL(
+                                `https://play.google.com/store/apps/search?q=${ext}`,
+                              ).catch(() => {});
+                            },
+                          );
+                        },
                       },
-                    },
-                    {
-                      text: getDic('Close'),
-                    },
-                  ]);
-                });
+                      {
+                        text: getDic('Close'),
+                      },
+                    ]);
+                  });
+              },
             },
-          },
-          {
-            text: getDic('Ok'),
-          },
-        ],
-        { cancelable: true },
-      );
+            {
+              text: getDic('Ok'),
+            },
+          ],
+          { cancelable: true },
+        );
+      } else {
+        if (data.result === 'EXPIRED') {
+          Alert.alert(null, getDic('Msg_FileExpired', '만료된 파일입니다.'), [
+            {
+              text: getDic('Ok', '확인'),
+            },
+          ]);
+        } else if (data.result === 'FORBIDDEN') {
+          Alert.alert(
+            null,
+            getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
+            [
+              {
+                text: getDic('Ok', '확인'),
+              },
+            ],
+          );
+        }
+      }
     },
     progressCallback,
   );
@@ -242,7 +298,7 @@ export const downloadAndShare = item => {
         data.message,
         [
           {
-            text: getDic('Ok'),
+            text: getDic('Ok', '확인'),
           },
         ],
         { cancelable: true },
@@ -252,14 +308,7 @@ export const downloadAndShare = item => {
         message: '',
         title: '',
         url: `file://${data.savePath}`,
-      })
-        .then(() => {
-          // RNFS.unlink(data.savePath);
-        })
-        .catch(() => {
-          console.log('catch share');
-          //RNFS.unlink(data.savePath);
-        });
+      });
     }
   });
 };
@@ -269,36 +318,55 @@ const downloadShareFile = async (token, fileName, callback) => {
   const filePath = `${RNFS.CachesDirectoryPath}/${directoryName}`;
 
   let optionObj = {
-    fromUrl: `${getServer('MANAGE')}/download/${token}`,
+    fromUrl: `${getServer('MANAGE')}/download${
+      useFilePermission ? '/permission' : ''
+    }/${token}`,
     toFile: makeRandomFileName(filePath, fileName),
     headers: await getHeaders(),
     imageOrVideo: false,
   };
 
   const callbackFn = response => {
-    if (response.statusCode == 204) {
-      callback({ result: 'EXPIRED', message: getDic('Msg_FileExpired') });
-    } else if (response.statusCode == 403) {
-      callback({ result: 'FORBIDDEN', message: getDic('Msg_FilePermission') });
+    let result = '';
+    let message = '';
+    if (response.statusCode === 200) {
+      result = 'SUCCESS';
+      message = '';
+    } else if (response.statusCode === 204) {
+      result = 'EXPIRED';
+      message = getDic('Msg_FileExpired', '만료된 파일입니다.');
+    } else if (response.statusCode === 403) {
+      result = 'FORBIDDEN';
+      message = getDic(
+        'Block_FileDownload',
+        '파일 다운로드가 금지되어 있습니다.',
+      );
     } else {
-      callback({
-        result: 'SUCCESS',
-        message: '',
-        savePath: optionObj.toFile,
-      });
+      result = 'ERROR';
+      message = getDic(
+        'Msg_Error',
+        '오류가 발생했습니다.<br/>관리자에게 문의해주세요.',
+      );
     }
+    callback({
+      result,
+      message,
+      savePath: result === 'SUCCESS' && optionObj.toFile,
+    });
   };
 
   RNFS.exists(filePath).then(result => {
-    if (result) fileDownload(optionObj, callbackFn);
-    else {
-      RNFS.mkdir(filePath).then(result => {
+    if (result) {
+      fileDownload(optionObj, callbackFn);
+    } else {
+      RNFS.mkdir(filePath).then(() => {
         fileDownload(optionObj, callbackFn);
       });
     }
   });
 };
 
+// 2022-07-05 사용 안하는 코드?
 export const openFileViewer = async item => {
   const directoryName = 'eumtalkTemporaryFiles';
   const filePath = `${RNFS.CachesDirectoryPath}/${directoryName}`;
@@ -313,9 +381,15 @@ export const openFileViewer = async item => {
 
   const callbackFn = response => {
     if (response.statusCode == 204) {
-      callback({ result: 'EXPIRED', message: getDic('Msg_FileExpired') });
+      callback({
+        result: 'EXPIRED',
+        message: getDic('Msg_FileExpired', '만료된 파일입니다.'),
+      });
     } else if (response.statusCode == 403) {
-      callback({ result: 'FORBIDDEN', message: getDic('Msg_FilePermission') });
+      callback({
+        result: 'FORBIDDEN',
+        message: getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
+      });
     } else {
       // callback({
       //   result: 'SUCCESS',
@@ -355,7 +429,13 @@ export const creteContentFile = async (contents, fileName) => {
     RNFS.writeFile(path, contents, 'utf8').then(() => {
       Alert.alert(
         null,
-        getSysMsgFormatStr(getDic('Tmp_DownloadSuccess'), directoryName),
+        getSysMsgFormatStr(
+          getDic(
+            'Tmp_DownloadSuccess',
+            "다운로드가 완료되었습니다.\n파일 앱에서 경로 '%s' 에서 확인할 수 있습니다.",
+          ),
+          directoryName,
+        ),
         [
           {
             text: getDic('Open'),
@@ -366,9 +446,15 @@ export const creteContentFile = async (contents, fileName) => {
                   let ext = getFileExtensionByFileName(path);
                   let message = '';
                   if (ext) {
-                    message = getDic('Msg_MobileAndroidNoAvailableApp');
+                    message = getDic(
+                      'Msg_MobileAndroidNoAvailableApp',
+                      '현재 기기에 이 파일을 열수 있는 앱이 없습니다.\n PlayStore에서 관련 앱을 검색하시겠습니까?',
+                    );
                   } else {
-                    message = getDic('Msg_MobileFileOpenError');
+                    message = getDic(
+                      'Msg_MobileFileOpenError',
+                      '파일을 열던 중 오류가 발생하였습니다.',
+                    );
                   }
                   Alert.alert(null, message, [
                     ext != null && {
@@ -384,14 +470,14 @@ export const creteContentFile = async (contents, fileName) => {
                       },
                     },
                     {
-                      text: getDic('Close'),
+                      text: getDic('Close', '닫기'),
                     },
                   ]);
                 });
             },
           },
           {
-            text: getDic('Ok'),
+            text: getDic('Ok', '확인'),
           },
         ],
         { cancelable: true },
@@ -400,7 +486,10 @@ export const creteContentFile = async (contents, fileName) => {
   } else {
     Alert.alert(
       null,
-      getDic('Msg_StoragePermissionError')[{ text: getDic('Ok') }],
+      getDic(
+        'Msg_StoragePermissionError',
+        '저장공간 권한이 없어 다운로드가 불가능합니다.\n저장공간 권한을 승인한 뒤 다시 시도하시길바랍니다.',
+      )[{ text: getDic('Ok', '확인') }],
     );
   }
 };

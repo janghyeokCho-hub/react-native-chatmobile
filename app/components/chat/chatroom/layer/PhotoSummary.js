@@ -17,7 +17,7 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { CommonActions } from '@react-navigation/native';
 import { reqThumbnail } from '@/lib/api/api';
 import { useSelector } from 'react-redux';
-import { getConfig, getDic } from '@/config';
+import { getDic } from '@/config';
 import SummaryBack from '@C/chat/chatroom/layer/SummaryBack';
 import ImageModal from '@COMMON/layout/ImageModal';
 import NetworkError from '@/components/common/NetworkError';
@@ -143,6 +143,7 @@ const PhotoSummary = ({ route, navigation }) => {
 
   const { roomID } = route.params;
   const chineseWall = useSelector(({ login }) => login.chineseWall);
+  const filePermission = useSelector(({ login }) => login.filePermission);
 
   const loadCnt = 30;
   const [select, setSelect] = useState(false);
@@ -156,14 +157,16 @@ const PhotoSummary = ({ route, navigation }) => {
     navigation.dispatch(CommonActions.goBack());
   };
 
-  const handleMoveChat = (roomID, messageID) => {
-    navigation.navigate('MoveChat', { roomID, messageID });
+  const handleMoveChat = (id, messageID) => {
+    navigation.navigate('MoveChat', { roomID: id, messageID });
   };
 
   const handleSetSelect = () => {
     setSelect(!select);
 
-    if (select) setSelectItems([]);
+    if (select) {
+      setSelectItems([]);
+    }
   };
 
   const handleSelect = () => {
@@ -176,14 +179,8 @@ const PhotoSummary = ({ route, navigation }) => {
         // TODO: 차후 멀티다운로드로 수정 필요
         // 만료처리 등 처리 필요
 
-        // [0] PC [1] MOBILE
-        const downloadOption = getConfig('FileAttachViewMode') || [];
-
         // 다운로드가 금지되어 있는 경우
-        if (
-          downloadOption.length !== 0 &&
-          downloadOption[1].Download === false
-        ) {
+        if (filePermission.download === 'N') {
           Alert.alert(
             null,
             getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
@@ -199,7 +196,7 @@ const PhotoSummary = ({ route, navigation }) => {
           let arrDownloadList = [];
           selectItems.forEach(item => {
             arrDownloadList.push(
-              new Promise((resolove, reject) => {
+              new Promise((resolove, _) => {
                 file.downloadByToken(
                   { token: item.token, fileName: item.name },
                   data => {
@@ -211,7 +208,7 @@ const PhotoSummary = ({ route, navigation }) => {
             );
           });
 
-          Promise.all(arrDownloadList).then(values => {
+          Promise.all(arrDownloadList).then(() => {
             if (downloadMsgObject) {
               Alert.alert(
                 null,
@@ -255,7 +252,7 @@ const PhotoSummary = ({ route, navigation }) => {
       }
     } else {
       const deleteArr = selectItems.filter(
-        select => select.token !== item.token,
+        selectItem => selectItem.token !== item.token,
       );
       setSelectItems(deleteArr);
     }
@@ -313,7 +310,7 @@ const PhotoSummary = ({ route, navigation }) => {
         loadCnt: loadCnt,
         isImage: 'Y',
       }).then(({ data }) => {
-        if (data.status == 'SUCCESS') {
+        if (data.status === 'SUCCESS') {
           if (data.result.length > 0) {
             setFiles([...files, ...data.result]);
             if (data.result.length < loadCnt) {
@@ -340,7 +337,7 @@ const PhotoSummary = ({ route, navigation }) => {
         // 86400000 = 1000 * 60 * 60 * 24 (1day)
         const compareDate = Math.floor(item.SendDate / 86400000);
         if (firstDate != compareDate) {
-          if (firstDate != 0 && sameDateArr.length > 0)
+          if (firstDate != 0 && sameDateArr.length > 0) {
             returnJSX.push(
               <PhotoList
                 key={`plist_${firstDate}`}
@@ -351,6 +348,7 @@ const PhotoSummary = ({ route, navigation }) => {
                 onMoveChat={handleMoveChat}
               />,
             );
+          }
 
           returnJSX.push(
             <View style={styles.datetxt} key={`plist_date_${item.SendDate}`}>
@@ -366,7 +364,7 @@ const PhotoSummary = ({ route, navigation }) => {
 
         sameDateArr.push(item);
 
-        if (index == data.length - 1 && sameDateArr.length > 0) {
+        if (index === data.length - 1 && sameDateArr.length) {
           returnJSX.push(
             <PhotoList
               key={`plist_${firstDate}`}
@@ -404,47 +402,51 @@ const PhotoSummary = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
           <View style={styles.titleView}>
-            <Text style={styles.modaltit}>{getDic('PhotoSummary')}</Text>
+            <Text style={styles.modaltit}>
+              {getDic('PhotoSummary', '사진 모아보기')}
+            </Text>
           </View>
           {networkState && (
             <View style={styles.okbtnView}>
-              <TouchableOpacity onPress={handleSelect}>
-                <View style={{ ...styles.topBtn }}>
-                  {!select ? (
-                    <View
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginRight: 20,
-                      }}
-                    >
-                      <Text>{getDic('choosePhoto')}</Text>
-                      <Image
-                        style={{ marginLeft: 10 }}
-                        source={checkBlackImg}
-                      />
-                    </View>
-                  ) : (
-                    <>
-                      <Text
+              {filePermission.download === 'Y' && (
+                <TouchableOpacity onPress={handleSelect}>
+                  <View style={{ ...styles.topBtn }}>
+                    {!select ? (
+                      <View
                         style={{
-                          ...styles.colortxt,
-                          fontSize: sizes.default,
-                          color: colors.primary,
+                          width: '100%',
+                          height: '100%',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginRight: 20,
                         }}
                       >
-                        {selectItems.length}
-                      </Text>
-                      <Text style={{ fontSize: sizes.default }}>
-                        {getDic('Save')}
-                      </Text>
-                    </>
-                  )}
-                </View>
-              </TouchableOpacity>
+                        <Text>{getDic('choosePhoto', '사진 선택')}</Text>
+                        <Image
+                          style={{ marginLeft: 10 }}
+                          source={checkBlackImg}
+                        />
+                      </View>
+                    ) : (
+                      <>
+                        <Text
+                          style={{
+                            ...styles.colortxt,
+                            fontSize: sizes.default,
+                            color: colors.primary,
+                          }}
+                        >
+                          {selectItems.length}
+                        </Text>
+                        <Text style={{ fontSize: sizes.default }}>
+                          {getDic('Save', '저장')}
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -455,7 +457,7 @@ const PhotoSummary = ({ route, navigation }) => {
             )) || (
               <View style={styles.noPhotos}>
                 <Text style={{ fontSize: sizes.default }}>
-                  {getDic('Msg_ImageNotExist')}
+                  {getDic('Msg_ImageNotExist', '사진이 없습니다.')}
                 </Text>
               </View>
             )}

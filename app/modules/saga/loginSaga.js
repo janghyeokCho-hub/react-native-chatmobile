@@ -8,6 +8,7 @@ import {
   sync,
   preLoginSuccess,
   setChineseWall,
+  setFilePermission,
 } from '@/modules/login';
 import * as loginApi from '@API/login';
 import * as channelApi from '@API/channel';
@@ -116,6 +117,16 @@ export function createLoginRequestSaga(loginType, syncType) {
               });
             }
             yield put(setChineseWall(chineseWall));
+            // 파일 다운로드 권한
+            let filePermission = [];
+            const useFilePermission =
+              getConfig('UseFilePermission', 'N') === 'Y';
+            if (useFilePermission) {
+              filePermission = yield call(loginApi.getFilePermission, {
+                userId: response.data.result.id,
+              });
+            }
+            yield put(setFilePermission(filePermission));
           } else {
             yield put({
               type: FAILURE,
@@ -229,6 +240,17 @@ export function createExtLoginRequestSaga(loginType, syncType) {
               });
             }
             yield put(setChineseWall(chineseWall));
+
+            // 파일 다운로드 권한
+            let filePermission = {};
+            const useFilePermission =
+              getConfig('UseFilePermission', 'N') === 'Y';
+            if (useFilePermission) {
+              filePermission = yield call(loginApi.getFilePermission, {
+                userId: response.data.result.id,
+              });
+            }
+            yield put(setFilePermission(filePermission));
           } else {
             yield put({
               type: FAILURE,
@@ -416,6 +438,16 @@ export function createSyncTokenRequestSaga(type) {
             });
           }
           yield put(setChineseWall(chineseWall));
+
+          // 파일 다운로드 권한
+          let filePermission = [];
+          const useFilePermission = getConfig('UseFilePermission', 'N') === 'Y';
+          if (useFilePermission) {
+            filePermission = yield call(loginApi.getFilePermission, {
+              userId: authData.id,
+            });
+          }
+          yield put(setFilePermission(filePermission));
         } else {
           yield put(loginTokenAuth(result));
         }

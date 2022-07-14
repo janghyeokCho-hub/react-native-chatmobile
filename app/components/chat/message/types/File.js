@@ -27,6 +27,7 @@ import { useTheme } from '@react-navigation/native';
 const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
   const { sizes } = useTheme();
   const extension = getFileExtension(item.ext);
+  const filePermission = useSelector(({ login }) => login.filePermission);
   const [progressData, setProgressData] = useState(null);
   const currentRoom = useSelector(({ room }) => room.currentRoom);
   const currentChannel = useSelector(({ channel }) => channel.currentChannel);
@@ -65,7 +66,7 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
 
   const showModalMenu = () => {
     const download = {
-      title: getDic('Download'),
+      title: getDic('Download', '다운로드'),
       onPress: () => {
         file.downloadByTokenAlert(item, result => {
           handleProgress(result.bytesWritten, result.contentLength);
@@ -73,7 +74,7 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
       },
     };
     const viewer = {
-      title: getDic('RunViewer'),
+      title: getDic('RunViewer', '뷰어로 보기'),
       onPress: () => {
         openSynapViewer({
           ...item,
@@ -82,26 +83,35 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
       },
     };
 
-    const modalBtn = [download, viewer];
+    const modalBtn = [];
 
-    dispatch(
-      changeModal({
-        modalData: {
-          closeOnTouchOutside: true,
-          type: 'normal',
-          buttonList: modalBtn,
-        },
-      }),
-    );
-    dispatch(openModal());
+    if (filePermission.download === 'Y') {
+      modalBtn.push(download);
+    }
+    if (filePermission.viewer === 'Y') {
+      modalBtn.push(viewer);
+    }
+
+    if (modalBtn.length) {
+      dispatch(
+        changeModal({
+          modalData: {
+            closeOnTouchOutside: true,
+            type: 'normal',
+            buttonList: modalBtn,
+          },
+        }),
+      );
+      dispatch(openModal());
+    }
   };
 
-  if (type == 'list') {
+  if (type === 'list') {
     return (
       <>
         {progressData == null && (
           <>
-            {(extension == 'img' && (
+            {(extension === 'img' && (
               <PrevImage
                 type="list"
                 item={item}
@@ -128,26 +138,17 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
               <TouchableOpacity
                 onPress={() => {
                   if (
-                    selectDownloadOrViewer &&
-                    selectDownloadOrViewer.Download === true &&
-                    selectDownloadOrViewer.Viewer === true
+                    filePermission?.download === 'Y' ||
+                    filePermission?.viewer === 'Y'
                   ) {
                     showModalMenu();
-                  } else if (
-                    !isTemp &&
-                    selectDownloadOrViewer &&
-                    selectDownloadOrViewer.Download === true
-                  ) {
+                  } else if (!isTemp && filePermission?.download === 'Y') {
                     handleDownloadWithProgress();
-                  } else if (
-                    selectDownloadOrViewer &&
-                    selectDownloadOrViewer.Viewer === true
-                  ) {
+                  } else if (filePermission?.viewer === 'Y') {
                     handleRunViewer();
                   } else if (
-                    selectDownloadOrViewer &&
-                    selectDownloadOrViewer.Viewer === false &&
-                    selectDownloadOrViewer.Download === false
+                    filePermission?.download === 'Y' ||
+                    filePermission?.viewer === 'Y'
                   ) {
                     Alert.alert(
                       getDic('Eumtalk'),
@@ -214,26 +215,17 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
               id={id || ''}
               onPress={() => {
                 if (
-                  selectDownloadOrViewer &&
-                  selectDownloadOrViewer.Download === true &&
-                  selectDownloadOrViewer.Viewer === true
+                  filePermission?.download === 'Y' ||
+                  filePermission?.viewer === 'Y'
                 ) {
                   showModalMenu();
-                } else if (
-                  !isTemp &&
-                  selectDownloadOrViewer &&
-                  selectDownloadOrViewer.Download === true
-                ) {
+                } else if (!isTemp && filePermission?.download === 'Y') {
                   handleDownloadWithProgress();
-                } else if (
-                  selectDownloadOrViewer &&
-                  selectDownloadOrViewer.Viewer === true
-                ) {
+                } else if (filePermission?.viewer === 'Y') {
                   handleRunViewer();
                 } else if (
-                  selectDownloadOrViewer &&
-                  selectDownloadOrViewer.Viewer === false &&
-                  selectDownloadOrViewer.Download === false
+                  filePermission?.download === 'Y' ||
+                  filePermission?.viewer === 'Y'
                 ) {
                   Alert.alert(
                     getDic('Eumtalk'),
