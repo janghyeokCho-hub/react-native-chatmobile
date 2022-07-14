@@ -12,31 +12,34 @@ const Message = ({
   navigation,
   marking,
   styleType,
+  longPressEvt,
 }) => {
-  const { colors } = useTheme();
+  const { colors, sizes } = useTheme();
 
+  let newlineJSX = [];
   let returnJSX = [];
-  let newLineJSX = [];
+  let isNewLine = false;
 
-  function collectURL(text) {
+  const collectURL = text => {
     const rUrlRegex = /(?:(?:(https?|ftp|telnet):\/\/|[\s\t\r\n\[\]\`\<\>\"\'])((?:[\w$\-_\.+!*\'\(\),]|%[0-9a-f][0-9a-f])*\:(?:[\w$\-_\.+!*\'\(\),;\?&=]|%[0-9a-f][0-9a-f])+\@)?(?:((?:(?:[a-z0-9\-가-힣]+\.)+[a-z0-9\-]{2,})|(?:[\d]{1,3}\.){3}[\d]{1,3})|localhost)(?:\:([0-9]+))?((?:\/(?:[\w$\-_\.+!*\'\(\),;:@&=ㄱ-ㅎㅏ-ㅣ가-힣]|%[0-9a-f][0-9a-f])+)*)(?:\/([^\s\/\?\.:<>|#]*(?:\.[^\s\/\?:<>|#]+)*))?(\/?[\?;](?:[a-z0-9\-]+(?:=[^\s:&<>]*)?\&)*[a-z0-9\-]+(?:=[^\s:&<>]*)?)?(#[\w\-]+)?)/gim;
-    return text ? text.match(rUrlRegex)?.[0] || '' : '';
-  }
+    return text.match(rUrlRegex)?.[0];
+  };
+
+  console.log('children?????', children);
 
   const convertChildren = (children = '') => {
     let txt = '';
     let onTag = false;
-    let isNewLine = false;
     for (let i = 0; i < children.length; i++) {
       const char = children.charAt(i);
       if (char === '<' && onTag === true) {
         if (txt) {
-          newLineJSX.push(
+          returnJSX.push(
             <Plain
               style={style}
-              key={returnJSX.length}
               text={txt}
               marking={marking}
+              longPressEvt={longPressEvt}
             />,
           );
         }
@@ -45,14 +48,7 @@ const Message = ({
       if (char === '<' && onTag === false) {
         onTag = true;
         if (txt) {
-          newLineJSX.push(
-            <Plain
-              style={style}
-              key={returnJSX.length}
-              text={txt}
-              marking={marking}
-            />,
-          );
+          returnJSX.push(<Plain style={style} text={txt} marking={marking} />);
         }
         txt = '';
       }
@@ -72,8 +68,9 @@ const Message = ({
             if (attrs.link) {
               returnTag = (
                 <Link
-                  key={returnJSX.length}
                   marking={marking}
+                  style={{ ...styles[styleType], fontSize: sizes.chat }}
+                  longPressEvt={longPressEvt}
                   {...attrs}
                   link={collectURL(attrs.link)}
                 />
@@ -83,72 +80,65 @@ const Message = ({
           case 'NEWLINE':
             if (children.charAt(i - 1) === '/') {
               isNewLine = true;
-              newLineJSX.push(
-                <View key={newLineJSX.length} style={styles.lineBreaker}>
-                    {[...returnJSX]}
-                </View>,
-              )
-
-              returnJSX = [];
-
+              returnJSX.push(<View style={styles.lineBreaker} />);
             }
             break;
           case 'TAG':
             if (attrs.value && attrs.text?.startsWith('#')) {
               returnTag = (
-                <Tag key={returnJSX.length} marking={marking} {...attrs} />
+                <Tag
+                  marking={marking}
+                  style={{ ...styles[styleType], fontSize: sizes.chat }}
+                  longPressEvt={longPressEvt}
+                  {...attrs}
+                />
               );
             }
             break;
           case 'STICKER':
             if (attrs.emoticonId) {
-              returnTag = <Sticker key={returnJSX.length} {...attrs} />;
+              returnTag = (
+                <Sticker
+                  style={{ ...styles[styleType], fontSize: sizes.chat }}
+                  longPressEvt={longPressEvt}
+                  {...attrs}
+                />
+              );
             }
             break;
           case 'MENTION':
             if (attrs.type) {
               returnTag = (
                 <Mention
-                  key={returnJSX.length}
                   marking={marking}
-                  mentionInfo={roomInfo && roomInfo.members}
+                  mentionInfo={roomInfo?.members}
                   navigation={navigation}
+                  style={{ ...styles[styleType], fontSize: sizes.chat }}
+                  longPressEvt={longPressEvt}
                   {...attrs}
                 />
               );
             }
             break;
           default:
-            returnTag = (
-              <Plain
-                style={style}
-                key={returnJSX.length}
-                text={txt}
-                marking={marking}
-              />
-            );
+            returnTag = <Plain style={style} text={txt} marking={marking} />;
             break;
         }
         if (isNewLine === false) {
           if (txt) {
-            returnJSX.push(
+            newlineJSX.push(
               returnTag ? (
                 returnTag
               ) : (
-                <Plain
-                  style={style}
-                  key={returnJSX.length}
-                  text={txt}
-                  marking={marking}
-                />
-              ),)
+                <Plain style={style} text={txt} marking={marking} />
+              ),
+            );
           }
 
-            txt = ''
+          txt = '';
         } else {
           isNewLine = false;
-          txt = ''
-
+          txt = '';
         }
         txt = '';
       } else {
@@ -157,22 +147,14 @@ const Message = ({
 
       if (i === children.length - 1) {
         if (txt) {
-          newLineJSX.push(
-            <Plain
-              style={style}
-              key={returnJSX.length}
-              text={txt}
-              marking={marking}
-            />,
-          );
+          returnJSX.push(<Plain style={style} text={txt} marking={marking} />);
         }
-        newLineJSX.push(
-        <View style={{flexDirection: 'row'}}>
-          {returnJSX}
-        </View>);
+        returnJSX.push(
+          <View style={{ flexDirection: 'row' }}>{newlineJSX}</View>,
+        );
       }
     }
-    return newLineJSX;
+    return returnJSX;
   };
 
   return (
