@@ -165,7 +165,6 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
       }
 
       const modalBtn = [
-        pinToTopLimit >= 0 && (isPinTop ? unpinToTop : pinToTop),
         {
           title: getDic('OpenChat'),
           onPress: () => {
@@ -181,7 +180,14 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
             leaveRoomUtil(dispatch, room, id);
           },
         },
-        {
+      ];
+      // 상단고정 설정
+      if (pinToTopLimit >= 0) {
+        modalBtn.unshift(isPinTop ? unpinToTop : pinToTop);
+      }
+      // 알림끄기/켜기 설정
+      if (getDic('Tmp_failAlarmOnOff')) {
+        modalBtn.push({
           title: onNoti ? getDic('roomNotiOff') : getDic('roomNotiOn'),
           onPress: async () => {
             const params = {
@@ -203,8 +209,9 @@ const RoomItems = ({ rooms, loading, onRoomChange, navigation }) => {
 
             dispatch(closeModal());
           },
-        },
-      ];
+        });
+      }
+
       dispatch(
         changeModal({
           modalData: {
