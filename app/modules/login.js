@@ -6,6 +6,7 @@ import * as loginApi from '@API/login';
 
 import produce from 'immer';
 import * as saga from '@/modules/saga/loginSaga';
+import { getConfig } from '@/config';
 
 const [
   LOGIN_REQUEST,
@@ -54,6 +55,7 @@ const SET_CHINESEWALL = 'login/SET_CHINESEWALL';
 const SET_BLOCKLIST = 'login/SET_BLOCKLIST';
 
 const PRE_LOGIN_SUCCESS = 'login/PRE_LOGIN_SUCCESS';
+const SET_FILE_PERMISSION = 'login/SET_FILEPERMISSION';
 
 export const loginRequest = createAction(LOGIN_REQUEST);
 export const extLoginRequest = createAction(EXT_LOGIN_REQUEST);
@@ -78,6 +80,7 @@ export const setChineseWall = createAction(SET_CHINESEWALL);
 export const setBlockList = createAction(SET_BLOCKLIST);
 
 export const preLoginSuccess = createAction(PRE_LOGIN_SUCCESS);
+export const setFilePermission = createAction(SET_FILE_PERMISSION);
 
 const loginRequestSaga = saga.createLoginRequestSaga(LOGIN_REQUEST);
 const extLoginRequestSaga = saga.createExtLoginRequestSaga(
@@ -229,6 +232,33 @@ const login = handleActions(
         } else {
           draft.chineseWall = [];
           draft.blockList = [];
+        }
+      });
+    },
+    [SET_FILE_PERMISSION]: (state, action) => {
+      return produce(state, draft => {
+        /**
+         * filePermission 값이 없으면 기존에 사용하던
+         * FileAttachViewMode config 값으로 filePermission 사용.
+         */
+        // 기존 Synap viewer 설정 값
+        const fileAttachViewMode = getConfig('FileAttachViewMode');
+        const fileAttachViewModeConfig = fileAttachViewMode[1];
+
+        if (fileAttachViewModeConfig) {
+          draft.filePermission = {
+            download: fileAttachViewModeConfig?.Download ? 'Y' : 'N',
+            viewer: fileAttachViewModeConfig?.Viewer ? 'Y' : 'N',
+          };
+        } else {
+          draft.filePermission = {
+            download: 'Y',
+            viewer: 'Y',
+          };
+        }
+        const { data } = action.payload;
+        if (data?.result) {
+          draft.filePermission = data.result;
         }
       });
     },

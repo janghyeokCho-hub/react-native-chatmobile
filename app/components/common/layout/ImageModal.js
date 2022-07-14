@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -16,10 +17,11 @@ import {
   getBottomPadding,
   getScreenWidth,
 } from '@/lib/device/common';
-import { getDic, getConfig } from '@/config';
+import { getDic } from '@/config';
 import { downloadByTokenAlert, downloadAndShare } from '@/lib/device/file';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { openSynapViewer } from '@/lib/device/viewer';
 
 const loadingImg = require('@C/assets/loading.gif');
 const cancelBtnImg = require('@C/assets/ico_message_delete.png');
@@ -28,22 +30,13 @@ const _imagePreviewLoadSize = 15;
 
 const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
-
+  const filePermission = useSelector(({ login }) => login.filePermission);
   const [roomID, setRoomID] = useState(-1);
   const [sources, setSources] = useState(null);
   const [index, setIndex] = useState(0);
   const [virtualIndex, setVirtualIndex] = useState(0);
   const [allSize, setAllSize] = useState(0);
   const [loading, setLoading] = useState(false);
-  const selectDownloadOrViewer = useMemo(
-    // 다운로드 금지 설정이 없는 경우 기본값: 다운로드 허용, 뷰어 미설정
-    () =>
-      getConfig('FileAttachViewMode')?.[1] || {
-        Download: true,
-        Viewer: false,
-      },
-    [],
-  );
 
   useEffect(() => {
     if (type === 'ROOM' && show) {
@@ -129,7 +122,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
       derection = 'N';
     }
 
-    if (derection != '' && type == 'ROOM') {
+    if (derection !== '' && type === 'ROOM') {
       const findToken = sources[changeIdx]._item.FileID;
       setLoading(true);
       getRoomImages({
@@ -149,7 +142,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
         });
 
         const changeSources =
-          derection == 'B'
+          derection === 'B'
             ? [...sourceImages, ...sources]
             : [...sources, ...sourceImages];
 
@@ -167,30 +160,66 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
     setVirtualIndex(virtualIndex - (index - changeIdx));
   };
 
-  const downloadCurrent = () => {
-    const findItem = sources[index]._item;
-    downloadByTokenAlert({
-      token: findItem.FileID,
-      fileName: findItem.FileName,
-    });
+  const shareCurrent = () => {
+    if (filePermission.download === 'Y') {
+      const findItem = sources[index]._item;
+      downloadAndShare({
+        token: findItem.FileID,
+        fileName: findItem.FileName,
+      });
+    } else {
+      Alert.alert(
+        null,
+        getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
+        [
+          {
+            text: getDic('Ok'),
+          },
+        ],
+      );
+    }
   };
 
-  const shareCurrent = () => {
-    const findItem = sources[index]._item;
-    downloadAndShare({
-      token: findItem.FileID,
-      fileName: findItem.FileName,
-    });
+  const downloadCurrent = () => {
+    if (filePermission.download === 'Y') {
+      const findItem = sources[index]._item;
+      downloadByTokenAlert({
+        token: findItem.FileID,
+        fileName: findItem.FileName,
+      });
+    } else {
+      Alert.alert(
+        null,
+        getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
+        [
+          {
+            text: getDic('Ok'),
+          },
+        ],
+      );
+    }
   };
 
   const openSynapViewerCurrent = () => {
-    const findItem = sources[index]._item;
-    openSynapViewer({
-      token: findItem?.FileID,
-      fileName: findItem?.FileName,
-      ext: findItem?.Extension,
-      roomID: findItem.RoomID,
-    });
+    if (filePermission.viewer === 'Y') {
+      const findItem = sources[index]._item;
+      openSynapViewer({
+        token: findItem?.FileID,
+        fileName: findItem?.FileName,
+        ext: findItem?.Extension,
+        roomID: findItem.RoomID,
+      });
+    } else {
+      Alert.alert(
+        null,
+        getDic('Msg_FilePermission', '권한이 없는 파일입니다.'),
+        [
+          {
+            text: getDic('Ok'),
+          },
+        ],
+      );
+    }
   };
 
   return (
@@ -229,25 +258,23 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
                   enableSwipeDown={true}
                   index={index}
                   enablePreload={true}
-                  saveToLocalByLongPress={
-                    selectDownloadOrViewer.Download === true
-                  }
+                  saveToLocalByLongPress={filePermission.download === 'Y'}
                   onChange={handleChange}
                 />
                 <View style={styles.bottomMenu}>
-                  {hasDownload && (
+                  {filePermission?.download === 'Y' && hasDownload && (
                     <>
                       <TouchableOpacity
                         style={styles.bottomBtn}
-                        onPress={e => {
+                        onPress={() => {
                           shareCurrent();
                         }}
                       >
-                        {selectDownloadOrViewer.Download === true && (
+                        {
                           <Text style={styles.bottomBtnText}>
-                            {getDic('Share')}
+                            {getDic('Share', '공유하기')}
                           </Text>
-                        )}
+                        }
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.bottomBtn}
@@ -255,15 +282,15 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
                           downloadCurrent();
                         }}
                       >
-                        {selectDownloadOrViewer.Download === true && (
+                        {filePermission.download === 'Y' && (
                           <Text style={styles.bottomBtnText}>
-                            {getDic('Download')}
+                            {getDic('Download', '다운로드')}
                           </Text>
                         )}
                       </TouchableOpacity>
                     </>
                   )}
-                  {selectDownloadOrViewer?.Viewer === true && (
+                  {filePermission?.viewer === 'Y' && (
                     <TouchableOpacity
                       style={styles.bottomBtn}
                       onPress={e => {
@@ -271,7 +298,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
                       }}
                     >
                       <Text style={styles.bottomBtnText}>
-                        {getDic('RunViewer')}
+                        {getDic('RunViewer', '뷰어로 열기')}
                       </Text>
                     </TouchableOpacity>
                   )}

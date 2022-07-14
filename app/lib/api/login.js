@@ -124,3 +124,7 @@ export const saveLocalStorage = async ({ token, accessid }) => {
 export const getSystemConfigSaaS = params => {
   return managesvr('post', '/na/saas/config', params);
 };
+
+export const getFilePermission = ({ userId }) => {
+  return managesvr('get', `/file/permission/${userId}`);
+};

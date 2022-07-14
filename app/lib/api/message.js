@@ -1,4 +1,5 @@
 import { chatsvr, managesvr, filesvr, imgsvr } from '@API/api';
+import { getConfig } from '@/config';
 
 export const sendMessage = params => {
   return chatsvr('post', '/message', params);
@@ -74,7 +75,12 @@ export const getOriginalImage = params => {
 };
 
 export const getFileByToken = params => {
-  return filesvr('get', `/download/${params.token}`);
+  const useFilePermission = getConfig('UseFilePermission', 'N') === 'Y';
+  const url = useFilePermission
+    ? `/download/permission/${params.token}`
+    : `/download/${params.token}`;
+
+  return filesvr('get', url);
 };
 
 export const getURLThumbnail = params => {

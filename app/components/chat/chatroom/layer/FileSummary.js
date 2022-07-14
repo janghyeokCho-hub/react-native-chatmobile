@@ -23,7 +23,7 @@ import {
 import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { changeModal, openModal } from '@/modules/modal';
-import { getDic, getConfig } from '@/config';
+import { getDic } from '@/config';
 import Svg, { G, Path, Circle } from 'react-native-svg';
 import SummaryBack from '@C/chat/chatroom/layer/SummaryBack';
 import NetworkError from '@/components/common/NetworkError';
@@ -33,7 +33,13 @@ import { isJSONStr } from '@/lib/common';
 
 const checkBlackImg = require('@C/assets/ico_check_black.png');
 
-const FileList = ({ files, onSelect, selectMode, onMoveChat }) => {
+const FileList = ({
+  files,
+  onSelect,
+  selectMode,
+  onMoveChat,
+  filePermission,
+}) => {
   return (
     <View style={styles.fileList}>
       {files &&
@@ -44,17 +50,16 @@ const FileList = ({ files, onSelect, selectMode, onMoveChat }) => {
             onSelect={onSelect}
             selectMode={selectMode}
             onMoveChat={onMoveChat}
+            filePermission={filePermission}
           />
         ))}
     </View>
   );
 };
 
-const File = ({ file, onSelect, selectMode, onMoveChat }) => {
+const File = ({ file, onSelect, selectMode, onMoveChat, filePermission }) => {
   const { sizes } = useTheme();
   const [check, setCheck] = useState(false);
-  let selectDownloadOrViewer = getConfig('FileAttachViewMode');
-  selectDownloadOrViewer = selectDownloadOrViewer[1];
 
   const dispatch = useDispatch();
 
@@ -84,103 +89,42 @@ const File = ({ file, onSelect, selectMode, onMoveChat }) => {
   const handlePress = () => {
     if (selectMode) {
       handleCheck();
-    } else if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Download === true
-    ) {
+    } else if (filePermission.download === 'Y') {
       handleMenu();
-    } else if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Viewer === true
-    ) {
+    } else if (filePermission.viewer === 'Y') {
       handleViewer();
     }
   };
 
   const handleMoreOption = () => {
-    let buttons = [];
-    if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Download === true &&
-      selectDownloadOrViewer.Viewer === true
-    ) {
-      buttons = [
-        {
-          code: 'showContent',
-          title: getDic('ShowChat'),
-          onPress: () => {
-            onMoveChat(file.RoomID, file.MessageID);
-          },
+    let buttons = [
+      {
+        code: 'showContent',
+        title: getDic('ShowChat'),
+        onPress: () => {
+          onMoveChat(file.RoomID, file.MessageID);
         },
-        {
-          code: 'download',
-          title: getDic('Download'),
-          onPress: () => {
-            handleMenu();
-          },
+      },
+    ];
+
+    if (filePermission.download === 'Y') {
+      buttons.push({
+        code: 'download',
+        title: getDic('Download'),
+        onPress: () => {
+          handleMenu();
         },
-        {
-          code: 'viewer',
-          title: getDic('RunViewer'),
-          onPress: () => {
-            handleViewer();
-          },
+      });
+    }
+
+    if (filePermission.viewer === 'Y') {
+      buttons.push({
+        code: 'viewer',
+        title: getDic('RunViewer'),
+        onPress: () => {
+          handleViewer();
         },
-      ];
-    } else if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Download === true
-    ) {
-      buttons = [
-        {
-          code: 'showContent',
-          title: getDic('ShowChat'),
-          onPress: () => {
-            onMoveChat(file.RoomID, file.MessageID);
-          },
-        },
-        {
-          code: 'download',
-          title: getDic('Download'),
-          onPress: () => {
-            handleMenu();
-          },
-        },
-      ];
-    } else if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Viewer === true
-    ) {
-      buttons = [
-        {
-          code: 'showContent',
-          title: getDic('ShowChat'),
-          onPress: () => {
-            onMoveChat(file.RoomID, file.MessageID);
-          },
-        },
-        {
-          code: 'viewer',
-          title: getDic('RunViewer'),
-          onPress: () => {
-            handleViewer();
-          },
-        },
-      ];
-    } else if (
-      selectDownloadOrViewer &&
-      selectDownloadOrViewer.Download === false &&
-      selectDownloadOrViewer.Viewer === false
-    ) {
-      buttons = [
-        {
-          code: 'showContent',
-          title: getDic('ShowChat'),
-          onPress: () => {
-            onMoveChat(file.RoomID, file.MessageID);
-          },
-        },
-      ];
+      });
     }
 
     dispatch(
@@ -270,6 +214,8 @@ const FileSummary = ({ route, navigation }) => {
   const { roomID } = route.params;
   const chineseWall = useSelector(({ login }) => login.chineseWall);
 
+  const filePermission = useSelector(({ login }) => login.filePermission);
+
   const loadCnt = 30;
   const [select, setSelect] = useState(false);
   const [selectItems, setSelectItems] = useState([]);
@@ -285,11 +231,13 @@ const FileSummary = ({ route, navigation }) => {
   const handleSetSelect = () => {
     setSelect(!select);
 
-    if (select) setSelectItems([]);
+    if (select) {
+      setSelectItems([]);
+    }
   };
 
-  const handleMoveChat = (roomID, messageID) => {
-    navigation.navigate('MoveChat', { roomID, messageID });
+  const handleMoveChat = (id, messageID) => {
+    navigation.navigate('MoveChat', { roomID: id, messageID });
   };
 
   const handleSelect = () => {
@@ -298,14 +246,9 @@ const FileSummary = ({ route, navigation }) => {
     if (select) {
       // 이전 상태가 선택모드였다면 변경시 cnt도 0으로 초기화
 
-      if (selectItems.length > 0) {
-        // [0] PC [1] MOBILE
-        const downloadOption = getConfig('FileAttachViewMode') || [];
-        // 다운로드가 금지되어 있는 경우
-        if (
-          downloadOption.length !== 0 &&
-          downloadOption[1].Download === false
-        ) {
+      if (selectItems.length) {
+        if (filePermission.download !== 'Y') {
+          // 다운로드가 금지되어 있는 경우
           Alert.alert(
             null,
             getDic('Block_FileDownload', '파일 다운로드가 금지되어 있습니다.'),
@@ -314,14 +257,13 @@ const FileSummary = ({ route, navigation }) => {
               cancelable: true,
             },
           );
-        }
-        // 다운로드 가능 && 선택개수 5개 미만
-        else if (selectItems.length <= 5) {
+        } else if (selectItems.length <= 5) {
+          // 다운로드 가능 && 선택개수 5개 미만
           let downloadMsgObject = null;
           let arrDownloadList = [];
           selectItems.forEach(item => {
             arrDownloadList.push(
-              new Promise((resolove, reject) => {
+              new Promise((resolove, _) => {
                 downloadByToken(
                   { token: item.token, fileName: item.name },
                   data => {
@@ -333,7 +275,7 @@ const FileSummary = ({ route, navigation }) => {
             );
           });
 
-          Promise.all(arrDownloadList).then(values => {
+          Promise.all(arrDownloadList).then(() => {
             if (downloadMsgObject) {
               Alert.alert(
                 null,
@@ -380,7 +322,7 @@ const FileSummary = ({ route, navigation }) => {
       }
     } else {
       const deleteArr = selectItems.filter(
-        select => select.token !== item.token,
+        selectItem => selectItem.token !== item.token,
       );
       setSelectItems(deleteArr);
     }
@@ -399,7 +341,7 @@ const FileSummary = ({ route, navigation }) => {
         isImage: 'N',
       }).then(({ data }) => {
         if (data.status === 'SUCCESS') {
-          const result = data.result.filter(item => {
+          const result = data.result?.filter(item => {
             let isBlock = false;
             if (item?.FileID && chineseWall?.length) {
               const senderInfo = isJSONStr(item.SenderInfo)
@@ -423,7 +365,7 @@ const FileSummary = ({ route, navigation }) => {
         setLoading(false);
       });
     }
-  }, []);
+  }, [networkState, chineseWall, roomID, pageNum, loadCnt]);
 
   const handleUpdate = value => {
     const nativeEvent = value.nativeEvent;
@@ -440,8 +382,8 @@ const FileSummary = ({ route, navigation }) => {
         loadCnt: loadCnt,
         isImage: 'N',
       }).then(({ data }) => {
-        if (data.status == 'SUCCESS') {
-          if (data.result.length > 0) {
+        if (data.status === 'SUCCESS') {
+          if (data.result?.length) {
             setFiles([...files, ...data.result]);
             if (data.result.length < loadCnt) {
               setPageEnd(true);
@@ -466,8 +408,8 @@ const FileSummary = ({ route, navigation }) => {
       data.forEach((item, index) => {
         // 86400000 = 1000 * 60 * 60 * 24 (1day)
         const compareDate = Math.floor(item.SendDate / 86400000);
-        if (firstDate != compareDate) {
-          if (firstDate != 0 && sameDateArr.length > 0)
+        if (firstDate !== compareDate) {
+          if (firstDate !== 0 && sameDateArr.length) {
             returnJSX.push(
               <FileList
                 key={`flist_${firstDate}`}
@@ -475,8 +417,10 @@ const FileSummary = ({ route, navigation }) => {
                 selectMode={select}
                 onSelect={handleSelectItem}
                 onMoveChat={handleMoveChat}
+                filePermission={filePermission}
               />,
             );
+          }
 
           returnJSX.push(
             <View style={styles.datetxt} key={`flist_${firstDate}_txt`}>
@@ -492,7 +436,7 @@ const FileSummary = ({ route, navigation }) => {
 
         sameDateArr.push(item);
 
-        if (index == data.length - 1 && sameDateArr.length > 0) {
+        if (index === data.length - 1 && sameDateArr.length) {
           returnJSX.push(
             <FileList
               key={`flist_${firstDate}`}
@@ -500,6 +444,7 @@ const FileSummary = ({ route, navigation }) => {
               selectMode={select}
               onSelect={handleSelectItem}
               onMoveChat={handleMoveChat}
+              filePermission={filePermission}
             />,
           );
         }
@@ -529,47 +474,51 @@ const FileSummary = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
           <View style={styles.titleView}>
-            <Text style={styles.modaltit}>{getDic('FileSummary')}</Text>
+            <Text style={styles.modaltit}>
+              {getDic('FileSummary', '파일 모아보기')}
+            </Text>
           </View>
           {networkState && (
             <View style={styles.okbtnView}>
-              <TouchableOpacity onPress={handleSelect}>
-                <View style={{ ...styles.topBtn }}>
-                  {!select ? (
-                    <View
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginRight: 20,
-                      }}
-                    >
-                      <Text>{getDic('chooseFile')}</Text>
-                      <Image
-                        style={{ marginLeft: 10 }}
-                        source={checkBlackImg}
-                      />
-                    </View>
-                  ) : (
-                    <>
-                      <Text
+              {filePermission.download === 'Y' && (
+                <TouchableOpacity onPress={handleSelect}>
+                  <View style={{ ...styles.topBtn }}>
+                    {!select ? (
+                      <View
                         style={{
-                          ...styles.colortxt,
-                          fontSize: sizes.default,
-                          color: colors.primary,
+                          width: '100%',
+                          height: '100%',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginRight: 20,
                         }}
                       >
-                        {selectItems.length}
-                      </Text>
-                      <Text style={{ fontSize: sizes.default }}>
-                        {getDic('Save')}
-                      </Text>
-                    </>
-                  )}
-                </View>
-              </TouchableOpacity>
+                        <Text>{getDic('chooseFile', '파일 선택')}</Text>
+                        <Image
+                          style={{ marginLeft: 10 }}
+                          source={checkBlackImg}
+                        />
+                      </View>
+                    ) : (
+                      <>
+                        <Text
+                          style={{
+                            ...styles.colortxt,
+                            fontSize: sizes.default,
+                            color: colors.primary,
+                          }}
+                        >
+                          {selectItems.length}
+                        </Text>
+                        <Text style={{ fontSize: sizes.default }}>
+                          {getDic('Save', '저장')}
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -579,7 +528,7 @@ const FileSummary = ({ route, navigation }) => {
               <ScrollView onScroll={handleUpdate}>{drawData(files)}</ScrollView>
             )) || (
               <View style={styles.noFiles}>
-                <Text>{getDic('Msg_FileNotExist')}</Text>
+                <Text>{getDic('Msg_FileNotExist', '파일이 없습니다.')}</Text>
               </View>
             )}
           </>

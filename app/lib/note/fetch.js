@@ -1,6 +1,7 @@
 import qs from 'qs';
 import { chatsvr, managesvr, filesvr } from '@API/api';
 import { getAesUtil } from '@/lib/AesUtil';
+import { getConfig } from '@/config';
 
 // 쪽지 발송
 export function sendNote({
@@ -63,15 +64,12 @@ export function downloadFile({
     return null;
   }
 
+  const useFilePermission = getConfig('UseFilePermission', 'N') === 'Y';
+  const url = useFilePermission
+    ? `/na/download/permission/${module}/${userId}/${accessKey}/${serviceType}`
+    : `/na/download/${module}/${userId}/${accessKey}/${serviceType}`;
   //GET module userId accesskey serviceType
-  return filesvr(
-    'get',
-    `/na/download/${module}/${userId}/${accessKey}/${serviceType}`,
-    // `/download/${accessKey}`,
-    {},
-    {},
-    downloadHandler,
-  );
+  return filesvr('get', url, {}, {}, downloadHandler);
 }
 
 // 쪽지 내용 조회
