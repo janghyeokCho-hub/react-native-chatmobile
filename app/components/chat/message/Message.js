@@ -25,8 +25,6 @@ const Message = ({
     return text.match(rUrlRegex)?.[0];
   };
 
-  console.log('children?????', children);
-
   const convertChildren = (children = '') => {
     let txt = '';
     let onTag = false;
