@@ -153,7 +153,8 @@ export const convertChildren = ({
   let onTag = false;
   for (let i = 0; i < children.length; i++) {
     const char = children.charAt(i);
-    if (char === '<' && onTag === true) {
+    if (char === '<') {
+      onTag = onTag ? onTag : !onTag;
       if (txt) {
         returnJSX.push(
           <Plain
@@ -166,14 +167,7 @@ export const convertChildren = ({
       }
       txt = '';
     }
-    if (char === '<' && onTag === false) {
-      onTag = true;
-      if (txt) {
-        returnJSX.push(<Plain style={style} text={txt} marking={marking} />);
-      }
-      txt = '';
-    }
-    if (onTag === true && char === '>') {
+    if (onTag && char === '>') {
       onTag = false;
       txt += char;
       const pattern = new RegExp(
@@ -186,7 +180,7 @@ export const convertChildren = ({
       const attrs = getAttribute(match?.[0]);
       switch (matchedTag?.toUpperCase()) {
         case 'LINK':
-          if (attrs.link) {
+          if (attrs.link && collectURL(attrs.link)) {
             returnTag = (
               <Link
                 marking={marking}
