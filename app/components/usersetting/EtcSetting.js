@@ -1,16 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { useSelector } from 'react-redux';
 import IconButton from '@COMMON/buttons/IconButton';
-import * as db from '@/lib/appData/connector';
 import { restartApp } from '@/lib/device/common';
 import { initHostInfo, getDic } from '@/config';
-const EtcSetting = () => {
-  const { userInfo } = useSelector(({ login }) => ({
-    userInfo: login.userInfo,
-  }));
 
+const EtcSetting = () => {
   return (
     <View style={styles.container}>
       <IconButton

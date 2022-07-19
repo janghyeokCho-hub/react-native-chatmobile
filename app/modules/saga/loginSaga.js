@@ -26,6 +26,7 @@ import { exceptionHandler } from './createRequestSaga';
 import { getConfig, initConfig } from '@/config';
 // ChineseWall
 import { getChineseWall } from '@/lib/api/orgchart';
+import { checkDatabaseMigration } from '@/lib/appData/migrations';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -529,6 +530,17 @@ export function createSyncTokenOfflineSaga(type) {
 
 export function* preLoginSuccessSaga(action) {
   const isSaaSClient = getConfig('IsSaaSClient', 'N') === 'Y';
+  const userId = action.payload.id;
+
+  // db 버전 검사 && migration
+  if (userId) {
+    try {
+      yield call(checkDatabaseMigration, userId);
+    } catch (err) {
+      console.log('checkDatabaseMigration occured an error: ', err);
+    }
+  }
+
   /**
    * 2022.05.23
    * SaaS버전 클라이언트인 경우 유저의 CompanyCode를 사용해서 사별 시스템설정 가져오기
