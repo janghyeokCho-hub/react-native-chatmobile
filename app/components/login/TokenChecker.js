@@ -34,23 +34,22 @@ class TokenChecker extends Component {
     checkToken();
   }
 
-  _tokenCheck = ({ token, accessid }) => {
+  _tokenCheck = async ({ token, accessid }) => {
     const { networkState } = this.props;
 
     if (networkState) {
       LoginInfo.setData(accessid, token, null);
-
-      api
-        .tokencheckRequest()
-        .then(({ data }) => {
+      try {
+        const response = await api.tokencheckRequest();
+        if (response.data) {
           //TODO: auth success 시 login 정보 맵핑 전에 data sync 수행 -- 이부분은 server 요청보다는 local db 요청으로 전환
           this.props.syncTokenRequest({
-            result: data,
+            result: response.data,
           });
-        })
-        .catch(e => {
-          console.log(e);
-        });
+        }
+      } catch (err) {
+        console.log('Token check occured an error : ', err);
+      }
     } else {
       this.props.syncTokenOffline({ token, accessid });
     }

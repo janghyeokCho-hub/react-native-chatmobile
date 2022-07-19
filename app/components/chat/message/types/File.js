@@ -38,7 +38,7 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
 
   let selectDownloadOrViewer = getConfig('FileAttachViewMode');
   if (selectDownloadOrViewer) {
-    selectDownloadOrViewer = selectDownloadOrViewer[1];
+    selectDownloadOrViewer = selectDownloadOrViewer?.[1];
   }
 
   const dispatch = useDispatch();

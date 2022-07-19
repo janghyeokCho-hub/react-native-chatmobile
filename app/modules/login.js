@@ -243,7 +243,7 @@ const login = handleActions(
          */
         // 기존 Synap viewer 설정 값
         const fileAttachViewMode = getConfig('FileAttachViewMode');
-        const fileAttachViewModeConfig = fileAttachViewMode[1];
+        const fileAttachViewModeConfig = fileAttachViewMode?.[1];
 
         if (fileAttachViewModeConfig) {
           draft.filePermission = {
