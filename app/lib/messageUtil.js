@@ -236,7 +236,7 @@ export const convertChildren = ({
           }
           break;
         default:
-          returnTag = <Plain style={style} text={txt} marking={marking} />;
+          returnTag = <Plain style={style} text={txt} marking={marking} longPressEvt={longPressEvt} />;
           break;
       }
       if (isNewLine === false) {
@@ -245,7 +245,7 @@ export const convertChildren = ({
             returnTag ? (
               returnTag
             ) : (
-              <Plain style={style} text={txt} marking={marking} />
+              <Plain style={style} text={txt} marking={marking} longPressEvt={longPressEvt} />
             ),
           );
         }
@@ -262,7 +262,7 @@ export const convertChildren = ({
 
     if (i === children.length - 1) {
       if (txt) {
-        returnJSX.push(<Plain style={style} text={txt} marking={marking} />);
+        returnJSX.push(<Plain style={style} text={txt} marking={marking} longPressEvt={longPressEvt} />);
       }
       returnJSX.push(
         <View style={{ flexDirection: 'row' }}>{newlineJSX}</View>,

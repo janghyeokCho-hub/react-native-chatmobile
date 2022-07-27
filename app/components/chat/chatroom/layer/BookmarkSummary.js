@@ -34,15 +34,15 @@ const BookmarkSummary = ({ route, navigation }) => {
     let returnText = '';
     if (bookmark.fileCnt > 1) {
       returnText = getSysMsgFormatStr(getDic('Tmp_andCnt', '외 %s건'), [
-        { type: 'Plain', data: bookmark.fileCnt },
+        { type: 'Plain', data: bookmark.fileCnt - 1 },
       ]);
     }
     return returnText;
   };
 
   const substrTxt = str => {
-    if (str.length >= 15) {
-      return str.substr(0, 12) + '......';
+    if (str.length >= 30) {
+      return str.substr(0, 27) + '...';
     } else {
       return str;
     }
@@ -100,8 +100,11 @@ const BookmarkSummary = ({ route, navigation }) => {
         >
           <View style={styles.contents}>
             <Text style={styles.context}>
-              {substrTxt(item.context)}
-              {`${substrTxt(item.fileName)} ${getOtherCases(item)}`}
+              {item.fileCnt ? (
+                <>{`${substrTxt(item.fileName)} ${getOtherCases(item)}`}</>
+              ) : (
+                <>{substrTxt(item.context)}</>
+              )}
             </Text>
             <Text style={styles.sendProfile}>
               {`${getJobInfo(item.senderInfo)} ·  ${format(
