@@ -9,6 +9,8 @@ import Share from 'react-native-share';
 import * as RootNavigation from '@/components/RootNavigation';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { isBlockCheck } from '@/lib/api/orgchart';
+import useSWR from 'swr';
+import { getBookmarkList, deleteBookmark } from '@API/message';
 
 const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
@@ -21,33 +23,86 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   }));
   const useBookmark = getConfig('UseBookmark', 'N') === 'Y';
 
+  const roomId = isChannel ? currentChannel.roomId : currentRoom.roomID
+
+  //책갈피 불러오기
+  const { data: bookmarkList, mutate: setBookmarkList } = useSWR(
+    `bookmark/${roomId}`,
+    async () => {
+      const response = await getBookmarkList(roomId.toString());
+      if (response.data.status === 'SUCCESS') {
+        return response.data.list;
+
+      }
+      return [];
+    },
+  );  
+
+  //책갈피 등록
   const handleAddBookmark = messageData => {
     const sendData = {
-      roomId: currentRoom
-        ? currentRoom.roomID.toString()
-        : currentChannel.roomId.toString(),
+      roomId : roomId.toString(),
       messageId: messageData.messageID.toString(),
     };
 
     messageApi
       .createBookmark(sendData)
-      .then(({ data }) => {
+      .then(async({ data }) => {
         let popupMsg;
 
         if (data?.status == 'SUCCESS') {
+
+          const response = await getBookmarkList(
+            roomId.toString(),
+          );
+          let list = [];
+
+          if (response.data.status === 'SUCCESS') {
+            list = response.data.list;
+          }
+          setBookmarkList(list);
           popupMsg = getDic(
             'Msg_Bookmark_Registeration',
             '책갈피가 등록되었습니다.',
-          );
-        } else if (data?.status === 'DUPLICATE') {
-          popupMsg = getDic(
-            'Msg_Bookmark_Registeration_duplicate',
-            '이미 등록된 책갈피 입니다.',
           );
         } else {
           popupMsg = getDic(
             'Msg_Bookmark_Registeration_fail',
             '책갈피가 등록에 실패했습니다.',
+          );
+        }
+        Alert.alert('', popupMsg);
+      })
+      .catch(error => console.log('Send Error   ', error));
+  };
+
+  //책갈피 삭제
+
+  const handleDeleteBookmark = bookmark => {
+    const param = {
+      roomId: roomId.toString(),
+      bookmarkId: bookmark.bookmarkId,
+    };
+    deleteBookmark(param)
+      .then(({ data }) => {
+        let popupMsg = '';
+
+        if (data?.status == 'SUCCESS') {
+          setBookmarkList(
+            bookmarkList?.filter(
+              bookmarkOrigin =>
+                bookmarkOrigin.bookmarkId !== bookmark.bookmarkId,
+            ),
+          );
+          popupMsg = getDic(
+            'Msg_Bookmark_Delete',
+            '책갈피가 삭제되었습니다.',
+          );
+        } else {
+          console.log(data,'data???????')
+          popupMsg = getDic(
+            'Msg_Bookmark_Delete_fail',
+            '책갈피 삭제에 실패했습니다.',
           );
         }
         Alert.alert('', popupMsg);
@@ -86,15 +141,35 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
         });
     }
 
+    const isExistOnBookmark = Boolean(
+      bookmarkList?.find(bookmark => bookmark.messageId === messageData.messageID)
+    );
+  
+    const bookmark = bookmarkList?.find((bookmark = {}) => {
+      if (bookmark.messageId === messageData.messageID) return bookmark;
+    });
+
     // bookmark
     if (useBookmark && !isBlock) {
-      modalBtn.push({
-        type: 'AddBookmark',
-        title: getDic('AddBookmark', '책갈피등록'),
-        onPress: () => {
-          handleAddBookmark(messageData);
-        },
-      });
+      if (isExistOnBookmark === true) {
+        modalBtn.push({
+          type: 'deleteBookmark',
+          title: getDic('DeleteBookmark', '책갈피삭제'),
+          onPress: () => {
+            handleDeleteBookmark(bookmark);
+          },
+        });
+      }else{
+        modalBtn.push({
+          type: 'AddBookmark',
+          title: getDic('AddBookmark', '책갈피등록'),
+          onPress: () => {
+            handleAddBookmark(messageData);
+          },
+        });
+
+      }
+
     }
 
     // share
