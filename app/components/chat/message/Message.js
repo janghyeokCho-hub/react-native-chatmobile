@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import MessageReplyBox from '@/components/reply/MessageReplyBox';
 import { getAttribute } from '@/lib/messageUtil';
+import { convertChildren } from '@/lib/messageUtil';
 
 const Message = ({
   children,
@@ -20,127 +21,7 @@ const Message = ({
   roomType,
 }) => {
   const { colors, sizes } = useTheme();
-  const [drawText, setDrawText] = useState(<View />);
   const replyView = replyID > 0;
-
-  useEffect(() => {
-    const pattern = new RegExp(
-      /[<](LINK|NEWLINE|TAG|STICKER|MENTION|MOVE)[^>]*[/>]/,
-      'gi',
-    );
-
-    let newLineJSX = [];
-    let returnJSX = [];
-    let beforeLastIndex = 0;
-    let match = null;
-
-    while ((match = pattern.exec(children)) != null) {
-      if (match.index > 0 && match.index > beforeLastIndex) {
-        returnJSX.push(
-          <Plain
-            key={returnJSX.length}
-            text={children.substring(beforeLastIndex, match.index)}
-            marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
-            longPressEvt={longPressEvt}
-          />,
-        );
-      }
-
-      const attrs = getAttribute(match[0]);
-
-      if (match[1] === 'LINK') {
-        returnJSX.push(
-          <Link
-            key={returnJSX.length}
-            marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
-            longPressEvt={longPressEvt}
-            {...attrs}
-          />,
-        );
-      } else if (match[1] === 'NEWLINE') {
-        if (returnJSX.length === 0) {
-          newLineJSX.push(
-            <View key={newLineJSX.length} style={styles.lineBreaker}>
-              <Plain
-                key="newline_0"
-                text=""
-                marking={marking}
-                style={{ ...styles[styleType], fontSize: sizes.chat }}
-              />
-            </View>,
-          );
-        } else {
-          newLineJSX.push(
-            <View key={newLineJSX.length} style={styles.lineBreaker}>
-              {[...returnJSX]}
-            </View>,
-          );
-
-          returnJSX = [];
-        }
-      } else if (match[1] === 'TAG') {
-        returnJSX.push(
-          <Tag
-            key={returnJSX.length}
-            marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
-            longPressEvt={longPressEvt}
-            {...attrs}
-          />,
-        );
-      } else if (match[1] === 'STICKER') {
-        returnJSX.push(<Sticker key={returnJSX.length} {...attrs} />);
-      } else if (match[1] === 'MENTION') {
-        returnJSX.push(
-          roomInfo && (
-            <Mention
-              key={returnJSX.length}
-              marking={marking}
-              mentionInfo={roomInfo.members}
-              style={{ ...styles.sentMentionText, fontSize: sizes.chat }}
-              navigation={navigation}
-              longPressEvt={longPressEvt}
-              {...attrs}
-            />
-          ),
-        );
-      } else if (match[1] === 'MOVE') {
-        returnJSX.push(
-          <Plain
-            key={returnJSX.length}
-            text={'?'}
-            marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
-            longPressEvt={longPressEvt}
-          />,
-        );
-      } else {
-      }
-      beforeLastIndex = match.index + match[0].length;
-    }
-
-    if (beforeLastIndex < children.length)
-      returnJSX.push(
-        <Plain
-          key={returnJSX.length}
-          text={children.substr(beforeLastIndex)}
-          marking={marking}
-          style={{ ...styles[styleType], fontSize: sizes.chat }}
-          longPressEvt={longPressEvt}
-        />,
-      );
-
-    if (returnJSX.length > 0) {
-      newLineJSX.push(
-        <View key={newLineJSX.length} style={styles.lineBreaker}>
-          {[...returnJSX]}
-        </View>,
-      );
-    }
-    setDrawText(newLineJSX);
-  }, [children]);
 
   return (
     <>
@@ -167,7 +48,16 @@ const Message = ({
             goToOriginMsg={goToOriginMsg}
           />
         )}
-        {drawText}
+        {convertChildren({
+          children,
+          style,
+          styleType,
+          marking,
+          roomInfo,
+          sizes,
+          longPressEvt,
+          navigation,
+        })}
       </View>
     </>
   );
@@ -184,10 +74,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
-  },
-  repliseText: {
-    color: '#fff',
-    fontSize: 13,
   },
   sentText: {
     color: '#444',
