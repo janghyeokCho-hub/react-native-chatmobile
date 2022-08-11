@@ -8,7 +8,7 @@ const SharePostBox = ({ context, shareData, onChangeText }) => {
 
   useEffect(() => {
     if (Array.isArray(shareData)) {
-      const shareType = shareData[0].type;
+      const shareType = shareData[0]?.type;
       if (shareType === 'text') {
         onChangeText(shareData[0].value);
       }

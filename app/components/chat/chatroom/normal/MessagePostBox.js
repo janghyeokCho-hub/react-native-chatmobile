@@ -85,6 +85,9 @@ const MessagePostBox = ({
         isMine: postReplyMessage.isMine,
       };
       setReplyInfo(JSON.stringify(replyData));
+    } else {
+      setReplyID(null);
+      setReplyInfo(null);
     }
   }, [postReplyMessage]);
 
@@ -167,9 +170,8 @@ const MessagePostBox = ({
             replyInfo,
           },
         });
-        dispatch(setPostReplyMessage(null));
-      } else {
       }
+      dispatch(setPostReplyMessage(null));
     },
     [currentChannel, postAction, scrollToStart, replyID, replyInfo],
   );
