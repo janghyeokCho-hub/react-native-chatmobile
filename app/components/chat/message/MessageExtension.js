@@ -32,11 +32,19 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
   const { data: bookmarkList, mutate: setBookmarkList } = useSWR(
     `bookmark/${roomId}`,
     async () => {
+      if (useBookmark === false) {
+        return;
+      }
       const response = await getBookmarkList(roomId.toString());
       if (response.data.status === 'SUCCESS') {
         return response.data.list;
       }
       return [];
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      initialData: [],
     },
   );
 
