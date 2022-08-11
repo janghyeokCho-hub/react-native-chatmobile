@@ -24,7 +24,15 @@ import { useTheme } from '@react-navigation/native';
 
 // const useForceUpdate = () => useState()[1];
 
-const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
+const File = ({
+  type,
+  item,
+  preview,
+  id,
+  isTemp,
+  longPressEvt,
+  replyView = false,
+}) => {
   const { sizes } = useTheme();
   const extension = getFileExtension(item.ext);
   const filePermission = useSelector(({ login }) => login.filePermission);
@@ -204,6 +212,7 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
             id={id}
             isTemp={isTemp}
             longPressEvt={longPressEvt}
+            replyView={replyView}
           />
         </>
       );
@@ -277,6 +286,7 @@ const File = ({ type, item, preview, id, isTemp, longPressEvt }) => {
 
 const styles = StyleSheet.create({
   fileMessageBox: {
+    backgroundColor: '#fff',
     minWidth: '60%',
     borderWidth: 1,
     borderColor: '#eee',

@@ -22,7 +22,10 @@ export function createSendMessageSaga(request, fileRequest, linkRequest) {
         status: action.payload.status,
         tempId: action.payload.tempId,
         blockList: action.payload.blockList,
+        replyID: action.payload.replyID,
+        replyInfo: action.payload.replyInfo,
       };
+
       if (action.payload.sendFileInfo) {
         const responseFile = yield call(fileRequest, action.payload);
 
@@ -88,6 +91,8 @@ export function createSendChannelMessageSaga(
         status: action.payload.status,
         tempId: action.payload.tempId,
         blockList: action.payload.blockList,
+        replyID: action.payload.replyID,
+        replyInfo: action.payload.replyInfo,
       };
       if (action.payload.sendFileInfo) {
         const responseFile = yield call(fileRequest, action.payload);

@@ -104,7 +104,7 @@ const MakeRoom = ({ route, navigation }) => {
       name: '',
       members: invites,
       memberType: makeInfo.memberType,
-      message: message,
+      message: message?.message,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
       blockList: blockList,

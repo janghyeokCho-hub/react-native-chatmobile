@@ -69,7 +69,7 @@ const initialize = async connection => {
                 [],
               ),
               tx.executeSql(
-                'CREATE TABLE message (messageId integer, context TEXT, sender varchar(50), sendDate bigint, roomId integer, roomType CHARACTER(1), receiver varchar(255), messageType CHARACTER(1), unreadCnt integer, isSyncUnread CHARACTER(1), readYN CHARACTER(1), isMine CHARACTER(1), tempId integer, fileInfos varchar(255), linkInfo varchar(255), tagInfo varchar(255), senderInfo text, reserved json, botInfo json, primary key (messageId))',
+                'CREATE TABLE message (messageId integer, context TEXT, sender varchar(50), sendDate bigint, roomId integer, roomType CHARACTER(1), receiver varchar(255), messageType CHARACTER(1), unreadCnt integer, isSyncUnread CHARACTER(1), readYN CHARACTER(1), isMine CHARACTER(1), tempId integer, fileInfos varchar(255), linkInfo varchar(255), tagInfo varchar(255), senderInfo text, reserved json, botInfo json, replyID integer, replyInfo json, primary key (messageId))',
                 [],
               ),
               tx.executeSql(

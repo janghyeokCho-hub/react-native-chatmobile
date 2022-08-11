@@ -12,7 +12,11 @@ import {
   readMessage,
   closeChannel,
 } from '@/modules/channel';
-import { clearFiles, sendChannelMessage } from '@/modules/message';
+import {
+  clearFiles,
+  sendChannelMessage,
+  setPostReplyMessage,
+} from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
 import * as fileUtil from '@/lib/fileUtil';
@@ -95,7 +99,13 @@ const ChannelRoom = ({ navigation, route }) => {
   //   // };
   // }, [channel]);
 
-  const handleMessage = async (message, filesObj, linkObj, mentionArr) => {
+  const handleMessage = async ({
+    message,
+    filesObj,
+    linkObj,
+    mentionArr,
+    reply,
+  }) => {
     const members = channel?.members?.map(
       item => item.id !== userId && item.id,
     );
@@ -113,6 +123,7 @@ const ChannelRoom = ({ navigation, route }) => {
       linkInfo: linkObj,
       mentionInfo: mentionArr,
       blockList: blockList,
+      ...reply,
     };
 
     // sendMessage 하기 전에 RoomType이 M인데 참가자가 자기자신밖에 없는경우 상대를 먼저 초대함.
@@ -122,6 +133,8 @@ const ChannelRoom = ({ navigation, route }) => {
       // rematchingMember 내에서 서버 호출 후 sendMessage 호출하도록 변경
       dispatch(sendChannelMessage(data));
     }
+
+    dispatch(setPostReplyMessage(null));
   };
   const handleSearchBox = visible => {
     setSearchVisible(visible);

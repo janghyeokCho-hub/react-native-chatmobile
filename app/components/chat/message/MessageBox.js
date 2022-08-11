@@ -26,9 +26,12 @@ const MessageBox = ({
   navigation,
   marking,
   isBlock,
+  goToOriginMsg,
 }) => {
   const { sizes, colors } = useTheme();
   const currMember = useSelector(({ room }) => room.currentRoom.members);
+  const roomInfo = useSelector(({ room }) => room.currentRoom);
+
   const [linkData, setLinkData] = useState(null);
   const { data: searchOptionState } = useSWR('message/search', null);
 
@@ -230,6 +233,22 @@ const MessageBox = ({
                         fileObj={fileInfoJSON}
                         id={!drawText && id}
                         longPressEvt={msgUtilBox}
+                        roomType="CHAT"
+                        isMine={message.isMine}
+                        context={message.context}
+                        replyID={message.replyID}
+                        replyInfo={message.replyInfo}
+                        goToOriginMsg={goToOriginMsg}
+                        style={[
+                          !nameBoxVisible
+                            ? styles.message
+                            : styles.sentFirstMessage,
+                          styles.sentText,
+                          messageType !== 'message' && styles[messageType],
+                        ]}
+                        styleType={'sentText'}
+                        roomInfo={roomInfo}
+                        sizes={sizes}
                       />
                     </View>
                   </View>
@@ -242,6 +261,22 @@ const MessageBox = ({
                     fileObj={fileInfoJSON}
                     id={!drawText && id}
                     longPressEvt={msgUtilBox}
+                    roomType="CHAT"
+                    isMine={message.isMine}
+                    context={message.context}
+                    replyID={message.replyID}
+                    replyInfo={message.replyInfo}
+                    goToOriginMsg={goToOriginMsg}
+                    style={[
+                      !nameBoxVisible
+                        ? styles.message
+                        : styles.sentFirstMessage,
+                      styles.sentText,
+                      messageType !== 'message' && styles[messageType],
+                    ]}
+                    styleType={'sentText'}
+                    roomInfo={roomInfo}
+                    sizes={sizes}
                   />
                 </View>
               )}
@@ -285,6 +320,20 @@ const MessageBox = ({
                 fileObj={fileInfoJSON}
                 id={!drawText && id}
                 longPressEvt={msgUtilBox}
+                roomType="CHAT"
+                isMine={message.isMine}
+                context={message.context}
+                replyID={message.replyID}
+                replyInfo={message.replyInfo}
+                goToOriginMsg={goToOriginMsg}
+                style={[
+                  !nameBoxVisible ? styles.message : styles.sentFirstMessage,
+                  styles.sentText,
+                  messageType !== 'message' && styles[messageType],
+                ]}
+                styleType={'sentText'}
+                roomInfo={roomInfo}
+                sizes={sizes}
               />
             </View>
           );
@@ -381,10 +430,16 @@ const MessageBox = ({
                                 messageType !== 'message' &&
                                   styles[messageType],
                               ]}
+                              eleId={message.messageID}
                               navigation={navigation}
                               styleType={'sentText'}
                               marking={_marking}
                               longPressEvt={msgUtilBox}
+                              replyID={message.replyID}
+                              replyInfo={message.replyInfo}
+                              goToOriginMsg={goToOriginMsg}
+                              roomType="CHAT"
+                              roomInfo={roomInfo}
                             >
                               {drawText}
                             </Message>
@@ -423,10 +478,16 @@ const MessageBox = ({
                           styles.sentText,
                           messageType !== 'message' && styles[messageType],
                         ]}
+                        eleId={message.messageID}
                         navigation={navigation}
                         styleType={'sentText'}
                         marking={_marking}
                         longPressEvt={msgUtilBox}
+                        replyID={message.replyID}
+                        replyInfo={message.replyInfo}
+                        goToOriginMsg={goToOriginMsg}
+                        roomType="CHAT"
+                        roomInfo={roomInfo}
                       >
                         {drawText}
                       </Message>
@@ -498,11 +559,16 @@ const MessageBox = ({
                       styles.repliseText,
                       messageType !== 'message' && styles[messageType],
                     ]}
-                    eleId={id}
+                    eleId={message.messageID}
                     navigation={navigation}
                     marking={_marking}
                     styleType={'repliseText'}
                     longPressEvt={msgUtilBox}
+                    replyID={message.replyID}
+                    replyInfo={message.replyInfo}
+                    goToOriginMsg={goToOriginMsg}
+                    roomType="CHAT"
+                    roomInfo={roomInfo}
                   >
                     {drawText}
                   </Message>

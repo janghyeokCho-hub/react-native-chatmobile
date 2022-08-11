@@ -31,6 +31,7 @@ const SearchList = ({
   roomID,
   navigation,
   chineseWall,
+  roomInfo,
 }) => {
   const [messages, setMessages] = useState([]);
   const [moveId, setMoveId] = useState(null);

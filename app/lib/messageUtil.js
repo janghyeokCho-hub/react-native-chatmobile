@@ -34,6 +34,34 @@ export const getMessage = async (
   return resultObj;
 };
 
+/**
+ * Reply 본문 메시지 ID + 10 부터 해당 방의 마지막 메시지까지
+ * @param {*} roomID 대화방 OR 채널 ID
+ * @param {*} startId replyID
+ * @param {*} cnt 위로 더 불러올 갯수
+ * @param {*} roomType CHAT / CHANNEL
+ * @returns [...messages]
+ */
+export const getMessageBetween = async (
+  roomID,
+  startId,
+  cnt = 10,
+  roomType = 'CHAT',
+) => {
+  const param = {
+    roomID,
+    startId,
+    cnt,
+  };
+
+  if (roomType === 'CHAT') {
+    return await dbAction.selectBetweenMessagesByIDs(param);
+  } else {
+    // CHANNEL
+    return await messageApi.getMessageBetween(param);
+  }
+};
+
 export const getChannelMessage = (roomID, startId, dist) => {
   let resultObj;
   const param = {

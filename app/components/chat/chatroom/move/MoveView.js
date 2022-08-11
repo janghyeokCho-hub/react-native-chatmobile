@@ -15,6 +15,9 @@ import { useTheme } from '@react-navigation/native';
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
 const MoveView = ({ route, navigation }) => {
+  const currentRoom = useSelector(
+    ({ room, channel }) => channel?.currentChannel || room?.currentRoom,
+  );
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { sizes } = useTheme();
   const { isRoom, isChannel } = useSelector(({ room, channel }) => ({
@@ -120,6 +123,7 @@ const MoveView = ({ route, navigation }) => {
             roomID={roomID}
             navigation={navigation}
             chineseWall={chineseWall}
+            roomInfo={currentRoom}
           />
         ) : (
           <ChannelSearchList
@@ -127,6 +131,7 @@ const MoveView = ({ route, navigation }) => {
             roomID={roomID}
             navigation={navigation}
             chineseWall={chineseWall}
+            roomInfo={currentRoom}
           />
         )}
 

@@ -33,6 +33,7 @@ const ChannelSearchList = ({
   roomID,
   navigation,
   chineseWall,
+  roomInfo,
 }) => {
   const [messages, setMessages] = useState([]);
   const [moveId, setMoveId] = useState(null);
@@ -164,6 +165,7 @@ const ChannelSearchList = ({
                   timeBox={timeBox}
                   marking={markingText}
                   isBlock={isBlock}
+                  roomInfo={roomInfo}
                 />
               </SearchMessageWrap>,
             );
@@ -221,6 +223,7 @@ const ChannelSearchList = ({
                     timeBox={timeBox}
                     marking={markingText}
                     isBlock={isBlock}
+                    roomInfo={roomInfo}
                   />
                 </View>,
               );
