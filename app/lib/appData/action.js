@@ -1253,7 +1253,7 @@ export const getRoomInfo = async param => {
             const selectMessages = db
               .tx(tx_2)
               .query(
-                'SELECT m.messageId AS messageID, m.context, m.sender, m.sendDate, m.roomId AS roomID, m.roomType, m.receiver, m.messageType, m.unreadCnt, m.readYN, m.isMine, m.tempId, m.fileInfos,' +
+                'SELECT m.messageId AS messageID, m.context, m.sender, m.sendDate, m.roomId AS roomID, m.roomType, m.receiver, m.messageType, m.unreadCnt, m.readYN, m.isMine, m.tempId, m.fileInfos, m.replyID, m.replyInfo,' +
                   (room.roomType == 'A'
                     ? `(SELECT 
                       '{"name":"' || name || '"
@@ -1297,7 +1297,7 @@ export const getMessages = async param => {
   const returnObj = {};
 
   try {
-    if (param.dist == 'CENTER') {
+    if (param.dist === 'CENTER') {
       messages = await getBetweenMessages(param);
     } else {
       messages = await getOtherMessages(param);
@@ -1317,13 +1317,32 @@ export const getAllMessages = async param => {
 
   const messages = await new Promise((resolve, reject) => {
     const commonQuery =
-      'SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo ' +
+      'SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo, replyID, replyInfo, ' +
       'FROM message as m ' +
       `WHERE roomId = ${param.roomID}`;
 
     dbCon.transaction(tx => {
       db.tx(tx)
         .query(`SELECT * FROM (${commonQuery}) AS a ORDER BY a.messageId`)
+        .execute((tx, result) => {
+          resolve(result.rows.raw());
+        });
+    });
+  });
+
+  return messages;
+};
+export const selectBetweenMessagesByIDs = async params => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  const messages = await new Promise((resolve, reject) => {
+    const subQuery = `SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo, replyID, replyInfo
+      FROM message as m 
+      WHERE roomId = ${params.roomID} AND messageId >= ${params.startId -
+      params.cnt}`;
+
+    dbCon.transaction(tx => {
+      db.tx(tx)
+        .query(`SELECT * FROM (${subQuery}) AS a ORDER BY a.messageId`)
         .execute((tx, result) => {
           resolve(result.rows.raw());
         });
@@ -1340,7 +1359,7 @@ const getBetweenMessages = async param => {
 
   const messages = await new Promise((resolve, reject) => {
     const commonQuery =
-      'SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo ' +
+      'SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo, replyID, replyInfo ' +
       'FROM message as m ' +
       `WHERE roomId = ${param.roomID}`;
 
@@ -1378,7 +1397,7 @@ const getOtherMessages = async param => {
 
   const messages = await new Promise((resolve, reject) => {
     let andWhere = '';
-    if (param.dist == 'BEFORE') {
+    if (param.dist === 'BEFORE') {
       andWhere = param.startId
         ? `AND messageId > ${param.startId}`
         : '' + ' ORDER BY messageId ';
@@ -1393,7 +1412,7 @@ const getOtherMessages = async param => {
         .query(
           'SELECT * FROM (' +
             'SELECT * FROM (' +
-            ' SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos,' +
+            ' SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, replyID, replyInfo,' +
             (param.isNotice
               ? `(SELECT 
                 '{"name":"' || name || '"
@@ -1809,6 +1828,8 @@ export const saveMessage = async param => {
         tempId: param.tempId,
         fileInfos: param.fileInfos,
         linkInfo: param.linkInfo,
+        replyID: param.replyID,
+        replyInfo: param.replyInfo,
       })
       .execute();
 

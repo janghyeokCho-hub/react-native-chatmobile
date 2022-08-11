@@ -14,6 +14,7 @@ import { getScreenWidth } from '@/lib/device/common';
 import Svg, { Rect, G, Circle } from 'react-native-svg';
 import { openMsgUtilBox } from '@/lib/messageUtil';
 import { getDic } from '@/config';
+import { useTheme } from '@react-navigation/native';
 
 const ChannelMessageBox = ({
   dateBox,
@@ -27,9 +28,14 @@ const ChannelMessageBox = ({
   navigation,
   roomInfo,
   isBlock,
+  goToOriginMsg,
 }) => {
+  const { sizes } = useTheme();
   const currMember = useSelector(
     ({ channel }) => channel.currentChannel.members,
+  );
+  const currentRoomID = useSelector(
+    ({ channel }) => channel.currentChannel.roomId,
   );
   const [linkData, setLinkData] = useState(null);
   const dispatch = useDispatch();
@@ -65,6 +71,7 @@ const ChannelMessageBox = ({
     let fileInfoJSX = null;
     let messageType = 'message';
     let _marking = null;
+
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (!isBlock && common.eumTalkRegularExp.test(drawText)) {
       const processMsg = common.convertEumTalkProtocol(drawText, {
@@ -218,6 +225,22 @@ const ChannelMessageBox = ({
                       fileObj={fileInfoJSON}
                       id={!drawText && id}
                       longPressEvt={msgUtilBox}
+                      roomType="CHANNEL"
+                      isMine={message.isMine}
+                      context={message.context}
+                      replyID={message.replyID}
+                      replyInfo={message.replyInfo}
+                      goToOriginMsg={goToOriginMsg}
+                      style={[
+                        !nameBoxVisible
+                          ? styles.message
+                          : styles.sentFirstMessage,
+                        styles.sentText,
+                        messageType !== 'message' && styles[messageType],
+                      ]}
+                      styleType={'sentText'}
+                      roomInfo={roomInfo}
+                      sizes={sizes}
                     />
                   </View>
                 </>
@@ -228,6 +251,20 @@ const ChannelMessageBox = ({
                   fileObj={fileInfoJSON}
                   id={!drawText && id}
                   longPressEvt={msgUtilBox}
+                  roomType="CHANNEL"
+                  isMine={message.isMine}
+                  context={message.context}
+                  replyID={message.replyID}
+                  replyInfo={message.replyInfo}
+                  goToOriginMsg={goToOriginMsg}
+                  style={[
+                    !nameBoxVisible ? styles.message : styles.sentFirstMessage,
+                    styles.sentText,
+                    messageType !== 'message' && styles[messageType],
+                  ]}
+                  styleType={'sentText'}
+                  roomInfo={roomInfo}
+                  sizes={sizes}
                 />
               )}
               <View style={styles.chatInfoSent}>
@@ -266,6 +303,20 @@ const ChannelMessageBox = ({
                 fileObj={fileInfoJSON}
                 id={!drawText && id}
                 longPressEvt={msgUtilBox}
+                roomType="CHANNEL"
+                isMine={message.isMine}
+                context={message.context}
+                replyID={message.replyID}
+                replyInfo={message.replyInfo}
+                goToOriginMsg={goToOriginMsg}
+                style={[
+                  !nameBoxVisible ? styles.message : styles.sentFirstMessage,
+                  styles.repliseText,
+                  messageType !== 'message' && styles[messageType],
+                ]}
+                styleType={'repliseText'}
+                roomInfo={roomInfo}
+                sizes={sizes}
               />
             </View>
           );
@@ -281,13 +332,6 @@ const ChannelMessageBox = ({
       // NEW LINE 처리
       drawText = drawText.replace(/\n/gi, '<NEWLINE />');
     }
-    // else if (messageType == 'mention') {
-    //   // 멘션 처리 처리
-    //   drawText = drawText;
-    //   if (search != undefined && search)
-    //     console.log('멘션 처리(검색o) =====>', drawText);
-    //   else console.log('멘션 처리(검색x) =====>', drawText);
-    // }
 
     if (drawText === '') {
       drawText = null;
@@ -363,17 +407,20 @@ const ChannelMessageBox = ({
                         <View style={styles.sentFirstMessageBox}>
                           <Message
                             style={[
-                              !nameBoxVisible
-                                ? styles.message
-                                : styles.sentFirstMessage,
+                              styles.message,
                               styles.sentText,
                               messageType !== 'message' && styles[messageType],
                             ]}
-                            roomInfo={roomInfo}
+                            eleId={message.messageID}
                             navigation={navigation}
                             styleType={'sentText'}
-                            longPressEvt={msgUtilBox}
                             marking={_marking}
+                            longPressEvt={msgUtilBox}
+                            replyID={message.replyID}
+                            replyInfo={message.replyInfo}
+                            goToOriginMsg={goToOriginMsg}
+                            roomType="CHANNEL"
+                            roomInfo={roomInfo}
                           >
                             {drawText}
                           </Message>
@@ -398,16 +445,21 @@ const ChannelMessageBox = ({
                   {!nameBoxVisible && (
                     <>
                       <Message
-                        roomInfo={roomInfo}
-                        navigation={navigation}
                         style={[
                           styles.message,
                           styles.sentText,
                           messageType !== 'message' && styles[messageType],
                         ]}
+                        eleId={message.messageID}
+                        navigation={navigation}
                         styleType={'sentText'}
-                        longPressEvt={msgUtilBox}
                         marking={_marking}
+                        longPressEvt={msgUtilBox}
+                        replyID={message.replyID}
+                        replyInfo={message.replyInfo}
+                        goToOriginMsg={goToOriginMsg}
+                        roomType="CHANNEL"
+                        roomInfo={roomInfo}
                       >
                         {drawText}
                       </Message>
@@ -468,12 +520,16 @@ const ChannelMessageBox = ({
                       styles.repliseText,
                       messageType !== 'message' && styles[messageType],
                     ]}
-                    eleId={id}
-                    marking={_marking}
-                    roomInfo={roomInfo}
+                    eleId={message.messageID}
                     navigation={navigation}
                     styleType={'repliseText'}
+                    marking={_marking}
                     longPressEvt={msgUtilBox}
+                    replyID={message.replyID}
+                    replyInfo={message.replyInfo}
+                    goToOriginMsg={goToOriginMsg}
+                    roomType="CHANNEL"
+                    roomInfo={roomInfo}
                   >
                     {drawText}
                   </Message>

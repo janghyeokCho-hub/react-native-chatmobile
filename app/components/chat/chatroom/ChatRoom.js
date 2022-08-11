@@ -69,7 +69,7 @@ const ChatRoom = ({ navigation, route }) => {
     };
   }, [room]);
 
-  const handleMessage = async (message, filesObj, linkObj) => {
+  const handleMessage = async ({ message, filesObj, linkObj, reply }) => {
     const members = room?.members?.map(item => item.id !== userId && item.id);
     let blockList = [];
     if (members?.length && blockUser) {
@@ -77,6 +77,7 @@ const ChatRoom = ({ navigation, route }) => {
         item => item !== userId && members.includes(item),
       );
     }
+
     const data = {
       roomID: roomID,
       context: message,
@@ -84,6 +85,7 @@ const ChatRoom = ({ navigation, route }) => {
       sendFileInfo: filesObj,
       linkInfo: linkObj,
       blockList: blockList,
+      ...reply,
       onSubmitCancelToken: token => {
         setCancelToken(token);
       },

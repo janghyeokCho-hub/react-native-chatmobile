@@ -65,7 +65,7 @@ const Mention = ({
       {targetId && (
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('ProfilePopup', {
+            navigation?.navigate('ProfilePopup', {
               targetID: targetId,
             });
           }}

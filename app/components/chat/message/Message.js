@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@react-navigation/native';
+import MessageReplyBox from '@/components/reply/MessageReplyBox';
 import { getAttribute } from '@/lib/messageUtil';
 
 const Message = ({
@@ -13,9 +14,14 @@ const Message = ({
   marking,
   styleType,
   longPressEvt,
+  replyID,
+  replyInfo,
+  goToOriginMsg,
+  roomType,
 }) => {
   const { colors, sizes } = useTheme();
   const [drawText, setDrawText] = useState(<View />);
+  const replyView = replyID > 0;
 
   useEffect(() => {
     const pattern = new RegExp(
@@ -138,34 +144,31 @@ const Message = ({
 
   return (
     <>
-      {(eleId && (
-        <View
-          style={[
-            {
-              backgroundColor:
-                styleType === 'repliseText' ? colors.primary : '',
-            },
-            style,
-            styles.container,
-          ]}
-          id={eleId}
-        >
-          {drawText}
-        </View>
-      )) || (
-        <View
-          style={[
-            {
-              backgroundColor:
-                styleType === 'repliseText' ? colors.primary : '',
-            },
-            style,
-            styles.container,
-          ]}
-        >
-          {drawText}
-        </View>
-      )}
+      <View
+        style={[
+          {
+            backgroundColor: styleType === 'repliseText' ? colors.primary : '',
+          },
+          style,
+          styles.container,
+        ]}
+        id={eleId ? eleId : undefined}
+      >
+        {replyView && (
+          <MessageReplyBox
+            replyID={replyID}
+            replyInfo={replyInfo}
+            roomType={roomType}
+            style={style}
+            styleType={styleType}
+            roomInfo={roomInfo}
+            sizes={sizes}
+            marking={marking}
+            goToOriginMsg={goToOriginMsg}
+          />
+        )}
+        {drawText}
+      </View>
     </>
   );
 };

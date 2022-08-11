@@ -1,7 +1,7 @@
 import * as db from '@/lib/appData/connector';
 
 const SQLITE_LIMIT_VARIABLES = 999;
-const splitCnt = 50;
+const splitCnt = 49;
 
 // 동기화 날짜 세팅
 export const setSyncDate = (transaction, key, date) => {

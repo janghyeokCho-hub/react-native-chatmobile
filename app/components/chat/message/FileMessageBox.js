@@ -8,8 +8,27 @@ import {
 import { View, StyleSheet } from 'react-native';
 import File from '@C/chat/message/types/File';
 import FileThumbList from './types/FileThumbList';
+import MessageReplyBox from '@/components/reply/MessageReplyBox';
+import { useTheme } from '@react-navigation/native';
 
-const FileMessageBox = ({ fileObj, id, isTemp, longPressEvt }) => {
+const FileMessageBox = ({
+  fileObj,
+  id,
+  isTemp,
+  longPressEvt,
+  context,
+  replyID = 0,
+  replyInfo,
+  goToOriginMsg,
+  roomType = 'CHAT',
+  isMine,
+  style,
+  styleType,
+  roomInfo,
+  sizes,
+}) => {
+  const replyView = replyID > 0 && !context;
+  const { colors } = useTheme();
   const handleFileList = fileObj => {
     let isAllimg = isAllImage(fileObj);
     if (isAllimg) {
@@ -48,6 +67,7 @@ const FileMessageBox = ({ fileObj, id, isTemp, longPressEvt }) => {
                 id={id}
                 isTemp={isTemp}
                 longPressEvt={longPressEvt}
+                replyView={replyView}
               />
             );
           })}
@@ -74,24 +94,63 @@ const FileMessageBox = ({ fileObj, id, isTemp, longPressEvt }) => {
     }
   };
 
+  let returnJSX = [];
+
   if (Array.isArray(fileObj) && fileObj.length > 1) {
-    return <>{handleFileList(fileObj)}</>;
+    returnJSX.push(handleFileList(fileObj));
   } else {
-    return (
+    returnJSX.push(
       <File
         type="unit"
         item={fileObj}
         preview={handlePreview}
-        id={id}
+        id={id || ''}
         isTemp={isTemp}
         longPressEvt={longPressEvt}
-      />
+        replyView={replyView}
+      />,
     );
+  }
+
+  if (replyView) {
+    returnJSX.unshift(
+      <MessageReplyBox
+        replyID={replyID}
+        replyInfo={replyInfo}
+        roomType={roomType}
+        style={style}
+        styleType={styleType}
+        roomInfo={roomInfo}
+        sizes={sizes}
+        goToOriginMsg={goToOriginMsg}
+      />,
+    );
+    colors;
+    return (
+      <View
+        style={{
+          backgroundColor: isMine === 'Y' ? colors.primary : '#efefef',
+          ...styles.replyFileMessageBox,
+        }}
+      >
+        {returnJSX}
+      </View>
+    );
+  } else {
+    return returnJSX;
   }
 };
 
 const styles = StyleSheet.create({
+  replyFileMessageBox: {
+    padding: 10,
+    borderRadius: 5,
+    maxWidth: '100%',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
   fileMessageBox: {
+    backgroundColor: '#fff',
     minWidth: '60%',
     borderWidth: 1,
     borderColor: '#eee',

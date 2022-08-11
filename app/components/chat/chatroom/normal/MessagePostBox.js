@@ -21,12 +21,14 @@ import ChannelMentionBox from '@C/channel/channelroom/controls/ChannelMentionBox
 import KeySpacer from '@C/common/layout/KeySpacer';
 import StickerLayer from '@C/chat/chatroom/controls/StickerLayer';
 import ExtensionLayer from '@C/chat/chatroom/controls/ExtensionLayer';
-import { getJobInfo, getSysMsgFormatStr } from '@/lib/common';
+import { getJobInfo, getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { getBottomPadding, resetInput } from '@/lib/device/common';
 import { getConfig, getDic } from '@/config';
 import * as fileUtil from '@/lib/fileUtil';
 import * as imageUtil from '@/lib/imagePickUtil';
 import * as dbAction from '@/lib/appData/action';
+import MessagePostReplyBox from '@/components/reply/MessagePostReplyBox';
+import { setPostReplyMessage } from '@/modules/message';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 const ico_send = require('@C/assets/m-send-btn.png');
@@ -59,6 +61,33 @@ const MessagePostBox = ({
   const dispatch = useDispatch();
   const { MOBILE } = getConfig('FileAttachMode', {});
 
+  const postReplyMessage = useSelector(
+    ({ message }) => message.postReplyMessage,
+  );
+
+  const [replyID, setReplyID] = useState(null);
+  const [replyInfo, setReplyInfo] = useState(null);
+
+  useEffect(() => {
+    if (postReplyMessage) {
+      const senderInfo = isJSONStr(postReplyMessage.senderInfo)
+        ? JSON.parse(postReplyMessage.senderInfo)
+        : postReplyMessage.senderInfo;
+      setReplyID(postReplyMessage.messageID);
+
+      const replyData = {
+        sender: postReplyMessage.sender,
+        senderName: senderInfo?.name,
+        deptCode: senderInfo?.deptCode,
+        companyCode: senderInfo?.companyCode,
+        context: postReplyMessage.context,
+        fileInfos: postReplyMessage.fileInfos,
+        isMine: postReplyMessage.isMine,
+      };
+      setReplyInfo(JSON.stringify(replyData));
+    }
+  }, [postReplyMessage]);
+
   const handleTextChange = useCallback(
     changedText => {
       const textArr = changedText?.split(' ');
@@ -87,7 +116,7 @@ const MessagePostBox = ({
 
   const handleSendImage = inputImage => {
     if (inputImage.files.length > 0) {
-      postAction('', inputImage, null);
+      postAction({ message: '', filesObj: inputImage, linkObj: null });
       setSelectImage({ files: [], fileInfos: [] });
     }
   };
@@ -128,17 +157,21 @@ const MessagePostBox = ({
             },
           );
         }
-        postAction(
-          inputContext,
-          //files.length > 0 ? { files, fileInfos } : null,
-          null,
-          null,
-          mentionArr,
-        );
+
+        postAction({
+          message: inputContext,
+          filesObj: null,
+          linkObj: null,
+          reply: {
+            replyID,
+            replyInfo,
+          },
+        });
+        dispatch(setPostReplyMessage(null));
       } else {
       }
     },
-    [currentChannel, postAction, scrollToStart],
+    [currentChannel, postAction, scrollToStart, replyID, replyInfo],
   );
 
   useEffect(() => {
@@ -160,7 +193,11 @@ const MessagePostBox = ({
     const fileInfos = fileCtrl.getRealFileInfos();
     if (context !== '' || files.length > 0) {
       try {
-        postAction('', files.length > 0 ? { files, fileInfos } : null, null);
+        postAction({
+          message: '',
+          filesObj: files.length > 0 ? { files, fileInfos } : null,
+          linkObj: null,
+        });
       } catch (err) {
         console.log(err);
       }
@@ -172,7 +209,7 @@ const MessagePostBox = ({
       scrollToStart();
     }
     // emoticon만 전송
-    postAction(emoticon, null, null);
+    postAction({ message: emoticon, filesObj: null, linkObj: null });
     // emoticon은 바로 발송
     onExtension('');
   };
@@ -387,8 +424,8 @@ const MessagePostBox = ({
             getSysMsgFormatStr(getDic('Msg_LimitFileSize'), [
               {
                 type: 'Plain',
-                data: fileUtil.convertFileSize(fileSizeLimit)
-              }
+                data: fileUtil.convertFileSize(fileSizeLimit),
+              },
             ]),
             [
               {
@@ -515,7 +552,11 @@ const MessagePostBox = ({
       //   () => {},
       // );
     } else if (type === 'image') {
-      postAction('', selectImage.files.length > 0 ? selectImage : null, null);
+      postAction({
+        message: '',
+        filesObj: selectImage.files.length > 0 ? selectImage : null,
+        linkObj: null,
+      });
       setSelectImage({ files: [], fileInfos: [] });
     } else if (type === 'test') {
       dbAction.updateUnreadCount({
@@ -565,6 +606,9 @@ const MessagePostBox = ({
         />
       )}
 
+      {!openMentionList && postReplyMessage && (
+        <MessagePostReplyBox replyMessage={postReplyMessage} roomType="CHAT" />
+      )}
       <View style={styles.messageInputWrap}>
         <View style={styles.buttonBox}>
           {(typeof MOBILE === 'undefined' || MOBILE.upload !== false) && (
@@ -812,11 +856,11 @@ const styles = StyleSheet.create({
     /**
      * 2021.04.30
      * minWidth, maxWidth
-     * 
+     *
      * 버튼박스에 들어가는 레이어는 1개당 width=40
      * 1. 레이어 종류는 ExtensionLayer, EmoticonLayer 두개가 최대 (최대 width 80)
      * 2. 두 레이어 중 ExtensionLayer만 파일업로드 설정에 의해 사라질 수 있다는 전제로 결정한 width 값임
-     * 
+     *
      * 추후 조건이 변경될 경우 수정 필요
      * 수정 ex) 활성화된 레이어 숫자에 맞춰서 width 자동계산
      */

@@ -301,6 +301,7 @@ const SearchView = ({ onSearchBox, navigation }) => {
           roomID={roomId}
           navigation={navigation}
           chineseWall={chineseWall}
+          roomInfo={currentRoom}
         />
 
         <SearchIndexBox

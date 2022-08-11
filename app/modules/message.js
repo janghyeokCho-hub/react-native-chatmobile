@@ -33,6 +33,8 @@ const [
 
 const REMOVE_CHANNEL_TEMPMESSAGE = 'message/REMOVE_CHANNEL_TEMPMESSAGE';
 
+// 답장 할 본문 메시지 내용
+const SET_POST_REPLY_MESSAGE = 'message/SET_POST_REPLY_MESSAGE';
 const SET_TEMP_MESSAGE = 'message/SET_TEMP_MESSAGE';
 
 export const init = createAction(INIT);
@@ -50,6 +52,8 @@ export const reSendChannelMessage = createAction(RESEND_CHANNEL_MESSAGE);
 export const removeChannelTempMessage = createAction(
   REMOVE_CHANNEL_TEMPMESSAGE,
 );
+
+export const setPostReplyMessage = createAction(SET_POST_REPLY_MESSAGE);
 
 export const setTempMessage = createAction(SET_TEMP_MESSAGE);
 
@@ -90,6 +94,8 @@ const initialState = {
   moveId: -1,
   moveRoomID: -1,
   moveVisible: false,
+  // 답글 보낼 본문 메시지
+  postReplyMessage: null,
   // 채널
   tempChannelMessage: [],
 };
@@ -241,6 +247,11 @@ const message = handleActions(
 
         if (action.payload && action.payload.length > 0)
           tempId = action.payload[action.payload.length - 1].tempId + 1;
+      });
+    },
+    [SET_POST_REPLY_MESSAGE]: (state, action) => {
+      return produce(state, draft => {
+        draft.postReplyMessage = action.payload;
       });
     },
   },

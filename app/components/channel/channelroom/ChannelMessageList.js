@@ -20,6 +20,8 @@ import {
 import ChannelMessageSync from '@C/channel/channelroom/controls/ChannelMessageSync';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { getMessageBetween } from '@/lib/messageUtil';
+import { setMessagesForSync } from '@/modules/channel';
 
 const ico_chatDown = require('@C/assets/ico_chatdownbtn.png');
 
@@ -114,6 +116,27 @@ const ChannelMessageList = React.forwardRef(
       dispatch(initMessages());
       setTopEnd(false);
     }, [dispatch, topEnd]);
+
+    const goToOriginMsg = async (currentRoomID, replyID) => {
+      const { current } = ref;
+      const msgEle = messages.findIndex(item => item.messageId === replyID);
+      if (msgEle === -1) {
+        const result = await getMessageBetween(
+          currentRoomID,
+          replyID,
+          10,
+          'CHANNLE',
+        );
+        dispatch(setMessagesForSync(result));
+      }
+
+      setTimeout(() => {
+        const replyEleIndex = current?.props?.data.findIndex(
+          item => item.messageID === replyID,
+        );
+        current.scrollToIndex({ index: replyEleIndex, viewPosition: 0.5 });
+      }, 1500);
+    };
 
     const drawMessage = useCallback(
       (item, index) => {
@@ -248,6 +271,7 @@ const ChannelMessageList = React.forwardRef(
                 navigation={navigation}
                 roomInfo={roomInfo}
                 isBlock={isBlock}
+                goToOriginMsg={goToOriginMsg}
               />
             )) ||
             (message.mentionInfo && (
@@ -270,6 +294,7 @@ const ChannelMessageList = React.forwardRef(
                 navigation={navigation}
                 roomInfo={roomInfo}
                 isBlock={isBlock}
+                goToOriginMsg={goToOriginMsg}
               />
             ))
           );
@@ -364,6 +389,20 @@ const ChannelMessageList = React.forwardRef(
               scrollEventThrottle={100}
               refreshing={refresh}
               decelerationRate="fast"
+              getItemLayout={(data, index) => ({
+                length: messageData.length,
+                offset: messageData.length * index,
+                index,
+              })}
+              onScrollToIndexFailed={info => {
+                const wait = new Promise(resolve => setTimeout(resolve, 700));
+                wait.then(() => {
+                  ref.current.scrollToIndex({
+                    index: info.index,
+                    viewPosition: 0.5,
+                  });
+                });
+              }}
             />
           </TouchableOpacity>
           {bottomView && (

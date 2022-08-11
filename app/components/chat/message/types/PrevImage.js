@@ -14,6 +14,7 @@ const PrevImage = ({
   index,
   len,
   longPressEvt,
+  replyView,
 }) => {
   const [thumbnailURL, setThumbnailURL] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -85,8 +86,8 @@ const PrevImage = ({
               >
                 <ScaledImage
                   source={thumbnailURL}
-                  scaledWidth={250}
-                  scaledHeight={250}
+                  scaledWidth={replyView ? 200 : 250}
+                  scaledHeight={replyView ? 200 : 250}
                 />
               </TouchableOpacity>
             </View>

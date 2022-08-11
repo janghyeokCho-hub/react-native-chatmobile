@@ -6,7 +6,14 @@ import { getConfig } from '@/config';
 
 const initNoImg = require('@C/assets/no_image.jpg');
 
-const Sticker = ({ companyCode, groupId, emoticonId, type }) => {
+const Sticker = ({
+  companyCode,
+  groupId,
+  emoticonId,
+  type,
+  style,
+  longPressEvt,
+}) => {
   const IsSaaSClient = getConfig('IsSaaSClient', 'N');
   const storagePrefix = getConfig('storePrefix', '/storage/');
   const timer = useRef(null);
@@ -75,13 +82,16 @@ const Sticker = ({ companyCode, groupId, emoticonId, type }) => {
       onPress={e => {
         if (type === 'A' && !isAnimation) setIsAnimation(true);
       }}
+      onLongPress={e => {
+        longPressEvt && longPressEvt();
+      }}
     >
       <FastImage
         source={resource}
         onError={e => {
           setResource(initNoImg);
         }}
-        style={{ width: 150, height: 150 }}
+        style={{ width: style?.width || 150, height: style?.height || 150 }}
       />
     </TouchableOpacity>
   );
