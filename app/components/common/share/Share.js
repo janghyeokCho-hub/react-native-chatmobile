@@ -30,11 +30,12 @@ import {
   messageFactory,
   getFileInfoStr,
 } from '@COMMON/share/lib/share';
-
+import * as LoginInfo from '@/lib/class/LoginInfo';
 import { accessTokenCheck } from '@API/login';
 import { initConfig, getServerConfigs, getServer, getDic } from '@/config';
 import AsyncStorage from '@react-native-community/async-storage';
 import { getChineseWall } from '@/lib/api/orgchart';
+import { getConfig } from '@/config';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
@@ -144,6 +145,8 @@ const Share = () => {
         setLoading(false);
 
         if (tokenShareData !== null) {
+          const { id, token, userInfo } = tokenShareData;
+          LoginInfo.setData(id, token, userInfo);
           api.makeServerUtil(tokenShareData);
         }
 
@@ -243,10 +246,6 @@ const Share = () => {
 
   const shareMessage = useCallback(
     async (shareInfo, message, files) => {
-      const { blockList } = await getChineseWall({
-        userId: loginInfo.id,
-      });
-
       let shareFlag = false;
       // share file & room info
       const shareFileAndRoom = {
@@ -256,9 +255,22 @@ const Share = () => {
           '',
         fileInfos: await getFileStat(files),
         roomType: shareInfo.roomType,
-        blockList: blockList || [],
       };
-      const { data: shareResult } = await shareFactory(shareFileAndRoom);
+      try {
+        const useChineseWall = getConfig('UseChineseWall', 'N') === 'Y';
+        if (useChineseWall) {
+          const { blockList } = await getChineseWall({
+            userId: loginInfo.id,
+          });
+          shareFileAndRoom.blockList = blockList || [];
+        }
+      } catch (err) {
+        console.error('An error occured when get ChineseWall: ', err);
+      }
+      const { data: shareResult } = await shareFactory(
+        shareFileAndRoom,
+        loginInfo,
+      );
 
       if (shareResult.state === 'SUCCESS') {
         const messageDatas = shareResult.result.map(item => ({
@@ -328,11 +340,12 @@ const Share = () => {
             ShareExtension.close();
           });
         })
-        .catch(() => {
+        .catch(err => {
+          console.error('An error occured while sharing message: ', err);
           handleAlert('메시지 발송에 실패하였습니다.');
         });
     }
-  }, []);
+  }, [loginInfo]);
 
   return (
     <View style={styles.container}>
