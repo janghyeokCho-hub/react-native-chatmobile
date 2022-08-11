@@ -80,7 +80,7 @@ const getMimeTypeFromExt = ext => {
   return `image/${ext === 'jpg' ? 'jpeg' : ext}`;
 };
 
-export const shareFactory = async shareData => {
+export const shareFactory = async (shareData, loginInfo) => {
   const isFileUpload =
     Array.isArray(shareData.fileInfos) && shareData.fileInfos.length > 0;
 
@@ -103,13 +103,15 @@ export const shareFactory = async shareData => {
     let fileInfos = shareData.fileInfos.map(getFileInfo);
     // make thumbnail data
     fileInfos = await getThumbnailDataURL(fileInfos);
-
     formData.append('fileInfos', JSON.stringify(fileInfos));
-
+    formData.append('USER_ID', loginInfo.id);
     formData.append('type', shareData.type);
     formData.append('targets', shareData.targets);
     formData.append('roomType', shareData.roomType);
-    formData.append('blockList', shareData.blockList);
+    if (typeof shareData?.blockList !== 'undefined') {
+      formData.append('blockList', shareData.blockList);
+    }
+
     return server.postRestful(url, formData, {
       'Content-Type': 'multipart/form-data',
     });
