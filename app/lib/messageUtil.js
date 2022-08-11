@@ -1,6 +1,9 @@
 import * as dbAction from '@/lib/appData/action';
 import * as messageApi from '@API/message';
 import { openModal, changeModal } from '@/modules/modal';
+import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
+import { View, StyleSheet } from 'react-native';
+import React from 'react';
 
 export const getMessage = async (
   roomID,
@@ -154,3 +157,202 @@ export const getAttribute = tag => {
   }
   return attrs;
 };
+
+export const convertChildren = ({
+  children,
+  style,
+  styleType,
+  marking,
+  roomInfo,
+  sizes,
+  longPressEvt,
+  navigation,
+}) => {
+  let newlineJSX = [];
+  let returnJSX = [];
+  let isNewLine = false;
+  let txt = '';
+  let onTag = false;
+  for (let i = 0; i < children.length; i++) {
+    const char = children.charAt(i);
+    if (char === '<') {
+      onTag = onTag ? onTag : !onTag;
+      if (txt) {
+        newlineJSX.push(
+          <Plain
+            key={returnJSX.length}
+            style={{ ...styles[styleType], fontSize: sizes.chat }}
+            text={txt}
+            marking={marking}
+            longPressEvt={longPressEvt}
+          />,
+        );
+      }
+      txt = '';
+    }
+    if (onTag && char === '>') {
+      onTag = false;
+      txt += char;
+      const pattern = new RegExp(
+        /[<](LINK|NEWLINE|TAG|STICKER|MENTION)[^>]*[/>]/,
+        'gi',
+      );
+      let returnTag;
+      const match = pattern.exec(txt);
+      let matchedTag = match?.[1];
+      const attrs = getAttribute(match?.[0]);
+      switch (matchedTag?.toUpperCase()) {
+        case 'LINK':
+          if (attrs.link) {
+            returnTag = (
+              <Link
+                key={returnJSX.length}
+                marking={marking}
+                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                longPressEvt={longPressEvt}
+                {...attrs}
+                link={attrs.link}
+              />
+            );
+          }
+          break;
+        case 'NEWLINE':
+          if (children.charAt(i - 1) === '/') {
+            isNewLine = true;
+            returnJSX.push(
+              <View key={returnJSX.length} style={styles.lineBreaker} >
+                {[...newlineJSX]}
+              </View>,
+            );
+            newlineJSX = [];
+          }
+          break;
+        case 'TAG':
+          if (attrs.value && attrs.text?.startsWith('#')) {
+            returnTag = (
+              <Tag
+                key={returnJSX.length}
+                marking={marking}
+                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                longPressEvt={longPressEvt}
+                {...attrs}
+              />
+            );
+          }
+          break;
+        case 'STICKER':
+          if (attrs.emoticonId) {
+            returnTag = (
+              <Sticker
+                key={returnJSX.length}
+                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                longPressEvt={longPressEvt}
+                {...attrs}
+              />
+            );
+          }
+          break;
+        case 'MENTION':
+          if (attrs.type) {
+            returnTag = (
+              <Mention
+                key={returnJSX.length}
+                marking={marking}
+                mentionInfo={roomInfo?.members}
+                navigation={navigation}
+                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                longPressEvt={longPressEvt}
+                {...attrs}
+              />
+            );
+          }
+          break;
+        default:
+          returnTag = (
+            <Plain
+              key={returnJSX.length}
+              style={{ ...styles[styleType], fontSize: sizes.chat }}
+              text={txt}
+              marking={marking}
+              longPressEvt={longPressEvt}
+            />
+          );
+          break;
+      }
+      if (isNewLine === false) {
+        if (txt) {
+          newlineJSX.push(
+            returnTag ? (
+              returnTag
+            ) : (
+              <Plain
+                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                text={txt}
+                key={returnJSX.length}
+                marking={marking}
+                longPressEvt={longPressEvt}
+              />
+            ),
+          );
+        }
+        txt = '';
+      } else {
+        isNewLine = false;
+        txt = '';
+      }
+      txt = '';
+    } else {
+      txt += char;
+    }
+
+    if (i === children.length - 1) {
+      if (txt) {
+        newlineJSX.push(
+          <Plain
+            key={returnJSX.length}
+            style={{ ...styles[styleType], fontSize: sizes.chat }}
+            text={txt}
+            marking={marking}
+            longPressEvt={longPressEvt}
+          />,
+        );
+      }
+      returnJSX.push(
+        <View  key={returnJSX.length} style={{ flexDirection: 'row' }}>{newlineJSX}</View>,
+      );
+    }
+  }
+  return returnJSX;
+};
+
+const styles = StyleSheet.create({
+  lineBreaker: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+  },
+  repliseText: {
+    color: '#fff',
+    fontSize: 13,
+  },
+  sentText: {
+    color: '#444',
+    fontSize: 13,
+  },
+  sentMentionText: {
+    color: '#444',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  sendText: {
+    color: '#444',
+    fontSize: 13,
+  },
+  noticeText: {
+    color: '#444',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+});
