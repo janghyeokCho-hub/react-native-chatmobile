@@ -137,7 +137,7 @@ export const getAttribute = tag => {
     'gi',
   );
   let attrs = {};
-  const match = tag.match(attrPattern);
+  const match = tag?.match(attrPattern);
 
   if (match?.length) {
     match.forEach(item => {
