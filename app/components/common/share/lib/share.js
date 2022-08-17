@@ -108,8 +108,12 @@ export const shareFactory = async (shareData, loginInfo) => {
     formData.append('type', shareData.type);
     formData.append('targets', shareData.targets);
     formData.append('roomType', shareData.roomType);
-    if (typeof shareData?.blockList !== 'undefined') {
-      formData.append('blockList', shareData.blockList);
+    if (shareData?.blockList?.length) {
+      for (const blockItem of shareData.blockList) {
+        formData.append('blockList', blockItem);
+      }
+    } else {
+      formData.append('blockList', null);
     }
 
     return server.postRestful(url, formData, {
