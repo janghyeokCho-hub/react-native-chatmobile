@@ -12,6 +12,7 @@ import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
 import Svg, { Path } from 'react-native-svg';
+import useSWR from 'swr';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr, getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { getBookmarkList, deleteBookmark } from '@API/message';
@@ -21,6 +22,24 @@ const BookmarkSummary = ({ route, navigation }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const [bookmarkList, setBookmarkList] = useState([]);
   const [edit, setEdit] = useState(false);
+
+
+    //책갈피 불러오기
+    const { data: globalBookmarkList, mutate: setGlobalBookmarkList } = useSWR(
+      `bookmark/${roomID}`,
+      async () => {
+        const response = await getBookmarkList(roomID.toString());
+        if (response.data.status === 'SUCCESS') {
+          return response.data.list;
+        }
+        return [];
+      },
+      {
+        revalidateOnFocus: false,
+        shouldRetryOnError: false,
+        initialData: [],
+      },
+    );
 
   const handleMoveChat = (roomID, messageID) => {
     navigation.navigate('MoveChat', { roomID, messageID });
@@ -74,6 +93,8 @@ const BookmarkSummary = ({ route, navigation }) => {
         list.sort((a, b) => b.sendDate - a.sendDate);
 
         setBookmarkList(list);
+        setGlobalBookmarkList(list);
+
       }
     } catch (error) {
       console.log('Send Error   ', error);
@@ -86,6 +107,12 @@ const BookmarkSummary = ({ route, navigation }) => {
         if (data.status === 'SUCCESS') {
           setBookmarkList([]);
           getList();
+          setGlobalBookmarkList(
+            globalBookmarkList?.filter(
+              bookmarkOrigin =>
+                bookmarkOrigin.bookmarkId !== bookmark.bookmarkId,
+            ),
+          );
         }
       })
       .catch(error => console.log('Send Error   ', error));

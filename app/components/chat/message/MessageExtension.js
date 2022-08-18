@@ -103,7 +103,6 @@ const MessageExtension = ({ messageData, onClose, btnStyle }) => {
           );
           popupMsg = getDic('Msg_Bookmark_Delete', '책갈피가 삭제되었습니다.');
         } else {
-          console.log(data, 'data???????');
           popupMsg = getDic(
             'Msg_Bookmark_Delete_fail',
             '책갈피 삭제에 실패했습니다.',
