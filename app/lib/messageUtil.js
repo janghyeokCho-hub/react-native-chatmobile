@@ -318,7 +318,7 @@ export const convertChildren = ({
         );
       }
       returnJSX.push(
-        <View  key={returnJSX.length} style={{ flexDirection: 'row' }}>{newlineJSX}</View>,
+        <View  key={returnJSX.length} style={styles.returnJSXStyle}>{newlineJSX}</View>,
       );
     }
   }
@@ -336,6 +336,10 @@ const styles = StyleSheet.create({
   repliseText: {
     color: '#fff',
     fontSize: 13,
+  },
+  returnJSXStyle:{
+    flexDirection:'row',
+    flexWrap:'wrap'
   },
   sentText: {
     color: '#444',
