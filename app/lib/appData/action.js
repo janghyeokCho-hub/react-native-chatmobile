@@ -1335,14 +1335,35 @@ export const getAllMessages = async param => {
 export const selectBetweenMessagesByIDs = async params => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
   const messages = await new Promise((resolve, reject) => {
-    const subQuery = `SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo, replyID, replyInfo
+    const subQuery = `
+      SELECT messageId AS messageID, context, sender, sendDate, roomId AS roomID, roomType, receiver, messageType, unreadCnt, readYN, isMine, tempId, fileInfos, senderInfo, linkInfo, replyID, replyInfo
       FROM message as m 
-      WHERE roomId = ${params.roomID} AND messageId >= ${params.startId -
-      params.cnt}`;
+      WHERE roomId = ${params.roomID}`;
 
     dbCon.transaction(tx => {
       db.tx(tx)
-        .query(`SELECT * FROM (${subQuery}) AS a ORDER BY a.messageId`)
+        .query(
+          `SELECT * FROM (
+          SELECT * FROM (
+            SELECT * FROM (
+              ${subQuery}
+            ) AS a
+            WHERE a.messageId <= ${params.startId}
+            ORDER BY a.messageId DESC
+            LIMIT ${params.count} OFFSET 0
+          ) AS before
+          UNION ALL
+          SELECT * FROM (
+            SELECT * FROM (
+              ${subQuery}
+            ) AS a
+            WHERE a.messageId > ${params.startId}
+            ORDER BY a.messageId DESC
+            LIMIT ${params.count} OFFSET 0
+          ) AS after
+        ) A
+        ORDER by A.messageId`,
+        )
         .execute((tx, result) => {
           resolve(result.rows.raw());
         });
@@ -1352,7 +1373,7 @@ export const selectBetweenMessagesByIDs = async params => {
   return messages;
 };
 
-const getBetweenMessages = async param => {
+export const getBetweenMessages = async param => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
 
   const count = Math.round(param.loadCnt / 2);
