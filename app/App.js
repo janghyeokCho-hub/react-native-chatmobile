@@ -9,12 +9,14 @@ import {
   setNativeExceptionHandler,
 } from 'react-native-exception-handler';
 import { YellowBox } from 'react-native';
-import { getDic } from '@/config';
+import { getDic, getConfig } from '@/config';
 import { restartApp } from '@/lib/device/common';
 import Orientation from 'react-native-orientation';
 import DeviceInfo from 'react-native-device-info';
 import getUpdater from '@/lib/class/Updater';
 import getTheme from '@/config/theme';
+import ScreenCaptureSecure from 'react-native-screen-capture-secure';
+import { withSecurityScreen } from './withSecurityScreen';
 
 // OS 폰트 크기 무시
 Text.defaultProps = Text.defaultProps || {};
@@ -68,6 +70,14 @@ class App extends Component {
   }
 
   componentDidMount() {
+    const useScreenCaptureSecure =
+      getConfig('UseScreenCaptureSecure', 'N') === 'Y';
+    if (useScreenCaptureSecure) {
+      ScreenCaptureSecure.enableSecure();
+    } else {
+      ScreenCaptureSecure.disableSecure();
+    }
+
     getUpdater().checkUpdate(progress => {
       this.setState({ downloadProgress: progress });
     });
@@ -108,4 +118,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default withSecurityScreen(App);

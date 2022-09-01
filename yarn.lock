@@ -6256,6 +6256,11 @@ react-native-safe-area-context@^0.7.2:
   resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-0.7.3.tgz#ad6bd4abbabe195332c53810e4ce5851eb21aa2a"
   integrity sha512-9Uqu1vlXPi+2cKW/CW6OnHxA76mWC4kF3wvlqzq4DY8hn37AeiXtLFs2WkxH4yXQRrnJdP6ivc65Lz+MqwRZAA==
 
+react-native-screen-capture-secure@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/react-native-screen-capture-secure/-/react-native-screen-capture-secure-1.0.5.tgz#5ba6649a7cb9fdf2595c7620c3ce6c0e785ab972"
+  integrity sha512-/YnJR2uAsMtuAB2/u83jBm6VvyF7xRx0VIisnc8KR2rX25/wVpjFWG8RdZ6gZfhWYtQoQSKJNuljoQIg1sjeJw==
+
 react-native-screens@^2.0.0-beta.2:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-2.18.1.tgz#47b9991c6f762d00d0ed3233e5283d523e859885"

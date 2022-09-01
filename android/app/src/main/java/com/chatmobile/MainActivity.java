@@ -8,6 +8,10 @@ import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
 import android.content.Intent;
 import android.content.res.Configuration;
 
+import android.os.Bundle;
+import com.facebook.react.ReactActivity;
+import android.view.WindowManager;
+
 public class MainActivity extends ReactActivity {
 
   /**
@@ -35,5 +39,15 @@ public class MainActivity extends ReactActivity {
     Intent intent = new Intent("onConfigurationChanged");
     intent.putExtra("newConfig", newConfig);
     this.sendBroadcast(intent);
+  }
+
+  @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        );
   }
 }

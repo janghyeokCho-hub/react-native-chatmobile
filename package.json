@@ -31,6 +31,7 @@
     "react-native-popup-menu": "^0.15.11",
     "react-native-progress": "^5.0.0",
     "react-native-render-html": "^6.1.0",
+    "react-native-screen-capture-secure": "^1.0.5",
     "react-native-skeleton-placeholder": "^4.0.0",
     "react-native-webview": "10.10.2",
     "rn-fetch-blob": "file:lib/rn-fetch-blob.tgz",
