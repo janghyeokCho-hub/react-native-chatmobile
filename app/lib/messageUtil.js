@@ -38,27 +38,29 @@ export const getMessage = async (
 };
 
 /**
- * Reply 본문 메시지 ID + 10 부터 해당 방의 마지막 메시지까지
  * @param {*} roomID 대화방 OR 채널 ID
- * @param {*} startId replyID
- * @param {*} cnt 위로 더 불러올 갯수
+ * @param {*} startId 기준 메시지 ID
+ * @param {*} loadCnt 불러올 메시지의 수
  * @param {*} roomType CHAT / CHANNEL
+ * @param {*} dist BEFORE / CENTER
  * @returns [...messages]
  */
 export const getMessageBetween = async (
   roomID,
   startId,
-  cnt = 10,
+  loadCnt = 50,
   roomType = 'CHAT',
+  dist = 'CENTER',
 ) => {
   const param = {
     roomID,
     startId,
-    cnt,
+    loadCnt,
+    dist,
   };
 
   if (roomType === 'CHAT') {
-    return await dbAction.selectBetweenMessagesByIDs(param);
+    return await dbAction.getMessages(param);
   } else {
     // CHANNEL
     return await messageApi.getMessageBetween(param);
@@ -220,7 +222,7 @@ export const convertChildren = ({
           if (children.charAt(i - 1) === '/') {
             isNewLine = true;
             returnJSX.push(
-              <View key={returnJSX.length} style={styles.lineBreaker} >
+              <View key={returnJSX.length} style={styles.lineBreaker}>
                 {[...newlineJSX]}
               </View>,
             );
@@ -318,7 +320,9 @@ export const convertChildren = ({
         );
       }
       returnJSX.push(
-        <View  key={returnJSX.length} style={styles.returnJSXStyle}>{newlineJSX}</View>,
+        <View key={returnJSX.length} style={styles.returnJSXStyle}>
+          {newlineJSX}
+        </View>,
       );
     }
   }
@@ -337,9 +341,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
   },
-  returnJSXStyle:{
-    flexDirection:'row',
-    flexWrap:'wrap'
+  returnJSXStyle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   sentText: {
     color: '#444',

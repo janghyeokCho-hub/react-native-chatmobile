@@ -727,7 +727,7 @@ const room = handleActions(
     },
     [SET_MESSAGES]: (state, action) => {
       return produce(state, draft => {
-        if (action.payload.dist == 'BEFORE') {
+        if (action.payload.dist === 'BEFORE') {
           draft.messages = [...draft.messages, ...action.payload.messages];
         } else {
           draft.messages = [...action.payload.messages, ...draft.messages];
