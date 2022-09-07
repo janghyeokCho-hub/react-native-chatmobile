@@ -279,6 +279,8 @@ PODS:
     - React
   - react-native-safe-area-context (0.7.3):
     - React
+  - react-native-screen-capture-secure (1.0.5):
+    - React
   - react-native-sqlite-storage (4.1.0):
     - React
   - react-native-version-check (3.4.2):
@@ -435,6 +437,7 @@ DEPENDENCIES:
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-orientation (from `../node_modules/react-native-orientation`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-screen-capture-secure (from `../node_modules/react-native-screen-capture-secure`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-version-check (from `../node_modules/react-native-version-check`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -547,6 +550,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-orientation"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-screen-capture-secure:
+    :path: "../node_modules/react-native-screen-capture-secure"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
   react-native-version-check:
@@ -664,6 +669,7 @@ SPEC CHECKSUMS:
   react-native-notifications: f56a12d741eeb2fd4d7a418a4689111c50f7cd72
   react-native-orientation: f1caf84d65f1a4fd4511a18f2b924e634ad7a628
   react-native-safe-area-context: e200d4433aba6b7e60b52da5f37af11f7a0b0392
+  react-native-screen-capture-secure: e5b88c0aa936ea94adcb60380e10bfa160089b0b
   react-native-sqlite-storage: f06bfba10f67f989c00b6a699b9c2b80a816edbe
   react-native-version-check: d8b8900e6ce03ae1568cb22ef9451f2508188883
   react-native-webview: 0aa2cde4ee7e3e1c5fffdf64dbce9c709aa18155
