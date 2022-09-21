@@ -37,6 +37,8 @@ const REMOVE_CHANNEL_TEMPMESSAGE = 'message/REMOVE_CHANNEL_TEMPMESSAGE';
 const SET_POST_REPLY_MESSAGE = 'message/SET_POST_REPLY_MESSAGE';
 const SET_TEMP_MESSAGE = 'message/SET_TEMP_MESSAGE';
 
+const SET_POST_ACTION = 'message/SET_POST_ACTION';
+
 export const init = createAction(INIT);
 export const sendMessage = createAction(SEND_MESSAGE);
 export const reSendMessage = createAction(RESEND_MESSAGE);
@@ -56,6 +58,8 @@ export const removeChannelTempMessage = createAction(
 export const setPostReplyMessage = createAction(SET_POST_REPLY_MESSAGE);
 
 export const setTempMessage = createAction(SET_TEMP_MESSAGE);
+
+export const setPostAction = createAction(SET_POST_ACTION);
 
 const sendMessageSaga = saga.createSendMessageSaga(
   messageApi.sendMessage,
@@ -98,6 +102,8 @@ const initialState = {
   postReplyMessage: null,
   // 채널
   tempChannelMessage: [],
+  // 메시지 보낸 Action check
+  postAction: false,
 };
 
 let tempId = 0;
@@ -110,6 +116,7 @@ const message = handleActions(
     [SEND_MESSAGE]: (state, action) => {
       return produce(state, draft => {
         // 해당 메시지를 tempMessage에 넣고 상태를 send으로 지정
+
         const sendData = action.payload;
         sendData.status = 'send';
         sendData.tempId = tempId++;
@@ -122,7 +129,6 @@ const message = handleActions(
     [SEND_MESSAGE_FAILURE]: (state, action) => {
       return produce(state, draft => {
         // 해당 메시지의 상태를 fail로 변경
-
         const sendData = draft.tempMessage.find(
           m => m.tempId === action.payload.tempId,
         );
@@ -252,6 +258,12 @@ const message = handleActions(
     [SET_POST_REPLY_MESSAGE]: (state, action) => {
       return produce(state, draft => {
         draft.postReplyMessage = action.payload;
+      });
+    },
+    [SET_POST_ACTION]: (state, action) => {
+      return produce(state, draft => {
+        console.log('SET_POST_ACTION : ', action.payload);
+        draft.postAction = action.payload;
       });
     },
   },

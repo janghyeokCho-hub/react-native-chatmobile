@@ -7,7 +7,7 @@ import {
   closeRoom,
 } from '@/modules/room';
 import { addTargetUserList, delTargetUserList } from '@/modules/presence';
-import { sendMessage, clearFiles } from '@/modules/message';
+import { sendMessage, clearFiles, setPostAction } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import MessageView from '@C/chat/chatroom/normal/MessageView';
 import SearchView from '@C/common/search/SearchView';
@@ -98,6 +98,7 @@ const ChatRoom = ({ navigation, route }) => {
       // rematchingMember 내에서 서버 호출 후 sendMessage 호출하도록 변경
       dispatch(sendMessage(data));
     }
+    dispatch(setPostAction(true));
   };
 
   const handleSearchBox = visible => {
