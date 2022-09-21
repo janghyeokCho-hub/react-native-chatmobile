@@ -16,6 +16,7 @@ import {
   clearFiles,
   sendChannelMessage,
   setPostReplyMessage,
+  setPostAction,
 } from '@/modules/message';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
@@ -134,6 +135,7 @@ const ChannelRoom = ({ navigation, route }) => {
       dispatch(sendChannelMessage(data));
     }
 
+    dispatch(setPostAction(true));
     dispatch(setPostReplyMessage(null));
   };
   const handleSearchBox = visible => {

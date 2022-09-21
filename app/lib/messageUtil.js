@@ -16,7 +16,7 @@ export const getMessage = async (
   const param = {
     roomID,
     startId,
-    loadCnt: loadCnt ? loadCnt : 100,
+    loadCnt: loadCnt ? loadCnt : 50,
     dist,
     isNotice,
   };

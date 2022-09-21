@@ -7,6 +7,8 @@ import createRequestSaga, {
 } from '@/modules/saga/createRequestSaga';
 import produce from 'immer';
 
+var _ = require('lodash');
+
 const [
   GET_ROOMS,
   GET_ROOMS_SUCCESS,
@@ -727,11 +729,11 @@ const room = handleActions(
     },
     [SET_MESSAGES]: (state, action) => {
       return produce(state, draft => {
-        if (action.payload.dist === 'BEFORE') {
-          draft.messages = [...draft.messages, ...action.payload.messages];
-        } else {
-          draft.messages = [...action.payload.messages, ...draft.messages];
-        }
+        const actionMessages = action.payload.messages;
+        const messages = [...draft.messages, ...actionMessages].sort(
+          (a, b) => a.messageID - b.messageID,
+        );
+        draft.messages = _.uniqBy(messages, 'messageID');
       });
     },
     [SET_MESSAGES_SYNC]: (state, action) => {
@@ -742,9 +744,9 @@ const room = handleActions(
     [INIT_MESSAGES]: (state, action) => {
       return produce(state, draft => {
         const startIdx =
-          draft.messages.length - 100 >= 0 ? draft.messages.length - 100 : 0;
+          draft.messages.length - 50 >= 0 ? draft.messages.length - 50 : 0;
         // 최근 100개의 메시지만 남김
-        draft.messages = draft.messages.splice(startIdx, 100);
+        draft.messages = draft.messages.splice(startIdx, 50);
       });
     },
     [ROOM_LEAVE_OTHER_DEVICE]: (state, action) => {

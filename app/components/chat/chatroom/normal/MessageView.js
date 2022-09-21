@@ -18,7 +18,6 @@ const MessageView = ({
   navigation,
   cancelToken,
 }) => {
-  const [replyMessage, setReplyMessage] = useState(null);
   const isBackLock = useSelector(({ app }) => app.backHandler['ChatMenuBox']);
 
   const [extensionType, setExtensionType] = useState('');
