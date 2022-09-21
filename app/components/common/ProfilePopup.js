@@ -26,8 +26,51 @@ import { getJobInfo, getDictionary } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import { makePhotoPath } from '@/lib/util/paramUtil';
 import { isBlockCheck } from '@/lib/api/orgchart';
+import { FlatList } from 'react-native-bidirectional-infinite-scroll';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
+
+function ProfilePopupContent({ data }) {
+  const { sizes } = useTheme();
+  if (!data || typeof data !== 'object') {
+    return <></>;
+  }
+  return (
+    <FlatList
+      data={Object.keys(data)}
+      keyExtractor={item => `AddInfo_${item}`}
+      contentContainerStyle={styles.profileContainer}
+      renderItem={({ item }) => {
+        return (
+          <View style={styles.profileInfoWrap}>
+            <View style={styles.profileSubTitle}>
+              <Text
+                style={{
+                  ...styles.profileSubTitle_text,
+                  fontSize: sizes.large,
+                }}
+                numberOfLines={2}
+              >
+                {getDic(item, item)}
+              </Text>
+            </View>
+            <View style={styles.profileInfo}>
+              <Text
+                style={{
+                  ...styles.profileInfo_text,
+                  fontSize: sizes.large,
+                }}
+                numberOfLines={2}
+              >
+                {data?.[item]}
+              </Text>
+            </View>
+          </View>
+        );
+      }}
+    />
+  );
+}
 
 const ProfilePopup = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
@@ -40,6 +83,27 @@ const ProfilePopup = ({ route, navigation }) => {
 
   const { targetID } = route.params;
   const [targetInfo, setTargetInfo] = useState({});
+  const userInfos = useMemo(() => {
+    let addInfos = {};
+    try {
+      const addInfoType = typeof targetInfo?.addInfo;
+      if (addInfoType === 'string') {
+        addInfos = JSON.parse(targetInfo.addInfo);
+      } else if (addInfoType === 'object') {
+        addInfos = targetInfo.addInfo;
+      }
+    } catch (err) {
+      // ...
+    }
+    return {
+      Mobile: targetInfo.phoneNumber,
+      Phone: targetInfo.companyNumber,
+      Email: targetInfo.mailAddress,
+      Work: targetInfo.work,
+      ...addInfos,
+    };
+  }, [targetInfo]);
+
   const [showModal, setShowModal] = useState(false);
   const [targetAbsenceInfo, setTargetAbsenceInfo] = useState({});
   const photoPath = useMemo(() => makePhotoPath(targetInfo?.photoPath), [
@@ -226,107 +290,10 @@ const ProfilePopup = ({ route, navigation }) => {
               </View>
             </View>
           </View>
-          <ScrollView>
-            <View style={styles.profileContainer}>
-              <View style={styles.profileInfoWrap}>
-                <View style={styles.profileSubTitle}>
-                  <Text
-                    style={{
-                      ...styles.profileSubTitle_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {getDic('Mobile')}
-                  </Text>
-                </View>
-                <View style={styles.profileInfo}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      linkCall(targetInfo.phoneNumber);
-                    }}
-                  >
-                    <Text
-                      style={{
-                        ...styles.profileInfo_text,
-                        fontSize: sizes.large,
-                      }}
-                    >
-                      {targetInfo.phoneNumber}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.profileInfoWrap}>
-                <View style={styles.profileSubTitle}>
-                  <Text
-                    style={{
-                      ...styles.profileSubTitle_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {getDic('Phone')}
-                  </Text>
-                </View>
-                <View style={styles.profileInfo}>
-                  <Text
-                    style={{
-                      ...styles.profileInfo_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {targetInfo.companyNumber}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.profileInfoWrap}>
-                <View style={styles.profileSubTitle}>
-                  <Text
-                    style={{
-                      ...styles.profileSubTitle_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {getDic('Email')}
-                  </Text>
-                </View>
-                <View style={styles.profileInfo}>
-                  <Text
-                    style={{
-                      ...styles.profileInfo_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {targetInfo.mailAddress}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.profileInfoWrap_work}>
-                <View style={styles.profileSubTitle}>
-                  <Text
-                    style={{
-                      ...styles.profileSubTitle_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {getDic('Work')}
-                  </Text>
-                </View>
-                <View style={styles.profileInfo}>
-                  <Text
-                    style={{
-                      ...styles.profileInfo_text,
-                      fontSize: sizes.large,
-                    }}
-                  >
-                    {targetInfo.work}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </ScrollView>
+          <ProfilePopupContent data={userInfos} />
           <View style={styles.startChat}>
             <View style={styles.bottomBtn}>
-              {(myInfo.id != targetID && (
+              {(myInfo.id !== targetID && (
                 <>
                   <TouchableOpacity onPress={opneChatRoomView}>
                     <View style={styles.btnChat}>
@@ -465,19 +432,19 @@ const styles = StyleSheet.create({
   },
   profileContainer: {
     alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'column',
     paddingBottom: getBottomPadding(),
-    paddingLeft: 30,
-    paddingRight: 30,
-    paddingTop: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingTop: 8,
   },
   profileInfoWrap: {
+    display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    height: 50,
+    marginVertical: 8,
     alignItems: 'center',
-  },
-  profileInfoWrap_work: {
-    flexDirection: 'row',
   },
   profileImage: {
     flex: 1,
