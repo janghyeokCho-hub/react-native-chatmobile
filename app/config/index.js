@@ -79,10 +79,14 @@ export const initConfig = async (domain, configs) => {
   };
 };
 
-export const getServerConfigs = domain => {
+export const getServerConfigs = async domain => {
+  const lang = (await AsyncStorage.getItem('covi_user_lang')) || undefined;
   return axios({
     method: 'get',
     url: `${domain}/restful/na/nf/config`,
+    params: {
+      lang,
+    },
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json; charset=utf-8',

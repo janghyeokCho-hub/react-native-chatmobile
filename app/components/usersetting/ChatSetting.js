@@ -17,23 +17,18 @@ import {
 } from '@/config';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
 import { useTheme } from '@react-navigation/native';
-//TODO: 다국어
+
 const getJobInfoName = jobInfo => {
-  let infoName = '';
   switch (jobInfo) {
     case 'PN':
-      infoName = '직위';
-      break;
+      return getDic('JobPosition', '직위');
     case 'TN':
-      infoName = '직책';
-      break;
+      return getDic('JobTitle', '직책');
     case 'LN':
-      infoName = '직급';
-      break;
+      return getDic('JobLevel', '직급');
     default:
-      infoName = '사용안함';
+      return getDic('DoNotUse', '사용안함');
   }
-  return infoName;
 };
 
 const getMultiDicName = multiDic => {
@@ -193,17 +188,17 @@ const ChatSetting = ({ navigation }) => {
 
   const openJobInfoModal = useCallback(() => {
     const config = getConfig('jobCode', [
-      { name: '표시안함', value: 'NN' },
-      { name: '직위', value: 'PN' },
-      { name: '직급', value: 'LN' },
-      { name: '직책', value: 'TN' },
+      { value: 'NN' },
+      { value: 'PN' },
+      { value: 'LN' },
+      { value: 'TN' },
     ]);
 
     var modalBtn = [];
 
     config.map(data => {
       modalBtn.push({
-        title: data.name,
+        title: getJobInfoName(data.value),
         onPress: () => {
           closeJobInfoModal(data.value);
         },
