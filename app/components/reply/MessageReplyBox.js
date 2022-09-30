@@ -275,7 +275,13 @@ const ContextComponent = ({
             key={returnJSX.length}
             text={context.substring(beforeLastIndex, match.index)}
             marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
+            style={{
+              ...styles[styleType],
+              fontSize: sizes.chat,
+              width: '100%',
+            }}
+            ellipsizeMode="tail"
+            numberOfLines={1}
           />,
         );
       }
@@ -299,7 +305,13 @@ const ContextComponent = ({
                 key="newline_0"
                 text=""
                 marking={marking}
-                style={{ ...styles[styleType], fontSize: sizes.chat }}
+                style={{
+                  ...styles[styleType],
+                  fontSize: sizes.chat,
+                  width: '100%',
+                }}
+                ellipsizeMode="tail"
+                numberOfLines={1}
               />
             </View>,
           );
@@ -341,7 +353,13 @@ const ContextComponent = ({
             key={returnJSX.length}
             text={'?'}
             marking={marking}
-            style={{ ...styles[styleType], fontSize: sizes.chat }}
+            style={{
+              ...styles[styleType],
+              fontSize: sizes.chat,
+              width: '100%',
+            }}
+            ellipsizeMode="tail"
+            numberOfLines={1}
           />,
         );
       } else {
@@ -355,7 +373,9 @@ const ContextComponent = ({
           key={returnJSX.length}
           text={context.substr(beforeLastIndex)}
           marking={marking}
-          style={{ ...styles[styleType], fontSize: sizes.chat }}
+          style={{ ...styles[styleType], fontSize: sizes.chat, width: '100%' }}
+          ellipsizeMode="tail"
+          numberOfLines={1}
         />,
       );
     }
