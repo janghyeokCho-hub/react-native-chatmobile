@@ -19,11 +19,24 @@ const LongPressWrapper = ({ children, longPressEvt }) => {
   );
 };
 
-const Plain = ({ marking, text, style, longPressEvt }) => {
+const Plain = ({
+  marking,
+  text,
+  style,
+  longPressEvt,
+  ellipsizeMode,
+  numberOfLines,
+}) => {
   if (!marking || (marking && !marking.trim())) {
     return (
       <LongPressWrapper longPressEvt={longPressEvt}>
-        <Text style={{ ...style }}>{text}</Text>
+        <Text
+          style={{ ...style }}
+          ellipsizeMode={ellipsizeMode}
+          numberOfLines={numberOfLines}
+        >
+          {text}
+        </Text>
       </LongPressWrapper>
     );
   }
@@ -53,13 +66,20 @@ const Plain = ({ marking, text, style, longPressEvt }) => {
                       backgroundColor: '#222',
                       color: '#fff',
                     }}
+                    ellipsizeMode={ellipsizeMode}
+                    numberOfLines={numberOfLines}
                   >
                     {part}
                   </Text>
                 );
               } else {
                 return (
-                  <Text key={i} style={style}>
+                  <Text
+                    key={i}
+                    style={{ ...style }}
+                    ellipsizeMode={ellipsizeMode}
+                    numberOfLines={numberOfLines}
+                  >
                     {part}
                   </Text>
                 );
