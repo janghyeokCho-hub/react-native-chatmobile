@@ -33,3 +33,6 @@ export const modifyRoomNotification = (roomId, params) => {
 export const changeNotificationBlockOption = params => {
   return managesvr('post', '/nf/office/overtime/option', params);
 };
+
+export const setUserSetting = params =>
+  managesvr('post', '/user/setting', { deviceType: 'm', settings: params });
