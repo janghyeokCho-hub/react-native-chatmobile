@@ -1,12 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import { StyleSheet, View, Alert, Text } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import Svg, { G, Path } from 'react-native-svg';
+import { useTheme } from '@react-navigation/native';
+
 import IconButton from '@COMMON/buttons/IconButton';
 import * as db from '@/lib/appData/connector';
 import * as dbAction from '@/lib/appData/action';
 import { restartApp } from '@/lib/device/common';
-import Svg, { G, Path } from 'react-native-svg';
 import {
   getConfig,
   getSetting,
@@ -16,7 +18,7 @@ import {
   getServer,
 } from '@/config';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
-import { useTheme } from '@react-navigation/native';
+import { setUserSetting } from '@/lib/api/setting';
 
 const getJobInfoName = jobInfo => {
   switch (jobInfo) {
@@ -94,7 +96,10 @@ const ChatSetting = ({ navigation }) => {
   const [theme, setTheme] = useState(getSetting('theme') || 'blue');
   const [jobInfo, setJobInfo] = useState(getSetting('jobInfo') || 'PN');
   const [multiDicInfo, setMultiDicInfo] = useState(getSetting('lang') || 'ko');
-
+  const useUserSettingSync = useMemo(
+    () => getConfig('UseUserSettingSync', 'Y') === 'Y',
+    [],
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -112,42 +117,27 @@ const ChatSetting = ({ navigation }) => {
           { text: getDic('Cancel') },
           {
             text: getDic('Ok'),
-            onPress: () => {
-              AsyncStorage.getItem('EHINF').then(domain => {
-                getServerDictionary(domain, multiDic).then(response => {
-                  AsyncStorage.setItem('covi_user_lang', multiDic);
-                  AsyncStorage.removeItem('ESETINF').then(result => {
-                    AsyncStorage.setItem(
-                      'ESETINF',
-                      JSON.stringify(response.data.result),
-                    );
-                    setMultiDicInfo(multiDic);
-                    dispatch(closeModal());
-                    restartApp();
-                  });
-                });
-              });
-            },
-          },
-        ],
-        { cancelable: true },
-      );
-    },
-    [dispatch],
-  );
+            onPress: async () => {
+              const domain = await AsyncStorage.getItem('EHINF');
+              const response = await getServerDictionary(domain, multiDic);
+              if (response.data?.status === 'SUCCESS') {
+                await AsyncStorage.setItem(
+                  'ESETINF',
+                  JSON.stringify(response.data.result),
+                );
+              }
+              AsyncStorage.setItem('covi_user_lang', multiDic);
+              AsyncStorage.removeItem('ESETINF');
 
-  const closeJobInfoModal = useCallback(
-    jobInfo => {
-      Alert.alert(
-        null,
-        getDic('Msg_ApplySettingInfo'),
-        [
-          { text: getDic('Cancel') },
-          {
-            text: getDic('Ok'),
-            onPress: () => {
-              AsyncStorage.setItem('covi_user_jobInfo', jobInfo);
-              setJobInfo(jobInfo);
+              if (useUserSettingSync) {
+                try {
+                  // Sync lang with server
+                  await setUserSetting({ clientLang: multiDic });
+                } catch (err) {
+                  // ...
+                }
+              }
+              setMultiDicInfo(multiDic);
               dispatch(closeModal());
               restartApp();
             },
@@ -156,7 +146,38 @@ const ChatSetting = ({ navigation }) => {
         { cancelable: true },
       );
     },
-    [dispatch],
+    [dispatch, useUserSettingSync],
+  );
+
+  const closeJobInfoModal = useCallback(
+    _jobInfo => {
+      Alert.alert(
+        null,
+        getDic('Msg_ApplySettingInfo'),
+        [
+          { text: getDic('Cancel') },
+          {
+            text: getDic('Ok'),
+            onPress: async () => {
+              AsyncStorage.setItem('covi_user_jobInfo', _jobInfo);
+              setJobInfo(_jobInfo);
+              if (useUserSettingSync) {
+                try {
+                  // Sync jobInfo with server
+                  await setUserSetting({ jobInfo: _jobInfo });
+                } catch (err) {
+                  // ...
+                }
+              }
+              dispatch(closeModal());
+              restartApp();
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    },
+    [dispatch, useUserSettingSync],
   );
 
   const openMultiDicModal = useCallback(() => {
