@@ -97,7 +97,7 @@ const ChatSetting = ({ navigation }) => {
   const [jobInfo, setJobInfo] = useState(getSetting('jobInfo') || 'PN');
   const [multiDicInfo, setMultiDicInfo] = useState(getSetting('lang') || 'ko');
   const useUserSettingSync = useMemo(
-    () => getConfig('UseUserSettingSync', 'Y') === 'Y',
+    () => getConfig('UseUserSettingSync', 'N') === 'Y',
     [],
   );
   const dispatch = useDispatch();
