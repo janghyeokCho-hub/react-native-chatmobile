@@ -78,12 +78,13 @@ const MakeRoom = ({ route, navigation }) => {
   };
 
   // TODO: 메시지 전송 실패 여부 처리
-  const handleMessage = async (message, filesObj, linkObj) => {
+  const handleMessage = async ({ message, filesObj, linkObj, messageType }) => {
     // 방생성 api 호출
     // 호출 결과에 따라 ChatRoom으로 화면 전환
     // -- MultiView의 경우 dispatch
     // -- NewWindow의 경우 route 이동
     setDisabled(true);
+    console.log(message, filesObj, linkObj);
 
     let invites = [];
     makeInfo.members.forEach(item => invites.push(item.id));
@@ -107,6 +108,7 @@ const MakeRoom = ({ route, navigation }) => {
       message: message?.message,
       sendFileInfo: filesObj,
       linkInfo: linkObj,
+      messageType: messageType ? messageType : 'N',
       blockList: blockList,
     };
 

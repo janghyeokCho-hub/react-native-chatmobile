@@ -35,6 +35,8 @@ const InviteChannelMember = ({ route, navigation }) => {
     callBack,
   } = route.params;
 
+  const currentRoom = useSelector(({ channel }) => channel.currentChannel);
+
   const { viewType, channels, selectId, myInfo } = useSelector(
     ({ channel, login }) => ({
       viewType: channel.viewType,
@@ -51,16 +53,32 @@ const InviteChannelMember = ({ route, navigation }) => {
   useEffect(() => {
     if (oldMemberList) {
       setOldMembers(oldMemberList);
-      if (roomType == 'M' || isNewRoom)
+      if (roomType === 'M' || isNewRoom) {
         oldMemberList.forEach(item => {
           addInviteMember({
             ...item,
             isShow: false,
           });
         });
+      }
     } else {
-      setOldMembers([
-        {
+      if (currentRoom?.members) {
+        setOldMembers(currentRoom.members);
+      } else {
+        setOldMembers([
+          {
+            id: myInfo.id,
+            name: myInfo.name,
+            presence: myInfo.presence,
+            photoPath: myInfo.photoPath,
+            PN: myInfo.PN,
+            LN: myInfo.LN,
+            TN: myInfo.TN,
+            dept: myInfo.dept,
+            type: 'U',
+          },
+        ]);
+        addInviteMember({
           id: myInfo.id,
           name: myInfo.name,
           presence: myInfo.presence,
@@ -70,22 +88,10 @@ const InviteChannelMember = ({ route, navigation }) => {
           TN: myInfo.TN,
           dept: myInfo.dept,
           type: 'U',
-        },
-      ]);
-      addInviteMember({
-        id: myInfo.id,
-        name: myInfo.name,
-        presence: myInfo.presence,
-        photoPath: myInfo.photoPath,
-        PN: myInfo.PN,
-        LN: myInfo.LN,
-        TN: myInfo.TN,
-        dept: myInfo.dept,
-        type: 'U',
-        isShow: false,
-      });
+        });
+      }
     }
-  }, []);
+  }, [currentRoom, isNewRoom, myInfo, oldMemberList, roomType]);
 
   const checkObj = useMemo(
     () => ({
@@ -95,7 +101,7 @@ const InviteChannelMember = ({ route, navigation }) => {
           if (
             isNewRoom &&
             members.length > 1 &&
-            (userInfo.type == 'G' || members[0].type == 'G')
+            (userInfo.type === 'G' || members[0].type === 'G')
           ) {
             Alert.alert(
               null,
@@ -108,7 +114,7 @@ const InviteChannelMember = ({ route, navigation }) => {
               { cancelable: true },
             );
           } else {
-            if (userInfo.pChat == 'Y') {
+            if (userInfo.pChat === 'Y') {
               addInviteMember({
                 id: userInfo.id,
                 name: userInfo.name,

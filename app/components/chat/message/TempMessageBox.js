@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { 
-  reSendMessage, 
+import {
+  reSendMessage,
   removeTempMessage,
   reSendChannelMessage,
-  removeChannelTempMessage
+  removeChannelTempMessage,
 } from '@/modules/message';
 import Message from '@/components/chat/message/Message';
 import { eumTalkRegularExp, convertEumTalkProtocol } from '@/lib/common';
@@ -29,14 +29,22 @@ const TempMessageBox = ({ message, type }) => {
           text: '재발송',
           onPress: () => {
             // dispatch(reSendMessage(message));
-            dispatch(message.roomType === "C" ? reSendChannelMessage(message): reSendMessage(message));
+            dispatch(
+              message.roomType === 'C'
+                ? reSendChannelMessage(message)
+                : reSendMessage(message),
+            );
           },
         },
         {
           text: getDic('Delete'),
           onPress: () => {
             // dispatch(removeTempMessage(message.tempId));
-            dispatch(message.roomType === 'C' ?  removeChannelTempMessage(message.tempId):removeTempMessage(message.tempId));
+            dispatch(
+              message.roomType === 'C'
+                ? removeChannelTempMessage(message.tempId)
+                : removeTempMessage(message.tempId),
+            );
           },
         },
       ],
@@ -108,6 +116,7 @@ const TempMessageBox = ({ message, type }) => {
   const messageContext = useMemo(() => {
     let messageType = 'message';
     let drawText = message.context;
+    console.log('message : ', message);
 
     // 처리가 필요한 message의 경우 ( protocol 이 포함된 경우 )
     if (eumTalkRegularExp.test(drawText)) {

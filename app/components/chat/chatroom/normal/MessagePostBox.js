@@ -21,6 +21,7 @@ import ChannelMentionBox from '@C/channel/channelroom/controls/ChannelMentionBox
 import KeySpacer from '@C/common/layout/KeySpacer';
 import StickerLayer from '@C/chat/chatroom/controls/StickerLayer';
 import ExtensionLayer from '@C/chat/chatroom/controls/ExtensionLayer';
+import ShareDocLayer from '@C/chat/chatroom/controls/document/ShareDocLayer';
 import { getJobInfo, getSysMsgFormatStr, isJSONStr } from '@/lib/common';
 import { getBottomPadding, resetInput } from '@/lib/device/common';
 import { getConfig, getDic } from '@/config';
@@ -29,6 +30,7 @@ import * as imageUtil from '@/lib/imagePickUtil';
 import * as dbAction from '@/lib/appData/action';
 import MessagePostReplyBox from '@/components/reply/MessagePostReplyBox';
 import { setPostReplyMessage } from '@/modules/message';
+import { openModal, changeModal } from '@/modules/modal';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 const ico_send = require('@C/assets/m-send-btn.png');
@@ -46,9 +48,18 @@ const MessagePostBox = ({
   const { currentChannel } = useSelector(({ channel }) => ({
     currentChannel: channel.currentChannel,
   }));
-  const { currentRoom } = useSelector(({ room }) => ({
-    currentRoom: room.currentRoom,
-  }));
+
+  const currentRoom = useSelector(({ room, channel }) => {
+    if (room.currentRoom) {
+      return room.currentRoom;
+    } else if (channel.currentChannel) {
+      return channel.currentChannel;
+    } else {
+      return {
+        members: [],
+      };
+    }
+  });
   const [inputLock, setInputLock] = useState(isLock);
   const [context, setContext] = useState('');
   const [suggestMember, setSuggestMember] = useState([]);
@@ -215,6 +226,17 @@ const MessagePostBox = ({
     // emoticon은 바로 발송
     onExtension('');
   };
+
+  /**
+   * 공동 문서 공유 Layer
+   */
+  const handleDocumentControl = useCallback(() => {
+    if (extension === 'D') {
+      onExtension(''); // 창 해제 ( 열려있는 경우 )
+    } else {
+      onExtension('D'); // 창 설정
+    }
+  }, [onExtension, extension]);
 
   const showDocumentPicker = async () => {
     // Pick multiple files
@@ -444,7 +466,18 @@ const MessagePostBox = ({
   const extensionCallback = type => {
     Keyboard.dismiss();
     if (type === 'file') {
-      showDocumentPicker();
+      dispatch(
+        changeModal({
+          modalData: {
+            type: 'upload',
+            currentRoom,
+            navigation,
+            onUploadFile: () => showDocumentPicker(),
+            onShareDocLayer: () => handleDocumentControl(),
+          },
+        }),
+      );
+      dispatch(openModal());
     } else if (type === 'camera') {
       imageUtil.selectImageWithCamera(
         data => {
@@ -623,7 +656,6 @@ const MessagePostBox = ({
                     onExtension('E');
                   }
                   Keyboard.dismiss();
-                  //handleStickerControl();
                   e.stopPropagation();
                 }
               }}
@@ -831,12 +863,11 @@ const MessagePostBox = ({
           </View>
         )}
       {extension === 'S' && <StickerLayer onClick={handleEmoticon} />}
-      {extension === 'E' && (
-        <ExtensionLayer
-          onClick={extensionCallback}
-          selectImage={selectImage}
-          setSelectImage={setSelectImage}
-          navigation={navigation}
+      {extension === 'E' && <ExtensionLayer onClick={extensionCallback} />}
+      {extension === 'D' && (
+        <ShareDocLayer
+          handleDocumentControl={handleDocumentControl}
+          postAction={postAction}
         />
       )}
     </>
