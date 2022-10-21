@@ -11,7 +11,6 @@ const APP_VERSION = VersionCheck.getCurrentVersion();
 
 export const chatsvr = (method, url, params, headers) => {
   const CHAT_SERVER = getServer('CHAT');
-  // console.log(`chatsvr ${method} ${CHAT_SERVER}${url} 1'${LoginInfo.getLoginInfo().getToken()}' 2'${LoginInfo.getLoginInfo().getAccessID()}'`)
 
   return axios({
     method: method,

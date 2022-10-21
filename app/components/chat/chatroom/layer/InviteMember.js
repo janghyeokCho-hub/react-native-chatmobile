@@ -35,6 +35,7 @@ const InviteMember = ({ route, navigation }) => {
     callBack,
   } = route.params;
 
+  const currentRoom = useSelector(({ room }) => room.currentRoom);
   const chineseWall = useSelector(({ login }) => login.chineseWall);
   const { viewType, rooms, selectId, myInfo } = useSelector(
     ({ room, login }) => ({
@@ -52,7 +53,7 @@ const InviteMember = ({ route, navigation }) => {
   useEffect(() => {
     if (oldMemberList) {
       setOldMembers(oldMemberList);
-      if (roomType == 'M' || roomType == 'O' || isNewRoom)
+      if (roomType === 'M' || roomType === 'O' || isNewRoom) {
         oldMemberList.forEach(item => {
           addInviteMember({
             ...item,
@@ -60,9 +61,25 @@ const InviteMember = ({ route, navigation }) => {
             isShow: false,
           });
         });
+      }
     } else {
-      setOldMembers([
-        {
+      if (currentRoom?.members) {
+        setOldMembers(currentRoom.members);
+      } else {
+        setOldMembers([
+          {
+            id: myInfo.id,
+            name: myInfo.name,
+            presence: myInfo.presence,
+            photoPath: myInfo.photoPath,
+            PN: myInfo.PN,
+            LN: myInfo.LN,
+            TN: myInfo.TN,
+            dept: myInfo.dept,
+            type: 'U',
+          },
+        ]);
+        addInviteMember({
           id: myInfo.id,
           name: myInfo.name,
           presence: myInfo.presence,
@@ -72,22 +89,10 @@ const InviteMember = ({ route, navigation }) => {
           TN: myInfo.TN,
           dept: myInfo.dept,
           type: 'U',
-        },
-      ]);
-      addInviteMember({
-        id: myInfo.id,
-        name: myInfo.name,
-        presence: myInfo.presence,
-        photoPath: myInfo.photoPath,
-        PN: myInfo.PN,
-        LN: myInfo.LN,
-        TN: myInfo.TN,
-        dept: myInfo.dept,
-        type: 'U',
-        isShow: false,
-      });
+        });
+      }
     }
-  }, []);
+  }, [currentRoom, myInfo, isNewRoom, roomType]);
 
   const checkObj = useMemo(
     () => ({

@@ -105,6 +105,7 @@ const ChannelRoom = ({ navigation, route }) => {
     filesObj,
     linkObj,
     mentionArr,
+    messageType,
     reply,
   }) => {
     const members = channel?.members?.map(
@@ -123,6 +124,7 @@ const ChannelRoom = ({ navigation, route }) => {
       sendFileInfo: filesObj,
       linkInfo: linkObj,
       mentionInfo: mentionArr,
+      messageType: messageType ? messageType : 'N',
       blockList: blockList,
       ...reply,
     };

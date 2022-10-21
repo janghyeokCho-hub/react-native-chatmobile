@@ -23,23 +23,22 @@ const BookmarkSummary = ({ route, navigation }) => {
   const [bookmarkList, setBookmarkList] = useState([]);
   const [edit, setEdit] = useState(false);
 
-
-    //책갈피 불러오기
-    const { data: globalBookmarkList, mutate: setGlobalBookmarkList } = useSWR(
-      `bookmark/${roomID}`,
-      async () => {
-        const response = await getBookmarkList(roomID.toString());
-        if (response.data.status === 'SUCCESS') {
-          return response.data.list;
-        }
-        return [];
-      },
-      {
-        revalidateOnFocus: false,
-        shouldRetryOnError: false,
-        initialData: [],
-      },
-    );
+  //책갈피 불러오기
+  const { data: globalBookmarkList, mutate: setGlobalBookmarkList } = useSWR(
+    `bookmark/${roomID}`,
+    async () => {
+      const response = await getBookmarkList(roomID.toString());
+      if (response.data.status === 'SUCCESS') {
+        return response.data.list;
+      }
+      return [];
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      initialData: [],
+    },
+  );
 
   const handleMoveChat = (roomID, messageID) => {
     navigation.navigate('MoveChat', { roomID, messageID });
@@ -94,7 +93,6 @@ const BookmarkSummary = ({ route, navigation }) => {
 
         setBookmarkList(list);
         setGlobalBookmarkList(list);
-
       }
     } catch (error) {
       console.log('Send Error   ', error);

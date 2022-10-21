@@ -18,7 +18,10 @@ const SocketContainer = () => {
     return {
       onNewMessage: socketActions.handleNewMessage(dispatch, userInfo),
       onAppUpdateConfig: socketActions.handleAppUpdateConfig(dispatch),
-      onNewNoteMessage: socketActions.handleNewNoteMessage(setNoteList, navigationRef),
+      onNewNoteMessage: socketActions.handleNewNoteMessage(
+        setNoteList,
+        navigationRef,
+      ),
       onChatRoomInvitation: socketActions.handleChatRoomInvite(dispatch),
       onChatRoomExit: socketActions.handleChatRoomExit(dispatch, userInfo),
       onReadCountChanged: socketActions.handleReadCountChanged(
@@ -49,6 +52,8 @@ const SocketContainer = () => {
       onAuthChanged: socketActions.handleAuthChanged(dispatch),
       onDelMessage: socketActions.handleDelChatroomMessage(dispatch),
       onRoomSettingChanged: socketActions.handleRoomSettingChanged(dispatch),
+      onDocumentChanged: socketActions.handleDocumentChanged(dispatch),
+      onNewShareDoc: socketActions.handleNewShareDoc(dispatch),
     };
   }, [userInfo, dispatch, setNoteList]);
 
@@ -66,7 +71,7 @@ const SocketContainer = () => {
 
   const getConnectObj = useCallback(() => {
     return {
-      auth: { token, accessid }, 
+      auth: { token, accessid },
       socketActionsObj,
       handleConnect: socketActions.handleConnect(dispatch),
       handleDisconnect: socketActions.handleDisconnect(dispatch),

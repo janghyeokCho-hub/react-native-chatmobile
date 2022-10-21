@@ -38,6 +38,8 @@ import {
   PhotoSummary,
   FileSummary,
   BookmarkSummary,
+  DocSummary,
+  DocPropertyView,
   ChangeRoomInfo,
   ChatSettingBox,
   InviteMember,
@@ -53,6 +55,7 @@ import {
   ChannelInfoDetailView,
   ChangeChannelInfoView,
 } from '@C/channel/layer';
+import CreateDocument from '@C/common/layout/CreateDocument';
 import SecondAuth from '@C/auth/SecondAuth';
 import ModalContainer from './ModalContainer';
 import { getDic, getServerConfigs } from '@/config';
@@ -140,7 +143,16 @@ const Root = ({ stack, theme }) => {
               />
               <Stack.Screen name="PhotoSummary" component={PhotoSummary} />
               <Stack.Screen name="FileSummary" component={FileSummary} />
-              <Stack.Screen name="BookmarkSummary" component={BookmarkSummary} />
+              <Stack.Screen
+                name="BookmarkSummary"
+                component={BookmarkSummary}
+              />
+              <Stack.Screen name="DocSummary" component={DocSummary} />
+              <Stack.Screen
+                name="DocPropertyView"
+                component={DocPropertyView}
+              />
+              <Stack.Screen name="CreateDocument" component={CreateDocument} />
 
               <Stack.Screen name="ImageList" component={ImageList} />
               <Stack.Screen name="ChangeRoomInfo" component={ChangeRoomInfo} />

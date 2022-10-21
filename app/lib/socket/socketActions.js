@@ -30,6 +30,7 @@ import {
 
 import { setUsersPresence, addFixedUsers } from '@/modules/presence';
 import { changeSocketConnect, sync } from '@/modules/login';
+import { receiveDocument } from '@/modules/document';
 import AsyncStorage from '@react-native-community/async-storage';
 import * as LoginInfo from '@/lib/class/LoginInfo';
 import * as RoomList from '@/lib/class/RoomList';
@@ -465,5 +466,19 @@ export const handleRoomSettingChanged = dispatch => {
     } else {
       dispatch(receiveRoomSetting(json_data));
     }
+  };
+};
+
+export const handleDocumentChanged = dispatch => {
+  return data => {
+    const json_data = JSON.parse(data);
+    dispatch(receiveDocument(json_data));
+  };
+};
+
+export const handleNewShareDoc = dispatch => {
+  return data => {
+    const json_data = JSON.parse(data);
+    dispatch(receiveDocument(json_data));
   };
 };

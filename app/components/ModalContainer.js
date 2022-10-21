@@ -16,6 +16,9 @@ import { getServer } from '@/config';
 import { modifyChannelInfo } from '@/modules/channel';
 import { getDic } from '@/config';
 import MessageExtension from '@C/chat/message/MessageExtension';
+import UploadExtension from '@/components/chat/message/UploadExtension';
+import ShareDocExtension from '@C/chat/message/ShareDocExtension';
+
 import Modal from '@C/common/Modal';
 import LoadingWrap from '@COMMON/LoadingWrap';
 
@@ -366,6 +369,29 @@ const ModalContainer = () => {
                 </TouchableOpacity>
               </View>
             )}
+        {modalType === 'upload' && modalData.currentRoom && (
+          <UploadExtension
+            currentRoom={modalData.currentRoom}
+            onClose={() => {
+              dispatch(closeModal());
+            }}
+            btnStyle={styles.modalButtons}
+            onUploadFile={modalData.onUploadFile}
+            onShareDocLayer={modalData.onShareDocLayer}
+            navigation={modalData.navigation}
+          />
+        )}
+        {modalType === 'shareDoc' && (
+          <ShareDocExtension
+            onClose={() => {
+              dispatch(closeModal());
+            }}
+            btnStyle={styles.modalButtons}
+            item={modalData.docItem}
+            room={modalData.room}
+            navigation={modalData.navigation}
+          />
+        )}
         {loading && <LoadingWrap />}
       </View>
     </Modal>

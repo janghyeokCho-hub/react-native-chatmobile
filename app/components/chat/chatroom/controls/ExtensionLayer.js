@@ -25,14 +25,8 @@ if (
 
 import { getBottomPadding, getScreenWidth } from '@/lib/device/common';
 import Svg, { G, Path } from 'react-native-svg';
-import FastImage from 'react-native-fast-image';
 
-const ExtensionLayer = ({
-  onClick,
-  selectImage,
-  setSelectImage,
-  handleSendFile,
-}) => {
+const ExtensionLayer = ({ onClick }) => {
   const [space, setSpace] = useState(0);
   const [extensions, setExtensions] = useState([]);
 

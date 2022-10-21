@@ -262,7 +262,6 @@ const message = handleActions(
     },
     [SET_POST_ACTION]: (state, action) => {
       return produce(state, draft => {
-        console.log('SET_POST_ACTION : ', action.payload);
         draft.postAction = action.payload;
       });
     },

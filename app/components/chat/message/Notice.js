@@ -22,6 +22,17 @@ import { getAttribute } from '@/lib/messageUtil';
 const Notice = ({ value, title, func, style, navigation, styleType }) => {
   const { sizes, colors } = useTheme();
   const userInfo = useSelector(({ login }) => login.userInfo);
+  const currentRoom = useSelector(({ room, channel }) => {
+    if (room.currentRoom) {
+      return room.currentRoom;
+    } else if (channel.currentChannel) {
+      return channel.currentChannel;
+    } else {
+      return {
+        members: [],
+      };
+    }
+  });
   const forbiddenUrls = getConfig('forbidden_url_mobile', []);
   const dispatch = useDispatch();
 
@@ -223,29 +234,82 @@ const Notice = ({ value, title, func, style, navigation, styleType }) => {
             ]);
           });
       };
+    } else if (type === 'openLayer') {
+      return async () => {
+        console.log('openLayer : ', data);
+        let params = {};
+        let componentName = data.componentName;
+        if (componentName === 'DocPropertyView') {
+          params = {
+            item: data.item,
+            room: data.room,
+            navigation: navigation,
+          };
+        } else if (componentName === 'InviteMember') {
+          if (data.roomType === 'C') {
+            componentName = 'InviteChannelMember';
+          }
+          params = {
+            headerName: getDic('InviteEditor', '편집자 초대'),
+            roomId: data.roomId,
+            roomType: data.roomType,
+            isNewRoom: false,
+          };
+        }
+        navigation.navigate(componentName, params);
+      };
     }
   };
 
   const drawFunc = useMemo(() => {
     if (func) {
-      const handlerFunc = actionHandler(func.type, func.data);
-      return (
-        <TouchableOpacity
-          onPress={handlerFunc}
-          style={{ ...styles.funcWrap, backgroundColor: colors.primary }}
-        >
-          <View style={styles.funcWrapBox}>
-            <Text style={{ ...styles.funcText, fontSize: sizes.large }}>
-              {/* func.name이 다국어 key가 아닐 경우 버튼 이름으로 사용 */}
-              {func?.name ? getDic(func.name, func.name) : '확인하기'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      );
+      let funcArr = [];
+      if (Array.isArray(func)) {
+        funcArr = func;
+      } else {
+        funcArr = new Array(func);
+      }
+
+      let returnJSX = [];
+      funcArr.forEach(item => {
+        if (item.data?.componentName === 'InviteMember') {
+          // 2022-10-19 편집자 초대 기능 보류
+          return;
+        }
+        // 공동문서 채널일 경우 채널 생성자인지 확인 후 편집자 초대 기능 생성
+        if (
+          item.type === 'openLayer' &&
+          item.data?.componentName === 'InviteMember' &&
+          item.data?.roomType === 'C'
+        ) {
+          // 공동문서 채널일 경우 채널 생성자인지 확인 후 편집자 초대 기능 생성
+          const auths = currentRoom?.members.filter(
+            member => member.channelAuth === 'Y',
+          );
+          if (!auths) {
+            return <></>;
+          }
+        }
+        const handlerFunc = actionHandler(item.type, item.data);
+        returnJSX.push(
+          <TouchableOpacity
+            onPress={handlerFunc}
+            style={{ ...styles.funcWrap, backgroundColor: colors.primary }}
+          >
+            <View style={styles.funcWrapBox}>
+              <Text style={{ ...styles.funcText, fontSize: sizes.large }}>
+                {/* func.name이 다국어 key가 아닐 경우 버튼 이름으로 사용 */}
+                {item?.name ? getDic(item.name, item.name) : '확인하기'}
+              </Text>
+            </View>
+          </TouchableOpacity>,
+        );
+      });
+      return returnJSX;
     } else {
       return <></>;
     }
-  }, [func]);
+  }, [func, currentRoom.members]);
 
   return (
     <View style={[style, styles.container]}>

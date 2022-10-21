@@ -35,6 +35,8 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
   const [channelAuth, setChannelAuth] = useState(false);
   const [channelAdminMembers, setChannelAdminMembers] = useState(false);
   const [notification, setNotification] = useState(true);
+  const shareDocConfig = getConfig('ShareDoc');
+  const useShareDoc = shareDocConfig?.use === 'Y';
 
   const initRoomNoti = async () => {
     try {
@@ -123,6 +125,13 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
     handleClose();
     navigation.navigate('BookmarkSummary', {
       roomID: roomInfo.roomId,
+    });
+  };
+
+  const handleDocSummary = () => {
+    handleClose();
+    navigation.navigate('DocSummary', {
+      room: roomInfo,
     });
   };
 
@@ -416,6 +425,48 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
                     style={{ ...styles.menuLabel, fontSize: sizes.default }}
                   >
                     {getDic('BookmarkSummary', '책갈피 모아보기')}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            {useShareDoc && (
+              <TouchableOpacity onPress={handleDocSummary}>
+                <View style={styles.menuBox}>
+                  <Svg width="16" height="14" viewBox="0 0 23.115 23.532">
+                    <G data-name="\uADF8\uB8F9 615" fill="#000">
+                      <G data-name="\uADF8\uB8F9 584">
+                        <Path
+                          data-name="\uD0C0\uC6D0 728"
+                          d="M2.606-.7A3.306 3.306 0 11-.7 2.606 3.31 3.31 0 012.606-.7zm0 5.213A1.906 1.906 0 10.7 2.606a1.909 1.909 0 001.906 1.907z"
+                          transform="translate(9967.3 -3597.759) translate(-9963.135 3608.028) translate(7.043 1)"
+                        />
+                        <Path
+                          data-name="\uD328\uC2A4 2913"
+                          d="M10.476 21.668H6a.7.7 0 01-.7-.7V19.1a4.8 4.8 0 018.1-3.493.7.7 0 01-.961 1.018A3.4 3.4 0 006.7 19.1v1.165h3.776a.7.7 0 110 1.4z"
+                          transform="translate(9967.3 -3597.759) translate(-9963.135 3608.028) translate(0 -8.778)"
+                        />
+                        <Path
+                          data-name="\uD328\uC2A4 2914"
+                          d="M25.442 13.458a.7.7 0 01.495.205l2.213 2.213a.7.7 0 010 .99l-4.434 4.442a.7.7 0 01-.5.205H21a.7.7 0 01-.7-.7v-2.221a.7.7 0 01.205-.5l4.442-4.434a.7.7 0 01.495-.2zm1.224 2.914l-1.224-1.224-3.742 3.734v1.231h1.231z"
+                          transform="translate(9967.3 -3597.759) translate(-9963.135 3608.028) translate(-9.405 -8.25)"
+                        />
+                      </G>
+                      <Path
+                        data-name="\uD328\uC2A4 2915"
+                        d="M.953 21.452V1.43A.477.477 0 011.43.953h11.918v2.384a1.43 1.43 0 001.43 1.43h2.384V10.2h.953V4.29a.476.476 0 00-.138-.338L14.163.138A.476.476 0 0013.825 0H1.43A1.43 1.43 0 000 1.43v20.022a1.43 1.43 0 001.43 1.43H7.1v-.953H1.43a.477.477 0 01-.477-.477zM14.3 1.626l2.19 2.188h-1.712a.477.477 0 01-.477-.477z"
+                        transform="translate(9967.3 -3597.759) translate(-9967 3598.059)"
+                      />
+                      <Path
+                        data-name="\uD328\uC2A4 2915 - \uC724\uACFD\uC120"
+                        d="M7.4 23.182H1.43a1.732 1.732 0 01-1.73-1.73V1.43A1.732 1.732 0 011.43-.3h12.395a.774.774 0 01.549.225l3.815 3.815a.772.772 0 01.226.553v6.2h-1.553V5.067h-2.084a1.732 1.732 0 01-1.73-1.73V1.253H1.43a.177.177 0 00-.177.177v20.022a.177.177 0 00.177.177H7.4zM13.828.3H1.43A1.131 1.131 0 00.3 1.43v20.022a1.131 1.131 0 001.13 1.13H6.8v-.353H1.43a.778.778 0 01-.777-.777V1.43A.778.778 0 011.43.653h12.218v2.684a1.131 1.131 0 001.13 1.13h2.684V9.9h.353V4.29a.177.177 0 00-.052-.127L13.951.35a.175.175 0 00-.123-.05zm3.386 3.814h-2.436A.778.778 0 0114 3.337V.9zM14.6 2.35v.987a.177.177 0 00.177.177h.987z"
+                        transform="translate(9967.3 -3597.759) translate(-9967 3598.059)"
+                      />
+                    </G>
+                  </Svg>
+                  <Text
+                    style={{ ...styles.menuLabel, fontSize: sizes.default }}
+                  >
+                    {getDic('ShareDocSummary', '공동문서 모아보기')}
                   </Text>
                 </View>
               </TouchableOpacity>

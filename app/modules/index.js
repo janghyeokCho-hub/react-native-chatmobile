@@ -10,6 +10,7 @@ import channel, { channelSaga } from '@/modules/channel';
 import message, { messageSaga } from '@/modules/message';
 import presence, { presenceSaga } from '@/modules/presence';
 import absence, { absenceSaga } from '@/modules/absence';
+import document, { documentSaga } from '@/modules/document';
 import modal from '@/modules/modal';
 
 const appReducer = combineReducers({
@@ -23,6 +24,7 @@ const appReducer = combineReducers({
   presence,
   modal,
   absence,
+  document,
 });
 
 const rootReducer = (state, action) => {
@@ -44,6 +46,7 @@ export function* rootSaga() {
     messageSaga(),
     presenceSaga(),
     absenceSaga(),
+    documentSaga(),
   ]);
 }
 
