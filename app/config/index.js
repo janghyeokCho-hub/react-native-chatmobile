@@ -150,9 +150,16 @@ export const getDic = (key, defaultValue) => {
   if (configInstance && configInstance.dic) {
     const searchConfig = search(configInstance.dic, key);
     /**
-     * 2021.02.15 TODO 팝업 메시지에서 HTML br태그 newline 처리 - 추후 보완 필요
+     * 2021.02.15 v1 react-native에서 HTML <br>태그의 개행처리를 위해 \n으로 변환처리
+     * 2022.10.21 v2
+     * '<br>'
+     * '<br/>'
+     * '<br />'
+     * => '\n'
      */
-    if (searchConfig !== undefined) return searchConfig.replace(/<br\s?\/>/g, '\n');
+    if (searchConfig !== undefined) {
+      return searchConfig.replace(/<br\s?\/?>/g, '\n');
+    }
   }
   return defaultValue;
 };
