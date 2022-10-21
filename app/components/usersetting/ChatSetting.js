@@ -28,8 +28,10 @@ const getJobInfoName = jobInfo => {
       return getDic('JobTitle', '직책');
     case 'LN':
       return getDic('JobLevel', '직급');
-    default:
+    case 'NN':
       return getDic('DoNotUse', '사용안함');
+    default:
+      return getDic(jobInfo);
   }
 };
 
