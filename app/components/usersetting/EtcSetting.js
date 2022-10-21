@@ -14,7 +14,10 @@ const EtcSetting = () => {
           // App 재시작
           Alert.alert(
             getDic('Eumtalk'),
-            '설정정보 초기화 시 앱이 재시작 됩니다.\r\n진행하시겠습니까?',
+            getDic(
+              'Msg_ApplyAndRefresh_Mobile',
+              'The app will be refreshed to apply the settings.\nWould you like to proceed?',
+            ),
             [
               { text: getDic('Cancel'), onPress: () => {} },
               {

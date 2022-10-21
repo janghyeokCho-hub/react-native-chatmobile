@@ -458,7 +458,10 @@ const ChatSetting = ({ navigation }) => {
         onPress={() => {
           Alert.alert(
             null,
-            '오래된 메시지들이 삭제될 수 있습니다.\n로컬 데이터를 삭제하시겠습니까?',
+            getDic(
+              'Msg_RemoveLocalData',
+              'Old messages may be deleted.\nAre you sure you want to delete local data?',
+            ),
             [
               { text: getDic('Cancel'), onPress: () => {} },
               {
