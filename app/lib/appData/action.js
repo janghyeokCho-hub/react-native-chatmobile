@@ -5,7 +5,8 @@ import * as RoomList from '@/lib/class/RoomList';
 
 import { managesvr, chatsvr } from '@API/api';
 import { setPresenceTargetUser } from '@API/presence';
-import { setSyncDate, spliceInsert } from '@/lib/appData/util';
+import { spliceInsert } from '@/lib/appData/util';
+import { getContactList } from '../api/contact';
 
 const splitCnt = 50;
 
@@ -94,11 +95,9 @@ export const initSyncAppData = async args => {
 export const syncAppData = async param => {
   const syncFN = new Promise.all([
     syncPresence(param),
-    syncContacts(), // 연락처 정보 불러오기
     syncRooms(), // 채팅방 정보 불러오기
   ]);
-  await syncFN;
-  return syncFN;
+  return await syncFN;
 };
 
 const syncMyDeptMember = async () => {
@@ -175,151 +174,6 @@ const syncPresence = async param => {
         );
       });
     }
-  }
-};
-
-const syncContacts = async () => {
-  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
-
-  const checkFN = new Promise((resolve, reject) => {
-    dbCon.transaction(transaction => {
-      db.tx(transaction, 'sync_date')
-        .select(['contactSyncDate'])
-        .execute(
-          (tx, result) => {
-            if (result.rows.length > 0) {
-              const temp = result.rows.item(0).contactSyncDate;
-              resolve(temp ? temp : 0);
-            } else {
-              resolve(0);
-            }
-          },
-          e => {
-            reject();
-          },
-        );
-    });
-  });
-
-  const syncDate = await checkFN;
-  const response = await managesvr('get', `/sync/contact?syncDate=${syncDate}`);
-  if (response.data.status == 'SUCCESS' && response.data.result.updateDate) {
-    const data = response.data.result;
-    const contactFolder = data.contact_folder;
-    const contactItem = data.contact_item;
-
-    let whereFolder = '';
-    contactFolder.forEach(item => {
-      whereFolder += `${item.folderID},`;
-    });
-    whereFolder = whereFolder.substring(0, whereFolder.length - 1);
-
-    let whereFolderItem = '';
-    let whereFolderItemIn = '';
-
-    if (contactItem.length > 0) {
-      whereFolderItem = 'NOT EXISTS ( SELECT * FROM (';
-      contactItem.forEach((item, i) => {
-        whereFolderItem += `SELECT ${item.folderID} as folderId, '${
-          item.contactTarget
-        }' as contactTarget`;
-        whereFolderItemIn += `(folderId = ${
-          item.folderID
-        } AND contactTarget = '${item.contactTarget}')`;
-
-        if (i == contactItem.length - 1) {
-          whereFolderItem +=
-            ') as a WHERE a.folderId = contact_item.folderId AND a.contactTarget = contact_item.contactTarget)';
-        } else {
-          whereFolderItem += ' UNION ALL ';
-          whereFolderItemIn += ' OR ';
-        }
-      });
-    }
-
-    // contact_folder
-    // 서버에 없는 데이터 삭제
-    const syncFolder = new Promise((resolve, reject) => {
-      dbCon.transaction(transaction => {
-        db.tx(transaction, 'contact_folder')
-          .delete()
-          .where(`folderId NOT IN (${whereFolder})`)
-          .execute();
-
-        db.tx(transaction, 'contact_folder')
-          .select(['FolderID'])
-          .where(`folderId IN (${whereFolder})`)
-          .execute((tx_2, result) => {
-            insertFolderFN(tx_2, result, resolve);
-          });
-      });
-    });
-
-    // 서버에만 있는 데이터 추가
-    // - 서버 데이터 기준으로 반복문 돌면서 없는 데이터 INSERT
-    const insertFolderFN = (tx, result, resolve) => {
-      let folderIDs = [];
-      if (result.rows.length > 0) {
-        folderIDs = result.rows.raw();
-      }
-
-      let insertList = [];
-      contactFolder.forEach(item => {
-        const sameFolder = folderIDs.find(id => id.folderId == item.folderID);
-        if (!sameFolder) {
-          insertList.push(item);
-        }
-      });
-
-      spliceInsert(insertList, resolve, tx, 'contact_folder');
-    };
-
-    await syncFolder;
-
-    // contact
-    // 서버에 없는 데이터 삭제
-    const syncItem = new Promise((resolve, reject) => {
-      dbCon.transaction(transaction => {
-        if (whereFolderItem != '') {
-          db.tx(transaction, 'contact_item')
-            .delete()
-            .where(whereFolderItem)
-            .execute();
-        }
-        db.tx(transaction, 'contact_item')
-          .select(['folderId', 'contactTarget'])
-          .where(whereFolderItemIn)
-          .execute((tx_2, result) => {
-            setSyncDate(tx_2, 'contactSyncDate', data.updateDate);
-            insertItemFN(tx_2, result, resolve);
-          });
-      });
-    });
-
-    // 서버에만 있는 데이터 추가
-    // - 서버 데이터 기준으로 반복문 돌면서 없는 데이터 INSERT
-    const insertItemFN = (tx, result, resolve) => {
-      let items = [];
-      if (result.rows.length > 0) {
-        items = result.rows.raw();
-      }
-
-      let insertList = [];
-      contactItem.forEach(item => {
-        const sameItem = items.find(
-          id =>
-            id.folderId == item.folderID &&
-            id.contactTarget == item.contactTarget,
-        );
-        if (!sameItem) {
-          insertList.push(item);
-        }
-      });
-
-      spliceInsert(insertList, resolve, tx, 'contact_item');
-    };
-
-    await syncItem;
   }
 };
 
@@ -654,91 +508,9 @@ export const getRooms = async () => {
 
 export const getContacts = async () => {
   const loginInfo = LoginInfo.getLoginInfo();
-  const dbCon = await db.getConnection(loginInfo.getID());
-
-  const deptCode = loginInfo.getData().userInfo.DeptCode;
-  const deptName = loginInfo.getData().userInfo.dept;
-
-  const selectList = await new Promise((resolve, reject) => {
-    dbCon.transaction(tx => {
-      const selectFolder = db
-        .tx(tx)
-        .query(
-          "SELECT ownerID, folderId as folderID, IFNULL(groupCode, '') as groupCode, folderName, folderType, folderSortKey, pChat " +
-            'FROM contact_folder ' +
-            'ORDER BY folderSortKey, folderId',
-        )
-        .execute();
-
-      const selectItem = db
-        .tx(tx)
-        .query(
-          "SELECT uc.folderId, uc.contactTarget as id, 'U' as type, u.name, u.isMobile, u.PN, u.LN, u.TN, u.dept, u.work, u.presence, u.photoPath, 'Y' as pChat, uc.companyCode as companyCode, uc.contactType as contactType, uc.globalFolder as globalFolder " +
-            'FROM contact_item as uc ' +
-            'INNER JOIN users as u ON u.id = uc.contactTarget ' +
-            'ORDER BY folderId, registDate, name',
-        )
-        .execute();
-
-      const selectMyDept = db
-        .tx(tx)
-        .query(
-          'SELECT id, type, name, isMobile, PN, LN, TN, dept, work, presence, photoPath, pChat, folderType AS isContact FROM (' +
-            `SELECT mm.memberCode as id, mm.type, u.name, u.isMobile, u.PN, u.LN, u.TN, '${deptName}' as dept, u.work, u.presence, u.photoPath, 1 as _order, u.sortKey, 'Y' as pChat, '' as folderType ` +
-            'FROM mydept_member as mm ' +
-            'INNER JOIN users as u on mm.memberCode = u.id ' +
-            'UNION ALL ' +
-            "SELECT  mm.memberCode as id, mm.type, mm.displayName as name, 'N' as isMobile, '' as PN, '' as LN, '' as TN, '' as dept, '' as work, '' as presence, '' as photoPath, 2 as _order, mm.sortKey, mm.pChat as pChat, '' AS folderType " +
-            'FROM mydept_member as mm ' +
-            "WHERE mm.type = 'G' " +
-            ') ORDER BY _order, sortKey, name ',
-        )
-        .execute();
-      Promise.all([selectFolder, selectItem, selectMyDept]).then(result => {
-        resolve(result);
-      });
-    });
-  });
-
-  let selectFolder = selectList[0][1].rows.raw();
-  let selectItem = selectList[1][1].rows.raw();
-  let selectMyDept = selectList[2][1].rows.raw();
-
-  let myDept = {
-    folderID: deptCode,
-    groupCode: deptCode,
-    folderName: deptName,
-    folderSortKey: '0',
-    folderType: 'M',
-    pChat: 'Y',
-    sub: selectMyDept,
-  };
-
-  if (selectFolder.length > 0) {
-    selectFolder.forEach(item => {
-      item.folderID = item.folderID.toString();
-      let sub = selectItem.filter(contact => item.folderID == contact.folderId);
-
-      if (sub && sub.length > 0) {
-        delete sub.folderId;
-        item.sub = sub;
-      }
-    });
-
-    selectFolder.splice(1, 0, myDept);
-  } else {
-    selectFolder.push(myDept);
-  }
-
-  // selectFolder.forEach(selectItem => {
-  //   if (selectItem.sub) {
-  //     selectItem.sub.forEach(selectItemSub => {
-  //       console.log(selectItemSub);
-  //     });
-  //   }
-  // });
-
-  return { result: selectFolder };
+  const DeptCode = loginInfo.getData().userInfo.DeptCode;
+  const response = await getContactList({ DeptCode });
+  return response.data;
 };
 
 export const updatePresence = async param => {
