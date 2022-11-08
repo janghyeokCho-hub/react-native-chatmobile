@@ -2,9 +2,12 @@ import { chatsvr, managesvr } from '@API/api';
 import { getJobInfo } from '@/lib/userSettingUtil';
 
 export const getContactList = async params => {
-  const jobInfo = await getJobInfo()
+  const jobInfo = await getJobInfo();
 
-  return managesvr('get', `/user/contact?deptCode=${params.DeptCode}&st=${jobInfo}`);
+  return managesvr(
+    'get',
+    `/user/contact?deptCode=${params.DeptCode}&st=${jobInfo}`,
+  );
 };
 
 export const addContactList = params => {
@@ -27,5 +30,5 @@ export const getItemGroupOneDepth = params => {
 };
 
 export const modiftyCustomGroupName = params => {
-  return managesvr('put', `/user/contact/name`, params);
+  return managesvr('put', '/user/contact/name', params);
 };
