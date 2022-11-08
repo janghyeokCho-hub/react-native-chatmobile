@@ -84,7 +84,6 @@ const MakeRoom = ({ route, navigation }) => {
     // -- MultiView의 경우 dispatch
     // -- NewWindow의 경우 route 이동
     setDisabled(true);
-    console.log(message, filesObj, linkObj);
 
     let invites = [];
     makeInfo.members.forEach(item => invites.push(item.id));
@@ -114,29 +113,30 @@ const MakeRoom = ({ route, navigation }) => {
 
     if (filesObj) {
       uploadFile(data)
-        .then(({ data }) => {
-          if (data.state === 'SUCCESS') {
+        .then(({ data: response }) => {
+          if (response.state === 'SUCCESS') {
             const messageParams = {
               context: message,
-              roomID: data.roomID,
+              roomID: response.roomID,
               sender: sender,
               roomType: makeInfo.roomType,
-              fileInfos: JSON.stringify(data.result),
+              fileInfos: JSON.stringify(response.result),
               blockList: blockList,
             };
 
             sendMessage(messageParams)
-              .then(({ data }) => {
-                if (data.status === 'SUCCESS') {
+              .then(({ data: sendMessageResponse }) => {
+                const { status, result } = sendMessageResponse;
+                if (status === 'SUCCESS') {
                   if (linkObj) {
                     getURLThumbnail({
-                      roomId: data.result.roomID,
-                      messageId: data.result.messageID,
+                      roomId: result.roomID,
+                      messageId: result?.messageID,
                       url: linkObj.url,
                     });
                   }
 
-                  handleNewRoom(data.result.roomID);
+                  handleNewRoom(result.roomID);
                 }
               })
               .catch(error => console.log(error));
@@ -144,18 +144,43 @@ const MakeRoom = ({ route, navigation }) => {
         })
         .catch(error => console.log(error));
     } else {
-      createRoom(data).then(({ data }) => {
-        if (data.status === 'SUCCESS') {
-          const roomID = data.result.room.roomID;
+      createRoom(data).then(({ data: response }) => {
+        if (response.status === 'SUCCESS') {
+          const roomID = response.result.room?.roomID;
+          const messageID = response?.result?.messageID;
           if (linkObj) {
             getURLThumbnail({
               roomId: roomID,
-              messageId: data.result.messageID,
+              messageId: messageID,
               url: linkObj.url,
             });
           }
 
-          handleNewRoom(roomID);
+          const messageParams = {
+            context: message,
+            roomID: roomID,
+            sender: sender,
+            roomType: makeInfo.roomType,
+            fileInfos: null,
+            blockList: blockList,
+          };
+
+          sendMessage(messageParams)
+            .then(({ data: sendMessageResponse }) => {
+              const { status } = sendMessageResponse;
+              if (status === 'SUCCESS') {
+                if (linkObj) {
+                  getURLThumbnail({
+                    roomId: roomID,
+                    messageId: messageID,
+                    url: linkObj.url,
+                  });
+                }
+
+                handleNewRoom(roomID);
+              }
+            })
+            .catch(error => console.log(error));
         }
       });
     }
