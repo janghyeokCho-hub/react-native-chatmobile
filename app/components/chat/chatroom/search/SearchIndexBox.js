@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import { getBottomPadding } from '@/lib/device/common';
 import KeySpacer from '@C/common/layout/KeySpacer';
 import { getDic } from '@/config';
+import { SEARCHVIEW_OPTIONS } from '@/components/common/search/searchView.constant';
 
 const SearchIndexBox = ({ length, onChange, handleNext }) => {
   const { sizes } = useTheme();
@@ -32,7 +33,7 @@ const SearchIndexBox = ({ length, onChange, handleNext }) => {
                 {index + 1} / {length}
               </Text>
             </View>
-            {searchOptionState?.type === 'Name' &&
+            {searchOptionState?.type !== SEARCHVIEW_OPTIONS.CONTEXT &&
               typeof handleNext === 'function' && (
                 <TouchableOpacity
                   onPress={handleNext}

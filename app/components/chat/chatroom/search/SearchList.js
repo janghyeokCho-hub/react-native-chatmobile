@@ -350,11 +350,21 @@ const SearchList = ({
     !loading && handleScrollTop();
   }, [refresh, loading]);
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.moveLoadingBoxWrap}>
+          <Image source={loadingImg} style={{ width: 100, height: 100 }} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <>
       <View style={styles.container}>
         {(moveData &&
-          ((messages && messages.length > 0 && (
+          (messages && messages.length > 0 && (
             <>
               <View style={{ flex: 1, zIndex: 10 }}>
                 <ScrollView
@@ -376,10 +386,6 @@ const SearchList = ({
                 </ScrollView>
               </View>
             </>
-          )) || (
-            <View style={styles.moveLoadingBoxWrap}>
-              <Image source={loadingImg} style={{ width: 100, height: 100 }} />
-            </View>
           ))) || (
           <View style={styles.emptyBoxWrap}>
             <Svg

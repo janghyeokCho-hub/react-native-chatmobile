@@ -24,6 +24,7 @@
     "react-native": "0.63.5",
     "react-native-bidirectional-infinite-scroll": "^0.3.3",
     "react-native-biometrics": "^2.1.4",
+    "react-native-calendars": "^1.1289.0",
     "react-native-collapsible": "^1.6.0",
     "react-native-exit-app": "file:lib/react-native-exit-app.tgz",
     "react-native-file-logger": "^0.2.1",

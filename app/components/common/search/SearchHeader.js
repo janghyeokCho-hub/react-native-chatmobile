@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useRef, useLayoutEffect } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  useLayoutEffect,
+  useMemo,
+} from 'react';
 import {
   View,
   Image,
@@ -7,32 +13,22 @@ import {
   TextInput,
   Platform,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Picker } from '@react-native-picker/picker';
 import { throttle } from 'throttle-debounce';
 
-import { getDic, getConfig } from '@/config';
+import { getDic, getUseFlag } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import cancelBtnImg from '@C/assets/ico_cancelbutton.png';
 import ChannelMentionBox from '@/components/channel/channelroom/controls/ChannelMentionBox';
 import { getDictionary } from '@/lib/common';
-
-function getActiveAttributes(active) {
-  if (active) {
-    return {
-      label: '🔍',
-      style: {
-        color: '#f50057',
-      },
-    };
-  } else {
-    return {
-      label: '',
-      style: {},
-    };
-  }
-}
+import SearchDatePicker from './SearchDatePicker';
+import {
+  parseDate,
+  isValidDate,
+  SEARCHVIEW_OPTIONS,
+  getCurrentDate,
+} from './searchView.constant';
 
 const SearchHeader = ({
   value,
@@ -44,49 +40,75 @@ const SearchHeader = ({
   const { sizes } = useTheme();
   const [searchText, setSearchText] = useState('');
   const [suggestMember, setSuggestMember] = useState([]);
-  const [openSuggestionBox, setOpenSuggestionBox] = useState(false);
-  const [selectedSearchOption, setSelectedSearchOption] = useState('Context');
-  const useSearchByName = getConfig('UseSearchMessageByName') || { use: false };
+  const [openSuggestionBox, setOpenSuggestionBox] = useState(null);
+  const [selectedSearchOption, setSelectedSearchOption] = useState(
+    SEARCHVIEW_OPTIONS.CONTEXT,
+  );
+
   const searchInput = useRef(null);
   const handleClose = () => {
-    if (openSuggestionBox) {
-      setOpenSuggestionBox(false);
-    } else {
+    if (
+      !openSuggestionBox ||
+      selectedSearchOption === SEARCHVIEW_OPTIONS.CONTEXT
+    ) {
       onSearchBox();
+    } else {
+      setOpenSuggestionBox(null);
     }
   };
 
   const handleSearch = () => {
     // Name 검색은 MentionBox 선택시에만 onSearch가 동작해야 함
     // => Context 검색인 경우에만 onSubmitEditing 핸들러 동작하도록 조건 부여
-    if (selectedSearchOption === 'Context' && searchText !== '') {
+    if (
+      selectedSearchOption === SEARCHVIEW_OPTIONS.CONTEXT &&
+      searchText !== ''
+    ) {
       onSearch(selectedSearchOption, searchText);
+    }
+    if (selectedSearchOption === SEARCHVIEW_OPTIONS.DATE) {
+      const date = parseDate(searchText);
+      const isValid = isValidDate(date);
+      if (isValid === false) {
+        // @TODO: Show fail popup
+        // ...
+        return;
+      }
+      onSearch(selectedSearchOption, date);
     }
   };
 
   const focusInput = useCallback(() => {
     searchInput.current.focus();
-    if (selectedSearchOption === 'Name') {
-      setOpenSuggestionBox(true);
-    }
+    setOpenSuggestionBox(selectedSearchOption);
   }, [searchInput, selectedSearchOption]);
 
-  useLayoutEffect(() => {
-    focusInput();
-    if (value !== null && value !== '') {
-      setSearchText(value);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const contextAttributes = getActiveAttributes(
-    selectedSearchOption === 'Context',
+  const getActiveAttributes = useCallback(
+    val => {
+      const isActive = selectedSearchOption === val;
+      const label = getDic(val);
+      if (isActive) {
+        return {
+          label: label + '🔍',
+          value: val,
+          style: {
+            color: '#f50057',
+          },
+        };
+      } else {
+        return {
+          label,
+          value: val,
+          style: {},
+        };
+      }
+    },
+    [selectedSearchOption],
   );
-  const nameAttributes = getActiveAttributes(selectedSearchOption === 'Name');
 
   const throttledHandleSearch = useCallback(
     throttle(300, text => {
-      if (selectedSearchOption !== 'Name' || !text) {
+      if (selectedSearchOption !== SEARCHVIEW_OPTIONS.SENDER || !text) {
         return;
       }
       const result = initialSearchData.filter(
@@ -96,54 +118,93 @@ const SearchHeader = ({
     }),
     [selectedSearchOption],
   );
+
+  const handleSearchDate = useCallback(
+    date => {
+      const { dateString } = date;
+      setSearchText(dateString);
+      setOpenSuggestionBox(null);
+      onSearch(selectedSearchOption, dateString);
+    },
+    [onSearch, selectedSearchOption],
+  );
+
   useLayoutEffect(() => throttledHandleSearch(searchText), [
     throttledHandleSearch,
     searchText,
   ]);
+
+  useLayoutEffect(() => {
+    focusInput();
+    if (value !== null && value !== '') {
+      setSearchText(value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pickerItems = useMemo(() => {
+    // 기본: 추가옵션 미설정시 context 검색 1개만 표시
+    const optionList = [SEARCHVIEW_OPTIONS.CONTEXT];
+    const addons = [
+      {
+        useFlag: getUseFlag('UseSearchMessageByName', false),
+        option: SEARCHVIEW_OPTIONS.SENDER,
+      },
+      {
+        useFlag: getUseFlag('UseSearchMessageByDate', false),
+        option: SEARCHVIEW_OPTIONS.DATE,
+      },
+    ];
+    addons.forEach(item => {
+      if (item.useFlag === true) {
+        optionList.push(item.option);
+      }
+    });
+    return optionList;
+  }, []);
 
   return (
     <View>
       <View style={styles.top}>
         <View
           style={{
-            width: Platform.OS === 'ios' && useSearchByName?.use ? 120 : 36,
+            width:
+              Platform.OS === 'ios' && pickerItems?.length === 1 ? 120 : 36,
             ...styles.searchIcon,
           }}
         >
-          {useSearchByName?.use ? (
-            <Picker
-              style={styles.searchOptionPicker}
-              itemStyle={styles.searchOptionPickerItem}
-              selectedValue={selectedSearchOption}
-              onValueChange={itemValue => {
-                setSelectedSearchOption(itemValue);
+          <Picker
+            style={styles.searchOptionPicker}
+            itemStyle={styles.searchOptionPickerItem}
+            selectedValue={selectedSearchOption}
+            onValueChange={itemValue => {
+              setSelectedSearchOption(itemValue);
+              // Context > Name 전환시 SuggestionBox 렌더링
+              setOpenSuggestionBox(itemValue);
+              if (itemValue === SEARCHVIEW_OPTIONS.DATE) {
+                // 날자검색 input 초기화시 기본값: 현재 날짜
+                setSearchText(getCurrentDate());
+              } else {
                 // option 전환시 Input 초기화
                 setSearchText('');
-                // Context > Name 전환시 SuggestionBox 렌더링
-                setOpenSuggestionBox(itemValue === 'Name');
-              }}
-              mode="dropdown"
-            >
-              <Picker.Item
-                label={getDic('Context') + contextAttributes.label}
-                value="Context"
-                style={contextAttributes.style}
-              />
-              <Picker.Item
-                label={getDic('Name') + nameAttributes.label}
-                value="Name"
-                style={nameAttributes.style}
-              />
-            </Picker>
-          ) : (
-            <Svg width="18" height="18" viewBox="0 0 13.364 13.364">
+              }
+            }}
+            mode="dropdown"
+          >
+            {pickerItems.map(item => {
+              return <Picker.item {...getActiveAttributes(item)} />;
+            })}
+          </Picker>
+          {/*
+          // Default search icon
+          <Svg width="18" height="18" viewBox="0 0 13.364 13.364">
               <Path
                 d="M304.2,2011.439l-3.432-3.432a5.208,5.208,0,0,0,.792-2.728,5.279,5.279,0,1,0-5.28,5.279,5.208,5.208,0,0,0,2.728-.792l3.432,3.432a.669.669,0,0,0,.88,0l.88-.88A.669.669,0,0,0,304.2,2011.439Zm-7.919-2.64a3.52,3.52,0,1,1,3.52-3.52A3.53,3.53,0,0,1,296.279,2008.8Z"
                 transform="translate(-291 -2000)"
                 fill="#ababab"
               />
             </Svg>
-          )}
+           */}
         </View>
         <View style={styles.searchTextWrap}>
           <View style={styles.searchInputWrap}>
@@ -169,8 +230,8 @@ const SearchHeader = ({
           </View>
         </TouchableOpacity>
       </View>
-      {openSuggestionBox && (
-        <View style={styles.suggestionBoxWrap}>
+      <View style={styles.suggestionBoxWrap}>
+        {openSuggestionBox === SEARCHVIEW_OPTIONS.SENDER && (
           <ChannelMentionBox
             members={searchText ? suggestMember : initialSearchData}
             onPress={userInfo => {
@@ -179,13 +240,16 @@ const SearchHeader = ({
               }
               // (1) input/검색대상 state 변경 > (2) SuggestionBox 닫기 > (3) 검색API 처리
               setSearchText(getDictionary(userInfo.name));
-              setOpenSuggestionBox(false);
+              setOpenSuggestionBox(null);
               onSearch(selectedSearchOption, userInfo.id);
               // ...
             }}
           />
-        </View>
-      )}
+        )}
+        {openSuggestionBox === SEARCHVIEW_OPTIONS.DATE && (
+          <SearchDatePicker onChange={handleSearchDate} value={searchText} />
+        )}
+      </View>
     </View>
   );
 };
@@ -247,7 +311,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   suggestionBoxWrap: {
-    paddingBottom: 8,
     borderBottomWidth: 2,
     borderColor: '#DEDEDE',
   },
