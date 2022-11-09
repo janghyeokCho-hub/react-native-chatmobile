@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderTopColor: '#f0f0f0',
     borderTopWidth: 1.0,
+    paddingBottom: 8,
     // borderRightColor: '#f0f0f0',
     // borderRightWidth: 1.0,
     // width: '65%',
@@ -55,8 +56,8 @@ const styles = StyleSheet.create({
   selectItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 15,
-    marginLeft: 12,
+    marginTop: 8,
+    marginLeft: 8,
   },
 });
 

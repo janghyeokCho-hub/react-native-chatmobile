@@ -15,6 +15,10 @@ import { linkPreview } from '@/lib/api/api';
 import { getScreenWidth } from '@/lib/device/common';
 import { openMsgUtilBox } from '@/lib/messageUtil';
 import { getDic } from '@/config';
+import {
+  isSameDate,
+  SEARCHVIEW_OPTIONS,
+} from '@/components/common/search/searchView.constant';
 
 const MessageBox = ({
   dateBox,
@@ -79,19 +83,22 @@ const MessageBox = ({
         senderInfo = message.senderInfo;
       }
     }
-
-    if (searchOptionState?.type === 'Context') {
+    if (searchOptionState?.type === SEARCHVIEW_OPTIONS.CONTEXT) {
       _marking = marking;
     } else if (
-      searchOptionState?.type === 'Name' &&
+      searchOptionState?.type === SEARCHVIEW_OPTIONS.SENDER &&
       searchOptionState?.value &&
       message?.sender
     ) {
       if (message.sender === searchOptionState.value) {
         _marking = '.*';
       }
+    } else if (
+      searchOptionState?.type === SEARCHVIEW_OPTIONS.DATE &&
+      isSameDate(searchOptionState?.value, message?.sendDate)
+    ) {
+      _marking = '.*';
     }
-
     if (!isBlock && messageType === 'message') {
       let index = 0;
 

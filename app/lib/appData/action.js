@@ -7,6 +7,7 @@ import { managesvr, chatsvr } from '@API/api';
 import { setPresenceTargetUser } from '@API/presence';
 import { spliceInsert } from '@/lib/appData/util';
 import { getContactList } from '../api/contact';
+import { SEARCHVIEW_OPTIONS } from '@/components/common/search/searchView.constant';
 
 const splitCnt = 50;
 
@@ -1760,25 +1761,29 @@ export const refreshAppData = async () => {
   });
 };
 
-export const reqGetSearchMessages = async (param, { searchByName }) => {
-  let search = [];
-  if (searchByName) {
-    search = await searchMessagesByName(param);
-  } else {
-    search = await searchMessages(param);
-  }
-
+export const reqGetSearchMessages = async (param, { searchOption }) => {
   const returnObj = {
     status: 'FAIL',
     search: null,
     firstPage: null,
   };
+  let search = [];
+  switch (searchOption) {
+    case SEARCHVIEW_OPTIONS.CONTEXT:
+      search = await searchMessages(param);
+      break;
+    case SEARCHVIEW_OPTIONS.DATE:
+      search = await searchMessagesByDate(param);
+      break;
+    case SEARCHVIEW_OPTIONS.SENDER:
+      search = await searchMessagesByName(param);
+      break;
+  }
+
   if (search.length > 0) {
     search = search.map(item => item.messageId);
-
     param.startId = search[0];
     const messages = await getBetweenMessages(param);
-
     returnObj.status = 'SUCCESS';
     returnObj.search = search;
     returnObj.firstPage = messages;
@@ -1809,6 +1814,26 @@ const searchMessages = async param => {
   return search;
 };
 
+const searchMessagesByDate = async param => {
+  const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
+  const query = `SELECT messageId FROM message WHERE roomId = ${
+    param.roomID
+  } AND DATE(sendDate/1000, 'unixepoch') = '${
+    param.search
+  }' AND context not like '%eumtalk://emoticon.%' AND messageType = 'N' ORDER BY messageId DESC LIMIT ${param?.loadCnt ||
+    100}`;
+  const search = await new Promise((resolve, reject) => {
+    dbCon.transaction(tx => {
+      db.tx(tx)
+        .query(query)
+        .execute((tx, result) => {
+          resolve(result.rows.raw());
+        });
+    });
+  });
+  return search;
+};
+
 const searchMessagesByName = async param => {
   const dbCon = await db.getConnection(LoginInfo.getLoginInfo().getID());
   const search = await new Promise((resolve, reject) => {
@@ -1820,7 +1845,7 @@ const searchMessagesByName = async param => {
           } AND sender = '${param.search}' AND messageId <= ${
             param?.messageId
           } AND messageType = 'N' ORDER BY messageId DESC LIMIT ${param?.loadCnt ||
-            50}`,
+            100}`,
         )
         .execute((tx, result) => {
           resolve(result.rows.raw());

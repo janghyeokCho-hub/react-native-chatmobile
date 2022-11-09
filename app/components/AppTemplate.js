@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import { useSelector } from 'react-redux';
+
 import ContactList from '@C/contact/ContactList';
 import ChatList from '@C/chat/ChatList';
 import OrgChartList from '@C/orgchart/OrgChartList';
 import ChannelList from '@C/channel/ChannelList';
 import UserSetting from '@C/usersetting/UserSetting';
 import Icon from '@COMMON/icons';
-import { useSelector } from 'react-redux';
 import UnreadCntButton from '@COMMON/buttons/UnreadCntButton';
 import PushContainer from '@/components/PushContainer';
-import { getTopPadding, getBottomPadding } from '@/lib/device/common';
+import { getTopPadding } from '@/lib/device/common';
 import AppTemplateBack from './AppTemplateBack';
-import { getServer, getConfig } from '@/config';
+import { getConfig } from '@/config';
 import SecondAuth from '@C/auth/SecondAuth';
 import * as dbAction from '@/lib/appData/action';
 import { useNoteUnreadCount } from '@/lib/note/state';

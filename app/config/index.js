@@ -133,9 +133,26 @@ export const getServer = key => {
 export const getConfig = (key, defaultValue) => {
   if (configInstance && configInstance.config) {
     const searchConfig = search(configInstance.config, key);
-    if (searchConfig != undefined) return searchConfig;
+    if (searchConfig !== undefined) {
+      return searchConfig;
+    }
   }
   return defaultValue;
+};
+
+function _validateFlag(option) {
+  if (Array.isArray(option)) {
+    return option.some(_validateFlag);
+  }
+  return option === true || option === 'Y';
+}
+
+export const getUseFlag = (key, defaultFlag = false) => {
+  const val = getConfig(key);
+  return (
+    _validateFlag([val, val?.isUse, val?.IsUse, val?.use]) ||
+    Boolean(defaultFlag)
+  );
 };
 
 export const getSetting = (key, defaultValue) => {

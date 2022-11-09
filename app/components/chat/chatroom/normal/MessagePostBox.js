@@ -876,7 +876,7 @@ const MessagePostBox = ({
 
 const styles = StyleSheet.create({
   messageInputWrap: {
-    marginTop: 10,
+    marginTop: 0,
     borderTopColor: '#DDDDDD',
     borderTopWidth: 0.5,
     backgroundColor: '#F9F9F9',

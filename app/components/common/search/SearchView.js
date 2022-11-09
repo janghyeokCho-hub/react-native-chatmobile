@@ -24,12 +24,11 @@ import { searchChannelMessage } from '@/lib/api/message';
 import ChannelSearchList from '@C/channel/search/SearchList';
 
 async function requestSearchMessage(isChannel, searchOption, param) {
-  const searchByName = searchOption === 'Name';
   if (isChannel) {
-    const { data } = await searchChannelMessage(param, { searchByName });
+    const { data } = await searchChannelMessage(param, { searchOption });
     return data;
   }
-  return reqGetSearchMessages(param, { searchByName });
+  return reqGetSearchMessages(param, { searchOption });
 }
 
 const SearchView = ({ onSearchBox, navigation }) => {

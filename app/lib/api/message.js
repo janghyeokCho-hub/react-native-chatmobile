@@ -1,5 +1,6 @@
 import { chatsvr, managesvr, filesvr, imgsvr } from '@API/api';
 import { getConfig } from '@/config';
+import { SEARCHVIEW_OPTIONS } from '@/components/common/search/searchView.constant';
 
 export const sendMessage = params => {
   return chatsvr('post', '/message', params);
@@ -163,12 +164,16 @@ export const sendChannelMessage = params => {
   return chatsvr('post', '/channel/message', params);
 };
 
-export const searchChannelMessage = (params, { searchByName }) => {
+export const searchChannelMessage = (params, { searchOption }) => {
   const searchText = encodeURIComponent(params.search);
   let requestMethod = 'get';
   let requestURL;
   let requestBody = {};
-  if (searchByName) {
+  if (searchOption === SEARCHVIEW_OPTIONS.CONTEXT) {
+    requestURL = `/channel/messages/search?roomID=${params.roomId}&loadCnt=${
+      params.loadCnt
+    }&searchText=${searchText}`;
+  } else if (searchOption === SEARCHVIEW_OPTIONS.SENDER) {
     requestMethod = 'post';
     requestURL = '/channel/sender/search';
     requestBody = {
@@ -176,10 +181,14 @@ export const searchChannelMessage = (params, { searchByName }) => {
       loadCnt: params.loadCnt,
       searchId: params.search,
     };
-  } else {
-    requestURL = `/channel/messages/search?roomID=${params.roomId}&loadCnt=${
-      params.loadCnt
-    }&searchText=${searchText}`;
+  } else if (searchOption === SEARCHVIEW_OPTIONS.DATE) {
+    requestMethod = 'post';
+    requestURL = '/channel/date/search';
+    requestBody = {
+      roomId: params.roomId,
+      loadCnt: params.loadCnt,
+      search: params.search,
+    };
   }
   return managesvr(requestMethod, requestURL, requestBody);
 };
