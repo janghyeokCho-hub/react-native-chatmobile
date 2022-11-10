@@ -99,7 +99,10 @@ export const getServerConfigs = async domain => {
 export const getServerDictionary = (domain, lang) => {
   return axios({
     method: 'get',
-    url: `${domain}/restful/na/nf/config?lang=${lang}`,
+    url: `${domain}/restful/na/nf/config`,
+    params: {
+      lang,
+    },
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json; charset=utf-8',

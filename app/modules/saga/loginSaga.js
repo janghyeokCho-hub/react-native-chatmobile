@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { call, put, fork } from 'redux-saga/effects';
 import AsyncStorage from '@react-native-community/async-storage';
 import { startLoading, finishLoading } from '@/modules/loading';
@@ -21,12 +22,12 @@ import { getFixedUserData } from '@/lib/presenceUtil';
 import { closeSocket } from '@/lib/socket/socketConnect';
 import * as dbAction from '@/lib/appData/action';
 import * as LoginInfo from '@/lib/class/LoginInfo';
-import { Alert } from 'react-native';
 import { exceptionHandler } from './createRequestSaga';
-import { getConfig, initConfig } from '@/config';
+import { getConfig, getDic, initConfig } from '@/config';
 // ChineseWall
 import { getChineseWall } from '@/lib/api/orgchart';
 import { checkDatabaseMigration } from '@/lib/appData/migrations';
+import { syncUserDefinedSettings } from '@/lib/userSettingUtil';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -318,8 +319,11 @@ export function createSyncSaga(type) {
       } else {
         Alert.alert(
           null,
-          '동기화 중 오류가 발생하였습니다. 관리자에게 문의 부탁드립니다.',
-          [{ text: '확인' }],
+          getDic(
+            'Msg_SyncError',
+            '동기화 중 오류가 발생하였습니다. 관리자에게 문의 부탁드립니다.',
+          ),
+          [{ text: 'OK' }],
           { cancelable: true },
         );
       }
@@ -530,6 +534,7 @@ export function createSyncTokenOfflineSaga(type) {
 
 export function* preLoginSuccessSaga(action) {
   const isSaaSClient = getConfig('IsSaaSClient', 'N') === 'Y';
+  const useUserSettingSync = getConfig('UseUserSettingSync', 'N') === 'Y';
   const userId = action.payload.id;
 
   // db 버전 검사 && migration
@@ -538,6 +543,14 @@ export function* preLoginSuccessSaga(action) {
       yield call(checkDatabaseMigration, userId);
     } catch (err) {
       console.log('checkDatabaseMigration occured an error: ', err);
+    }
+  }
+
+  if (useUserSettingSync && action?.payload?.settings) {
+    const settings = JSON.parse(action.payload.settings);
+    const mobile = JSON.parse(settings?.mobile);
+    if (mobile) {
+      yield call(syncUserDefinedSettings, mobile);
     }
   }
 

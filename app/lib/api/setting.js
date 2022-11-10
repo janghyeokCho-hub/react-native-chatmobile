@@ -34,5 +34,5 @@ export const changeNotificationBlockOption = params => {
   return managesvr('post', '/nf/office/overtime/option', params);
 };
 
-export const setUserSetting = params =>
+export const setUserDefinedSettings = params =>
   managesvr('post', '/user/setting', { deviceType: 'm', settings: params });
