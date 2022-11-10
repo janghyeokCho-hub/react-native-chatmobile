@@ -18,7 +18,7 @@ import {
   getServer,
 } from '@/config';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
-import { setUserSetting } from '@/lib/api/setting';
+import { setUserDefinedSettings } from '@/lib/api/setting';
 
 const getJobInfoName = jobInfo => {
   switch (jobInfo) {
@@ -134,7 +134,7 @@ const ChatSetting = ({ navigation }) => {
               if (useUserSettingSync) {
                 try {
                   // Sync lang with server
-                  await setUserSetting({ clientLang: multiDic });
+                  await setUserDefinedSettings({ clientLang: multiDic });
                 } catch (err) {
                   // ...
                 }
@@ -166,7 +166,7 @@ const ChatSetting = ({ navigation }) => {
               if (useUserSettingSync) {
                 try {
                   // Sync jobInfo with server
-                  await setUserSetting({ jobInfo: _jobInfo });
+                  await setUserDefinedSettings({ jobInfo: _jobInfo });
                 } catch (err) {
                   // ...
                 }
