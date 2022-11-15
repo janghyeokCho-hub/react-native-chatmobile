@@ -32,6 +32,7 @@ YellowBox.ignoreWarnings([
   'Warning: componentWillReceiveProps',
   'Warning: componentWillMount',
   'Warning: Encountered two children with the same key',
+  'Warning: Possible Unhandled Promise Rejection',
 ]);
 
 setJSExceptionHandler((e, isFatal) => {
