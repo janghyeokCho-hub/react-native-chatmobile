@@ -183,10 +183,10 @@ const UserInfoBox = ({
             <View style={styles.rightMessageAbsenceBox}>
               <Text
                 adjustsFontSizeToFit={Platform.OS == 'android'}
-                style={{
-                  ...styles.rightAbsenceMessage,
-                  fontSize: 13 + sizes.inc,
-                }}
+                style={[
+                  styles.rightAbsenceMessage,
+                  { fontSize: 13 + sizes.inc },
+                ]}
                 numberOfLines={1}
               >
                 {getDic('Ab_' + myAbsence.code, myAbsence.code)}
