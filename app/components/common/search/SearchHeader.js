@@ -192,7 +192,12 @@ const SearchHeader = ({
             mode="dropdown"
           >
             {pickerItems.map(item => {
-              return <Picker.item {...getActiveAttributes(item)} />;
+              return (
+                <Picker.Item
+                  key={`Picker_${item}`}
+                  {...getActiveAttributes(item)}
+                />
+              );
             })}
           </Picker>
           {/*
@@ -313,6 +318,7 @@ const styles = StyleSheet.create({
   suggestionBoxWrap: {
     borderBottomWidth: 2,
     borderColor: '#DEDEDE',
+    zIndex: 9999,
   },
 });
 
