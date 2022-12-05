@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getServer } from '@/config';
 import FastImage from 'react-native-fast-image';
 import { TouchableOpacity } from 'react-native';
@@ -16,10 +16,9 @@ const Sticker = ({
 }) => {
   const IsSaaSClient = getConfig('IsSaaSClient', 'N');
   const storagePrefix = getConfig('storePrefix', '/storage/');
-  const timer = useRef(null);
   const [resource, setResource] = useState({
     uri:
-      IsSaaSClient == 'Y'
+      IsSaaSClient === 'Y'
         ? `${getServer(
             'HOST',
           )}${storagePrefix}emoticon/${companyCode}/${groupId}/${emoticonId}.${
@@ -36,19 +35,10 @@ const Sticker = ({
   const [isAnimation, setIsAnimation] = useState(type === 'A');
 
   useEffect(() => {
-    return () => {
-      if (timer && timer.current) {
-        clearTimeout(timer.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (isAnimation) {
-      clearTimeout(timer.current);
       setResource({
         uri:
-          IsSaaSClient == 'Y'
+          IsSaaSClient === 'Y'
             ? `${getServer(
                 'HOST',
               )}${storagePrefix}emoticon/${companyCode}/${groupId}/${emoticonId}.gif`
@@ -57,22 +47,6 @@ const Sticker = ({
               )}${storagePrefix}emoticon/${groupId}/${emoticonId}.gif`,
         priority: FastImage.priority.high,
       });
-      timer.current = setTimeout(() => {
-        setResource({
-          uri:
-            IsSaaSClient == 'Y'
-              ? `${getServer(
-                  'HOST',
-                )}${storagePrefix}emoticon/${companyCode}/${groupId}/${emoticonId}.png`
-              : `${getServer(
-                  'HOST',
-                )}${storagePrefix}emoticon/${groupId}/${emoticonId}.png`,
-          priority: FastImage.priority.high,
-        });
-
-        setIsAnimation(false);
-        timer.current = null;
-      }, 6000);
     }
   }, [isAnimation]);
 
