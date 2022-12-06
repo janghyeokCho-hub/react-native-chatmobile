@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import {
   View,
@@ -137,16 +137,20 @@ const SecondAuth = ({
   };
 
   const shakeErrMsg = useRef(new Animated.Value(0)).current;
+  const bioAuthSuccessEventHandler = useCallback(
+    success => {
+      if (success) {
+        handlePasswordSuccessEvent();
+      }
+    },
+    [handlePasswordSuccessEvent],
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, marginTop: 80 }}>
       {bioAuth && (
         <BiometricsContainer
-          bioAuthSuccessEventHandler={success => {
-            if (success) {
-              handlePasswordSuccessEvent();
-            }
-          }}
+          bioAuthSuccessEventHandler={bioAuthSuccessEventHandler}
         />
       )}
       <View style={styles.header}>
