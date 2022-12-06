@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUnreadCountForSync } from '@/modules/room';
-import { View, StyleSheet, Image, FlatList } from 'react-native';
+import { View, StyleSheet, Image, FlatList, Platform } from 'react-native';
 import { getMessage } from '@/lib/messageUtil';
 import Svg, { Path, G } from 'react-native-svg';
 
@@ -133,6 +133,7 @@ const SearchFlatList = ({ moveData, markingText, roomID, navigation }) => {
       if (item.messageID == moveId) {
         return (
           <View
+            style={{ scaleY: Platform.OS === 'android' ? -1 : undefined }}
             onLayout={event => {
               if (offset == -1) setOffset(event.nativeEvent.layout.y);
             }}
@@ -141,7 +142,11 @@ const SearchFlatList = ({ moveData, markingText, roomID, navigation }) => {
           </View>
         );
       } else {
-        return <View>{drawMessage(item, index)}</View>;
+        return (
+          <View style={{ scaleY: Platform.OS === 'android' ? -1 : undefined }}>
+            {drawMessage(item, index)}
+          </View>
+        );
       }
     },
     [messages, moveId, offset],
@@ -265,14 +270,24 @@ const SearchFlatList = ({ moveData, markingText, roomID, navigation }) => {
         ((messages && messages.length > 0 && (
           <>
             <View style={{ flex: 1 }}>
+              {/**
+               * 2022-12-05 Android 13 Issues
+               * inverted 쓰면 성능 저하로 css scaleY: -1 로 변경함
+               */}
               <FlatList
-                inverted
+                inverted={Platform.OS === 'ios'}
                 ref={scrollBox}
                 contentContainerStyle={{
                   flexGrow: 1,
                   justifyContent: 'flex-end',
                 }}
-                style={[styles.messageBoxWrap, { flex: 1 }]}
+                style={[
+                  styles.messageBoxWrap,
+                  {
+                    flex: 1,
+                    scaleY: Platform.OS === 'android' ? -1 : undefined,
+                  },
+                ]}
                 data={messages}
                 keyExtractor={item => item.messageID}
                 windowSize={50}

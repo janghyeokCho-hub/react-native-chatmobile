@@ -25,6 +25,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import MessageSync from '../controls/MessageSync';
 import * as dbAction from '@/lib/appData/action';
@@ -512,6 +513,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
             onExtension('');
           }}
           activeOpacity={1}
+          style={{ scaleY: Platform.OS === 'android' ? -1 : undefined }}
         >
           {messageComp}
         </TouchableOpacity>
@@ -552,14 +554,21 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
           }}
           activeOpacity={1}
         >
+          {/**
+           * 2022-12-05 Android 13 Issues
+           * inverted 쓰면 성능 저하로 css scaleY: -1 로 변경함
+           */}
           {targetMessageData && (
             <FlatList
-              inverted
+              inverted={Platform.OS === 'ios'}
               data={targetMessageData}
               onEndReached={handleScrollTop}
               onStartReached={handleScrollBottom}
               renderItem={renderMessage}
-              style={[styles.container, { flex: 1 }]}
+              style={[
+                styles.container,
+                { flex: 1, scaleY: Platform.OS === 'android' ? -1 : undefined },
+              ]}
               ref={ref}
               onScrollToIndexFailed={info => {
                 const wait = new Promise(resolve => setTimeout(resolve, 500));
