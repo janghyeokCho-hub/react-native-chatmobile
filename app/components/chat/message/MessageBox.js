@@ -44,7 +44,7 @@ const MessageBox = ({
       currMember &&
       currMember.find(item => item.id === message.sender) === undefined
     );
-  }, [currMember]);
+  }, [currMember, message.sender]);
 
   const handleProfilePopup = senderId => {
     navigation.navigate('ProfilePopup', { targetID: senderId });
@@ -588,7 +588,35 @@ const MessageBox = ({
         </>
       );
     }
-  }, [message, marking, linkData, timeBox, nameBox, isBlock]);
+  }, [
+    isBlock,
+    message.context,
+    message.sender,
+    message.sendDate,
+    message.senderInfo,
+    message.linkInfo,
+    message.fileInfos,
+    message.messageID,
+    message.unreadCnt,
+    message.isMine,
+    message.replyID,
+    message.replyInfo,
+    nameBox,
+    isMine,
+    searchOptionState,
+    marking,
+    linkData,
+    colors.primary,
+    timeBox,
+    isOldMember,
+    sizes,
+    id,
+    msgUtilBox,
+    goToOriginMsg,
+    roomInfo,
+    handleProfilePopup,
+    navigation,
+  ]);
 
   return (
     <>

@@ -109,7 +109,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
       setVirtualIndex(1);
       setAllSize(1);
     }
-  }, [show, chineseWall]);
+  }, [show, chineseWall, type, image]);
 
   const handleChange = changeIdx => {
     let derection = '';
@@ -163,6 +163,7 @@ const ImageModal = ({ type, show, image, hasDownload, onClose, onMove }) => {
   const shareCurrent = () => {
     if (filePermission.download === 'Y') {
       const findItem = sources[index]._item;
+
       downloadAndShare({
         token: findItem.FileID,
         fileName: findItem.FileName,

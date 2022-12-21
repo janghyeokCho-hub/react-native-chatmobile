@@ -37,7 +37,7 @@ const FileMessageBox = ({
           {fileObj.map((item, index) => {
             return (
               <FileThumbList
-                key={index}
+                key={`fileThumbList_${item}_${index}`}
                 index={index}
                 len={fileObj.length}
                 type="list"
@@ -60,7 +60,7 @@ const FileMessageBox = ({
           {fileObj.map((item, index) => {
             return (
               <File
-                key={index}
+                key={`file_${item}_${index}`}
                 type="list"
                 item={item}
                 preview={handlePreview}
@@ -101,6 +101,7 @@ const FileMessageBox = ({
   } else {
     returnJSX.push(
       <File
+        key={`file_${id}`}
         type="unit"
         item={fileObj}
         preview={handlePreview}
