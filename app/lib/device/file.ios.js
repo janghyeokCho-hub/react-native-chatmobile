@@ -227,10 +227,10 @@ const downloadShareFile = async (token, fileName, callback) => {
   const callbackFn = response => {
     let result = '';
     let message = '';
+
     if (response.statusCode === 200) {
       result = 'SUCCESS';
-    }
-    if (response.statusCode === 204) {
+    } else if (response.statusCode === 204) {
       result = 'EXPIRED';
       message = getDic('Msg_FileExpired', '만료된 파일입니다.');
     } else if (response.statusCode === 403) {
