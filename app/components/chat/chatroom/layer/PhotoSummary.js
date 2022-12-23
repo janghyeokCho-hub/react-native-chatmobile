@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
   topBtn: {
     marginLeft: 10,
-    // padding: 10,
+    padding: 10,
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
