@@ -15,6 +15,7 @@ import { getDic } from '@/config';
 import { getJobInfo } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import { Alert } from 'react-native';
+import RoomMemberBox from '@C/chat/RoomMemberBox';
 
 const makeRoomName = (room, id, isInherit, sizes) => {
   // 방 이름 생성하는 규칙 처리 필요
@@ -107,10 +108,24 @@ const makeRoomName = (room, id, isInherit, sizes) => {
     } else {
       return (
         <>
-          <View>
-            <Text style={{ fontSize: sizes.default }}>
-              {room.roomName == '' ? getDic('GroupChatRoom') : room.roomName} (
-              {room.members.length})
+          <RoomMemberBox
+            type="G"
+            data={room.members}
+            roomID={room.roomID}
+            style={styles.headerProfile}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
+              {room.roomName == ''
+                ? getDic('GroupChatRoom', '그룹채팅방')
+                : room.roomName}{' '}
+              ({room.members.length})
             </Text>
           </View>
         </>
