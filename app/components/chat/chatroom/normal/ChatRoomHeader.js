@@ -148,33 +148,39 @@ const ChatRoomHeader = ({
     onSearchBox(true);
   };
 
-  const backButtonHandler = () => {
+  const backButtonHandler = useCallback(() => {
     if (tempMessage && tempMessage.length > 0) {
-      tempMessage.map(item => {
-        if (item.sendFileInfo && item.sendFileInfo.files.length > 0) {
-          Alert.alert(getDic('Eumtalk'), getDic('Msg_FileSendingClose'), [
-            {
-              text: getDic('Ok'),
-              onPress: () => {
-                cancelToken.cancel();
-                navigation.dispatch(CommonActions.goBack);
-              },
+      const hasPendingFile = tempMessage.some(
+        item => item.sendFileInfo && item.sendFileInfo.files.length > 0,
+      );
+
+      if (hasPendingFile) {
+        Alert.alert(getDic('Eumtalk'), getDic('Msg_FileSendingClose'), [
+          {
+            text: getDic('Ok'),
+            onPress: () => {
+              cancelToken.cancel();
+              navigation.dispatch(CommonActions.goBack);
             },
-            {
-              text: getDic('Cancel'),
-            },
-          ]);
-        }
-      });
-      return true;
-    } else navigation.dispatch(CommonActions.goBack);
-  };
+          },
+          { text: getDic('Cancel') },
+        ]);
+
+        return true;
+      }
+    }
+
+    navigation.dispatch(CommonActions.goBack);
+  }, [tempMessage, cancelToken, navigation]);
 
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backButtonHandler,
+    );
 
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
+      BackHandler.removeEventListener('hardwareBackPress', backHandler);
     };
   }, [backButtonHandler]);
 
