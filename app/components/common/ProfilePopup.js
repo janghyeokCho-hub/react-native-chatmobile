@@ -27,6 +27,7 @@ import { useTheme } from '@react-navigation/native';
 import { makePhotoPath } from '@/lib/util/paramUtil';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { FlatList } from 'react-native-bidirectional-infinite-scroll';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
@@ -496,4 +497,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfilePopup;
+export default withSecurityScreen(ProfilePopup);

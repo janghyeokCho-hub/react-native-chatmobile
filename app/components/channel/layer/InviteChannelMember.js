@@ -21,6 +21,7 @@ import Svg, { Circle, Path, G } from 'react-native-svg';
 import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
@@ -162,7 +163,7 @@ const InviteChannelMember = ({ route, navigation }) => {
 
   const handleClose = useCallback(() => {
     navigation.dispatch(CommonActions.goBack());
-  }, []);
+  }, [navigation]);
 
   const handleAddBtn = () => {
     let inviteMembers = [];
@@ -204,7 +205,9 @@ const InviteChannelMember = ({ route, navigation }) => {
       dispatch(inviteMember(params));
       handleClose();
     }
-    if (callBack) callBack();
+    if (callBack) {
+      callBack();
+    }
   };
 
   return (
@@ -424,4 +427,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InviteChannelMember;
+export default withSecurityScreen(InviteChannelMember);

@@ -14,6 +14,7 @@ import { modifyRoomName } from '@/modules/room';
 import { getDic } from '@/config';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChangeRoomInfo = ({ route, navigation }) => {
   const { sizes } = useTheme();
@@ -127,4 +128,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChangeRoomInfo;
+export default withSecurityScreen(ChangeRoomInfo);

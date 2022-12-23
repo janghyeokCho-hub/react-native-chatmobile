@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import IconButton from '@COMMON/buttons/IconButton';
 import { restartApp } from '@/lib/device/common';
 import { initHostInfo, getDic } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const EtcSetting = () => {
   return (
@@ -28,7 +29,7 @@ const EtcSetting = () => {
                     await AsyncStorage.removeItem('ESETINF');
                   } catch (err) {
                     console.log(
-                      `AsyncStorage removeItem 'covi_user_jobInfo', 'ESETINF' occured an error : `,
+                      "AsyncStorage removeItem 'covi_user_jobInfo', 'ESETINF' occured an error : ",
                       err,
                     );
                   }
@@ -107,4 +108,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EtcSetting;
+export default withSecurityScreen(EtcSetting);

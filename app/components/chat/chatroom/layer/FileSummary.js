@@ -30,6 +30,7 @@ import NetworkError from '@/components/common/NetworkError';
 import { useTheme } from '@react-navigation/native';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const checkBlackImg = require('@C/assets/ico_check_black.png');
 
@@ -614,4 +615,4 @@ const styles = StyleSheet.create({
   noFiles: { width: '100%', alignItems: 'center', marginTop: 30 },
 });
 
-export default FileSummary;
+export default withSecurityScreen(FileSummary);

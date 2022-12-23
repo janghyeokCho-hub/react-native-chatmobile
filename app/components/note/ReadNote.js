@@ -58,6 +58,7 @@ import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import RenderHtml from 'react-native-render-html';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const styles = StyleSheet.create({
   contanier: {
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function ReadNote({ route }) {
+const ReadNote = ({ route }) => {
   const navigation = useNavigation();
   const noteId = route?.params?.noteId;
   const [viewType] = useViewType();
@@ -498,7 +499,7 @@ export default function ReadNote({ route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text numberOfLines={1} style={{ fontSize: sizes.default }}>
                       {getDic('Note_Recipient')}
-                      {`: `}
+                      {': '}
                       {userNames.receiver}
                     </Text>
                     <DirectionIcon
@@ -716,4 +717,6 @@ export default function ReadNote({ route }) {
       </Drawer>
     </SafeAreaView>
   );
-}
+};
+
+export default withSecurityScreen(ReadNote);

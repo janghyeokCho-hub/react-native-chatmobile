@@ -14,7 +14,7 @@ import {
   Image,
   FlatList,
   Platform,
-  Button
+  Button,
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
@@ -23,38 +23,36 @@ import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import TitleInputBox from '@COMMON/TitleInputBox';
-import {
-  editGroupContactList, 
-  getApplyGroupInfo
-} from '@/lib/contactUtil';
-import { modifyGroupMember, modifyCustomGroupName } from "@/modules/contact";
+import { editGroupContactList, getApplyGroupInfo } from '@/lib/contactUtil';
+import { modifyGroupMember, modifyCustomGroupName } from '@/modules/contact';
 import { getDictionary } from '@/lib/common';
 import GroupList from '@/components/contact/GroupList';
-
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const EditGroup = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
-  const {
-    headerName,
-    folderID
-  } = route.params;
+  const { headerName, folderID } = route.params;
   const groupInfo = useSelector(({ contact }) => {
-    const groupIdx = contact.contacts.findIndex((contact)=> contact.folderType == 'R');
+    const groupIdx = contact.contacts.findIndex(
+      contact => contact.folderType == 'R',
+    );
     return contact.contacts[groupIdx].sub;
-  }).find( groupInfo => groupInfo.folderID === folderID );
+  }).find(groupInfo => groupInfo.folderID === folderID);
   const [members, setMembers] = useState([]);
   const [selectTab, setSelectTab] = useState('GM');
   const [oldMembers, setOldMembers] = useState([]);
   const [groupName, setGroupName] = useState('');
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
-    if(groupInfo?.folderName)
+    if (groupInfo?.folderName) {
       setGroupName(getDictionary(groupInfo.folderName));
+    }
 
     /* 그룹인원 0명처리 */
-    if(!groupInfo.sub)
+    if (!groupInfo.sub) {
       groupInfo.sub = [];
+    }
   }, [groupInfo]);
 
   const checkObj = useMemo(
@@ -113,20 +111,22 @@ const EditGroup = ({ route, navigation }) => {
   }, []);
 
   const handleGroupEditBtn = useCallback(() => {
-    let groupMembers = groupInfo.sub ?  [...groupInfo.sub] : [];
+    let groupMembers = groupInfo.sub ? [...groupInfo.sub] : [];
 
     /* 그룹 멤버 리스트 */
-    if(selectTab == 'GM')
-      groupMembers = groupMembers.filter(user =>{
+    if (selectTab == 'GM') {
+      groupMembers = groupMembers.filter(user => {
         let flag = true;
-        members.forEach(m =>{
-          if(m.id == user.id)
+        members.forEach(m => {
+          if (m.id == user.id) {
             flag = false;
+          }
         });
         return flag;
       });
-    else
+    } else {
       groupMembers = groupMembers.concat(members);
+    }
 
     editGroupContactList(
       dispatch,
@@ -135,33 +135,40 @@ const EditGroup = ({ route, navigation }) => {
         members,
         groupName,
         groupInfo,
-        (selectTab == 'GM' ? "D" : "A")
+        selectTab == 'GM' ? 'D' : 'A',
       ),
-      groupMembers
-    )
-    
+      groupMembers,
+    );
+
     setMembers([])
   
   },[members, groupInfo]);
 
   const handleModidyCustomGroupName = useCallback(() => {
-    let data= {
-      displayName: (groupInfo.folderName).replace(/[^\;]/g, "").replace(/[\;]/g, groupName+";"),
-      folderId: groupInfo.folderID
-    }
+    let data = {
+      displayName: groupInfo.folderName
+        .replace(/[^\;]/g, '')
+        .replace(/[\;]/g, groupName + ';'),
+      folderId: groupInfo.folderID,
+    };
     dispatch(modifyCustomGroupName(data));
 
-    Alert.alert('', getDic('Modify_Group_Name','그룹명이 변경되었습니다.'), [
+    Alert.alert('', getDic('Modify_Group_Name', '그룹명이 변경되었습니다.'), [
       { text: getDic('Close', '닫기'), onPress: () => {} },
     ]);
 
   }, [groupName, groupInfo]);
 
   const checkEditGroup = useCallback(() => {
-    if(members && members.length > 0){
-      Alert.alert('', getDic('Msg_Not_Moving_Editing','멤버 추가/제거중에는 탭을 이동 할 수 없습니다.'), [
-        { text: getDic('Close', '닫기'), onPress: () => {} },
-      ]);
+    if (members && members.length > 0) {
+      Alert.alert(
+        '',
+        getDic(
+          'Msg_Not_Moving_Editing',
+          '멤버 추가/제거중에는 탭을 이동 할 수 없습니다.',
+        ),
+        [{ text: getDic('Close', '닫기'), onPress: () => {} }],
+      );
       return false;
     }
     return true;
@@ -262,15 +269,16 @@ const EditGroup = ({ route, navigation }) => {
               handleModidyCustomGroupName();
             }}
           >
-            <Text style={styles.gbuttonText}>{"변경"}</Text>
+            <Text style={styles.gbuttonText}>{'변경'}</Text>
           </TouchableOpacity>
         </View>
-      </View> 
+      </View>
       <View style={styles.tab}>
         <TouchableOpacity
           onPress={() => {
-            if(checkEditGroup())
+            if (checkEditGroup()) {
               setSelectTab('GM');
+            }
           }}
           style={[
             styles.tabItem,
@@ -281,8 +289,9 @@ const EditGroup = ({ route, navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            if(checkEditGroup())
+            if (checkEditGroup()) {
               setSelectTab('GA');
+            }
           }}
           style={[
             styles.tabItem,
@@ -312,15 +321,17 @@ const EditGroup = ({ route, navigation }) => {
           />
         </View>
       )}
-      {members?.length > 0 &&
-        <TouchableOpacity
-          onPress={()=> handleGroupEditBtn(selectTab)}
-        >
+      {members?.length > 0 && (
+        <TouchableOpacity onPress={() => handleGroupEditBtn(selectTab)}>
           <View style={styles.editButton}>
-            <Text style={styles.editTextInfo}>{selectTab == 'GM' ? getDic('Remove', '제거'): getDic('Add', '추가')}</Text>
+            <Text style={styles.editTextInfo}>
+              {selectTab == 'GM'
+                ? getDic('Remove', '제거')
+                : getDic('Add', '추가')}
+            </Text>
           </View>
         </TouchableOpacity>
-      }
+      )}
     </View>
   );
 };
@@ -399,34 +410,34 @@ const styles = StyleSheet.create({
   tabcontent: {
     flex: 1,
   },
-  groupInput:{
+  groupInput: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    marginLeft: 10
+    marginLeft: 10,
   },
-  ginput:{
-    flex: 10
+  ginput: {
+    flex: 10,
   },
-  gbutton:{
+  gbutton: {
     flex: 2,
     margin: 20,
   },
-  gbuttonText:{
+  gbuttonText: {
     color: '#2bebf5',
-    fontSize: 15
+    fontSize: 15,
   },
-  editButton:{
+  editButton: {
     height: 45,
     backgroundColor: '#2bebf5',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  editTextInfo:{
+  editTextInfo: {
     color: 'white',
-    fontSize: 25
-  }
+    fontSize: 25,
+  },
 });
 
-export default EditGroup;
+export default withSecurityScreen(EditGroup);

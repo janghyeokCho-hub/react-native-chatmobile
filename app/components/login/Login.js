@@ -8,6 +8,7 @@ import { getConfig, getDic } from '@/config';
 import LoginBox from './LoginBox';
 import { useTheme } from '@react-navigation/native';
 import { getServer } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const Login = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -96,4 +97,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default withSecurityScreen(Login);

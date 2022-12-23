@@ -11,6 +11,7 @@ import { CommonActions } from '@react-navigation/native';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 
@@ -224,4 +225,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MoveView;
+export default withSecurityScreen(MoveView);

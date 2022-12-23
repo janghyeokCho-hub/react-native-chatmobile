@@ -20,6 +20,7 @@ import { createDocument } from '@/lib/api/shareDoc';
 import { rematchingMember } from '@/modules/room';
 import { sendChannelMessage } from '@/modules/message';
 import { sendMessage } from '@/modules/message';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const CreateDocument = ({ navigation, route, postAction }) => {
   const { colors, sizes } = useTheme();
@@ -389,4 +390,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateDocument;
+export default withSecurityScreen(CreateDocument);

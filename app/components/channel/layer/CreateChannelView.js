@@ -21,9 +21,10 @@ import DropDownBox from '@COMMON/dropdown/DropDownBox';
 import DropDownIcon from '@COMMON/icons/DropDownIcon';
 import * as channelApi from '@API/channel';
 import * as imageUtil from '@/lib/imagePickUtil';
-import { getDic, getConfig} from '@/config';
+import { getDic, getConfig } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { channel } from 'redux-saga';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const CreateChannelView = ({ navigation, route }) => {
   const { colors, sizes } = useTheme();
@@ -45,19 +46,21 @@ const CreateChannelView = ({ navigation, route }) => {
     name: '비공개',
   });
   const [channelPassword, setChannelPassword] = useState('');
-  
+
   const userInfo = useSelector(({ login }) => login.userInfo);
-  
+
   const IsSaaSClient = getConfig('IsSaaSClient', 'N');
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if(IsSaaSClient == 'Y'){
-      channelApi.getChannelCategoryListForSaaS({companyCode:userInfo.CompanyCode}).then(response => {
-        setChannelCategoryList(response.data.result);
-      });
-    }else{
+    if (IsSaaSClient == 'Y') {
+      channelApi
+        .getChannelCategoryListForSaaS({ companyCode: userInfo.CompanyCode })
+        .then(response => {
+          setChannelCategoryList(response.data.result);
+        });
+    } else {
       channelApi.getChannelCategoryList().then(response => {
         setChannelCategoryList(response.data.result);
       });
@@ -66,8 +69,11 @@ const CreateChannelView = ({ navigation, route }) => {
 
   const handleImageChange = file => {
     if (file != undefined) {
-      if (Platform.OS === 'ios') handleImageChangeForiOS(file);
-      else handleImageChangeForAndroid(file);
+      if (Platform.OS === 'ios') {
+        handleImageChangeForiOS(file);
+      } else {
+        handleImageChangeForAndroid(file);
+      }
     }
   };
 
@@ -142,7 +148,7 @@ const CreateChannelView = ({ navigation, route }) => {
           cancelable: true,
         },
       );
-    } else if (!channelCategory){
+    } else if (!channelCategory) {
       Alert.alert(
         getDic('Eumtalk'),
         getDic('Msg_InputChannelCategory'),
@@ -151,8 +157,7 @@ const CreateChannelView = ({ navigation, route }) => {
           cancelable: true,
         },
       );
-    } 
-    else {
+    } else {
       navigation.navigate('SelectChannelMemberView', {
         headerName: getDic('CreateChannel'),
         name: channelName,
@@ -330,12 +335,12 @@ const CreateChannelView = ({ navigation, route }) => {
                 <Text style={styles.dropdownPlaceholder}>
                   항목을 선택해주세요
                 </Text>
-              )} 
-              {(
+              )}
+              {
                 <Text style={styles.dropdownText}>
                   {channelCategory.categoryName}
                 </Text>
-              )}
+              }
               <View
                 style={{
                   marginLeft: 'auto',
@@ -535,4 +540,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateChannelView;
+export default withSecurityScreen(CreateChannelView);

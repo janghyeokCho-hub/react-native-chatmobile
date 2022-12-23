@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
-
 import ContactList from '@C/contact/ContactList';
 import ChatList from '@C/chat/ChatList';
 import OrgChartList from '@C/orgchart/OrgChartList';
@@ -60,7 +59,9 @@ const AppTemplate = ({ navigation }) => {
       let cnt = 0;
       if (channels) {
         channels.forEach(item => {
-          if (item.unreadCnt) cnt += item.unreadCnt;
+          if (item.unreadCnt) {
+            cnt += item.unreadCnt;
+          }
         });
       }
       return cnt;
@@ -77,7 +78,9 @@ const AppTemplate = ({ navigation }) => {
         if (data.join('') === secondAuthInfo.secondPass) {
           setSecondAuth(true);
           return true;
-        } else return false;
+        } else {
+          return false;
+        }
       }}
       handlePasswordSuccessEvent={() => {
         setSecondAuth(true);
@@ -115,9 +118,7 @@ const AppTemplate = ({ navigation }) => {
                 }}
               >
                 <Icon name={route.name} focus={focused} />
-                {
-                    <UnreadCntButton>{_unreadCnt}</UnreadCntButton>
-                }
+                {<UnreadCntButton>{_unreadCnt}</UnreadCntButton>}
               </View>
             );
           },
@@ -147,9 +148,7 @@ const AppTemplate = ({ navigation }) => {
         {useChannel === 'Y' && (
           <Tab.Screen name="Channel" component={ChannelList} />
         )}
-        {useNote?.use === 'Y' && (
-          <Tab.Screen name="Note" component={Note} />
-        )}
+        {useNote?.use === 'Y' && <Tab.Screen name="Note" component={Note} />}
         <Tab.Screen name="UserSetting" component={UserSetting} />
       </Tab.Navigator>
       <AppTemplateBack navigation={navigation} />

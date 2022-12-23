@@ -11,6 +11,7 @@ import RoomItems from './RoomItems';
 import NewChatIcon from '../common/icons/NewChatIcon';
 import SearchBar from '../common/SearchBar';
 import { getDic } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChatList = ({ navigation }) => {
   const roomList = useSelector(({ room }) => room.rooms);
@@ -194,4 +195,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatList;
+export default withSecurityScreen(ChatList);

@@ -25,6 +25,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@react-navigation/native';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr } from '@/lib/common';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const initNoImg = require('@C/assets/no_image.jpg');
 const checkBlackImg = require('@C/assets/ico_check_black.png');
@@ -531,4 +532,4 @@ const styles = StyleSheet.create({
   noPhotos: { width: '100%', alignItems: 'center', marginTop: 30 },
 });
 
-export default PhotoSummary;
+export default withSecurityScreen(PhotoSummary);

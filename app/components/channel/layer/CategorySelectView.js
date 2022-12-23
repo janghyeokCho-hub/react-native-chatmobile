@@ -22,6 +22,7 @@ import * as channelApi from '@API/channel';
 
 import EnterChannelBox from '../channelroom/controls/EnterChannelBox';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const colorList = [
   '#FFC53D',
@@ -92,7 +93,9 @@ const CategorySelectView = ({ navigation, route }) => {
         columnCnt = 0;
       }
     });
-    if (columnList.length > 0) result.push(columnList);
+    if (columnList.length > 0) {
+      result.push(columnList);
+    }
     setChannelCategoryTable(result);
   }, [channelCategoryList]);
 
@@ -376,4 +379,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CategorySelectView;
+export default withSecurityScreen(CategorySelectView);

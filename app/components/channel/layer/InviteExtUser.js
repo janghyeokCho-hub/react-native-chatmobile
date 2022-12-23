@@ -16,6 +16,7 @@ import Svg, { Path } from 'react-native-svg';
 import { CommonActions } from '@react-navigation/native';
 import { getServer, getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ico_plus = require('@C/assets/ico_plus.png');
 
@@ -342,4 +343,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InviteExtUser;
+export default withSecurityScreen(InviteExtUser);

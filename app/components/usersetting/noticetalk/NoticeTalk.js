@@ -19,6 +19,7 @@ import { chatsvr } from '@API/api';
 import { useTheme } from '@react-navigation/native';
 import LoadingWrap from '../../common/LoadingWrap';
 import { checkURL } from '@/lib/common';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const NoticeTalk = ({ navigation, route }) => {
   const { params = {} } = route;
@@ -32,15 +33,15 @@ const NoticeTalk = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [recipient, setRecipient] = useState([]);
   const [url, setUrl] = useState('');
-  const [validURL, setValidURL] = useState(false)
+  const [validURL, setValidURL] = useState(false);
 
-  useEffect(()=>{
-    if(url && checkURL(url).isURL){
-      setValidURL(true)
-    }else{
-      setValidURL(false)
+  useEffect(() => {
+    if (url && checkURL(url).isURL) {
+      setValidURL(true);
+    } else {
+      setValidURL(false);
     }
-  },[url])
+  }, [url]);
 
   async function handleSend() {
     let subjectId = '';
@@ -83,7 +84,6 @@ const NoticeTalk = ({ navigation, route }) => {
       );
       return;
     }
-
 
     if (url && !validURL) {
       setIsLoading(false);
@@ -209,8 +209,6 @@ const NoticeTalk = ({ navigation, route }) => {
   );
 };
 
-export default NoticeTalk;
-
 const styles = StyleSheet.create({
   contanier: {
     flex: 1,
@@ -232,3 +230,5 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
   },
 });
+
+export default withSecurityScreen(NoticeTalk);

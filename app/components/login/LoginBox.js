@@ -26,6 +26,7 @@ import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { getServer } from '@/config';
 import MemoTextInput from '@C/common/inputs/MemoTextInput';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const LoginBox = ({ route }) => {
   const { colors, sizes } = useTheme();
@@ -137,9 +138,9 @@ const LoginBox = ({ route }) => {
     }
   }, [authFail]);
 
-  const handleChangeId = userId =>{
-    setUserId(userId)
-  }
+  const handleChangeId = userId => {
+    setUserId(userId);
+  };
 
   return (
     <>
@@ -163,11 +164,9 @@ const LoginBox = ({ route }) => {
                 memKey="id"
                 changeHandler={handleChangeId}
                 value={userId}
-                placeholder={
-                  isExtUser ? getDic('Email') : getDic('LoginID')
-                }
+                placeholder={isExtUser ? getDic('Email') : getDic('LoginID')}
                 disabled={loading}
-              ></MemoTextInput>
+              />
 
               <TextInput
                 style={{ ...styles.textForm_Type2, fontSize: sizes.large }}
@@ -269,4 +268,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginBox;
+export default withSecurityScreen(LoginBox);

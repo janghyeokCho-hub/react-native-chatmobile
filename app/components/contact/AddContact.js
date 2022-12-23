@@ -15,15 +15,16 @@ import OrgChartList from '../orgchart/OrgChartList';
 import ProfileBox from '../common/ProfileBox';
 import {
   addContactList,
-  editGroupContactList, 
-  getApplyGroupInfo
+  editGroupContactList,
+  getApplyGroupInfo,
 } from '@/lib/contactUtil';
 import Svg, { Circle, Path, G } from 'react-native-svg';
 import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import TitleInputBox from '@COMMON/TitleInputBox';
-import { addCustomGroup } from "@/modules/contact";
+import { addCustomGroup } from '@/modules/contact';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const AddContact = ({ navigation, route }) => {
   const { colors, sizes } = useTheme();
@@ -33,19 +34,19 @@ const AddContact = ({ navigation, route }) => {
   }));
 
   const [selectors, setSelectors] = useState([]);
-  const [groupName, setGroupName] = useState("");
+  const [groupName, setGroupName] = useState('');
   const useGroup = route.params.useGroup;
   const dispatch = useDispatch();
 
   let oldContactList = [{ id: userID }];
 
-  if(!useGroup){
+  if (!useGroup) {
     contacts.forEach(item => {
-      if ((item.folderType == 'F' || item.folderType == 'C') && item.sub)
+      if ((item.folderType == 'F' || item.folderType == 'C') && item.sub) {
         item.sub.forEach(itemSub => {
           oldContactList.push(itemSub);
         });
-      else if (item.folderType == 'G' || item.folderType == 'M') {
+      } else if (item.folderType == 'G' || item.folderType == 'M') {
         oldContactList.push({ id: item.groupCode });
       }
     });
@@ -99,21 +100,23 @@ const AddContact = ({ navigation, route }) => {
     handleClose();
   }, [selectors]);
 
-  const handleAddGroupBtn = useCallback(()=>{
+  const handleAddGroupBtn = useCallback(() => {
     /* 그룹명 미 입력시 Alert Msg*/
-    if(groupName === ""){
-      Alert.alert('', getDic('Please_Input_GroupName','그룹명을 입력해주세요.'), [
-        { text: getDic('Close', '닫기'), onPress: () => {} },
-      ]);
-      return; 
+    if (groupName === '') {
+      Alert.alert(
+        '',
+        getDic('Please_Input_GroupName', '그룹명을 입력해주세요.'),
+        [{ text: getDic('Close', '닫기'), onPress: () => {} }],
+      );
+      return;
     }
-    
+
     /* 그룹 생성 */
     editGroupContactList(
-      dispatch, 
-      addCustomGroup, 
-      getApplyGroupInfo(selectors, groupName), 
-      selectors
+      dispatch,
+      addCustomGroup,
+      getApplyGroupInfo(selectors, groupName),
+      selectors,
     );
 
     handleClose();
@@ -138,10 +141,16 @@ const AddContact = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.titleView}>
-          <Text style={styles.modaltit}>{useGroup? getDic('Create_Group', '그룹 생성'): getDic('AddContact')}</Text>
+          <Text style={styles.modaltit}>
+            {useGroup
+              ? getDic('Create_Group', '그룹 생성')
+              : getDic('AddContact')}
+          </Text>
         </View>
         <View style={styles.okbtnView}>
-          <TouchableOpacity onPress={(useGroup ? handleAddGroupBtn : handleAddBtn)}>
+          <TouchableOpacity
+            onPress={useGroup ? handleAddGroupBtn : handleAddBtn}
+          >
             <View style={styles.topBtn}>
               <Text
                 style={{
@@ -211,7 +220,7 @@ const AddContact = ({ navigation, route }) => {
           horizontal
         />
       </View>
-      {useGroup ?
+      {useGroup ? (
         <View>
           <TitleInputBox
             title={getDic('Group_Name', '그룹 이름')}
@@ -221,8 +230,8 @@ const AddContact = ({ navigation, route }) => {
             }}
             value={groupName}
           />
-        </View> 
-      : null}
+        </View>
+      ) : null}
       <View style={styles.tabcontent}>
         <OrgChartList
           viewType="checklist"
@@ -293,4 +302,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddContact;
+export default withSecurityScreen(AddContact);
