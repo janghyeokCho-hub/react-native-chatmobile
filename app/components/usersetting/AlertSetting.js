@@ -10,6 +10,7 @@ import {
 import messaging from '@react-native-firebase/messaging';
 import { getDic, getConfig } from '@/config';
 import { changeMyInfo } from '@/modules/login';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const AlertSetting = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -125,4 +126,5 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
 });
-export default AlertSetting;
+
+export default withSecurityScreen(AlertSetting);

@@ -5,6 +5,7 @@ import SlideCheckedBox from '@COMMON/SlideCheckedBox';
 import { getDic } from '@/config';
 import { restartApp } from '@/lib/device/common';
 import * as dbAction from '@/lib/appData/action';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const AppLockSetting = ({ navigation }) => {
   const [secondPasswordSetting, setSecondPasswordSetting] = useState(false);
@@ -123,4 +124,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-export default AppLockSetting;
+
+export default withSecurityScreen(AppLockSetting);

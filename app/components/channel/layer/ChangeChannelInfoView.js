@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Image,
+  Platform,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
@@ -22,6 +23,7 @@ import * as imageUtil from '@/lib/imagePickUtil';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import { modifyChannelInfo } from '@/modules/channel';
 import { uploadChannelIcon } from '@/lib/api/channel';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChangeChannelInfoView = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
@@ -40,8 +42,20 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
   const IsSaaSClient = getConfig('IsSaaSClient', 'N');
 
   useEffect(() => {
-    if(IsSaaSClient == 'Y'){
-      channelApi.getChannelCategoryListForSaaS({companyCode:userInfo.CompanyCode}).then(response => {
+    if (IsSaaSClient == 'Y') {
+      channelApi
+        .getChannelCategoryListForSaaS({ companyCode: userInfo.CompanyCode })
+        .then(response => {
+          setChannelCategory({
+            categoryName: channleInfo.categoryName,
+            categoryCode: channleInfo.categoryCode,
+          });
+          setChannelCategoryList(response.data.result);
+          setChannelName(channleInfo.roomName);
+          setChannelDescription(channleInfo.description);
+        });
+    } else {
+      channelApi.getChannelCategoryList().then(response => {
         setChannelCategory({
           categoryName: channleInfo.categoryName,
           categoryCode: channleInfo.categoryCode,
@@ -50,23 +64,16 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
         setChannelName(channleInfo.roomName);
         setChannelDescription(channleInfo.description);
       });
-    }else{
-    channelApi.getChannelCategoryList().then(response => {
-      setChannelCategory({
-        categoryName: channleInfo.categoryName,
-        categoryCode: channleInfo.categoryCode,
-      });
-      setChannelCategoryList(response.data.result);
-      setChannelName(channleInfo.roomName);
-      setChannelDescription(channleInfo.description);
-    });
-  }
+    }
   }, []);
 
   const handleImageChange = file => {
     if (file != undefined) {
-      if (Platform.OS === 'ios') handleImageChangeForiOS(file);
-      else handleImageChangeForAndroid(file);
+      if (Platform.OS === 'ios') {
+        handleImageChangeForiOS(file);
+      } else {
+        handleImageChangeForAndroid(file);
+      }
     }
   };
 
@@ -344,7 +351,7 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
                         if (data.flag === true) {
                           params.iconPath = data.photoPath;
                           // icon 변경 추가 - 리덕스 저장
-                          reqDatas = {...reqDatas,iconPath:data.photoPath} 
+                          reqDatas = { ...reqDatas, iconPath: data.photoPath };
                         }
                         Alert.alert(
                           getDic('Eumtalk'),
@@ -523,4 +530,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChangeChannelInfoView;
+export default withSecurityScreen(ChangeChannelInfoView);

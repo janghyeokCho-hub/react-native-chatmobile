@@ -19,6 +19,7 @@ import {
 } from '@/config';
 import { openModal, changeModal, closeModal } from '@/modules/modal';
 import { setUserDefinedSettings } from '@/lib/api/setting';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const getJobInfoName = jobInfo => {
   switch (jobInfo) {
@@ -82,7 +83,9 @@ const getThemeColor = theme => {
   const themeLists = getConfig('ClientThemeList');
 
   const findItem = themeLists.find(item => item.name === theme);
-  if (findItem) color = findItem.value;
+  if (findItem) {
+    color = findItem.value;
+  }
 
   return color;
 };
@@ -539,4 +542,5 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
 });
-export default ChatSetting;
+
+export default withSecurityScreen(ChatSetting);

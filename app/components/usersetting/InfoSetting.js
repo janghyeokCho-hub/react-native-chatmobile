@@ -19,6 +19,7 @@ import { changeMyInfo, changeMyPhotoPath } from '@/modules/login';
 import { getServer, getConfig, getDic } from '@/config';
 import { getJobInfo } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const InfoSetting = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -458,4 +459,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-export default InfoSetting;
+
+export default withSecurityScreen(InfoSetting);

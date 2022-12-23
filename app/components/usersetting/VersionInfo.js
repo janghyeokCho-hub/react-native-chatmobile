@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Image, Text } from 'react-native';
 import { getServer } from '@/config';
 import VersionCheck from 'react-native-version-check';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const VersionInfo = () => {
   const version = VersionCheck.getCurrentVersion();
@@ -44,4 +45,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VersionInfo;
+export default withSecurityScreen(VersionInfo);

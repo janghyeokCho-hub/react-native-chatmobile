@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import useSWR from 'swr';
 import { managesvr } from '@API/api';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 function Header({ title }) {
   const navigation = useNavigation();
@@ -111,8 +112,6 @@ const AddChannel = ({ navigation, route }) => {
   );
 };
 
-export default AddChannel;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -172,3 +171,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default withSecurityScreen(AddChannel);

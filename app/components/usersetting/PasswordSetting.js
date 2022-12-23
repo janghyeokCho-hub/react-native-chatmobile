@@ -12,6 +12,7 @@ import { getAesUtil } from '@/lib/AesUtil';
 import { modifyUserPassword } from '@/lib/api/setting';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const PasswordSetting = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -266,4 +267,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-export default PasswordSetting;
+
+export default withSecurityScreen(PasswordSetting);

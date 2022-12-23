@@ -9,6 +9,7 @@ import { getDic } from '@/config';
 import { getRoomDicList } from '@/lib/api/shareDoc';
 import { Alert } from 'react-native';
 import { changeModal, openModal, closeModal } from '@/modules/modal';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const DocSummary = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -206,4 +207,5 @@ const styles = StyleSheet.create({
   },
   emptyListStyle: {},
 });
-export default DocSummary;
+
+export default withSecurityScreen(DocSummary);

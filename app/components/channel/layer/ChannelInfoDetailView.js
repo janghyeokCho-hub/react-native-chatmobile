@@ -6,6 +6,7 @@ import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import NotFoundIcon from '@/components/common/icons/NotFoundIcon';
 import TitleInputBox from '@COMMON/TitleInputBox';
 import { getDic, getServer, getConfig } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChannelInfoDetailView = ({ route, navigation }) => {
   const channleInfo = route.params.channelInfo;
@@ -19,17 +20,19 @@ const ChannelInfoDetailView = ({ route, navigation }) => {
   const IsSaaSClient = getConfig('IsSaaSClient', 'N');
 
   useEffect(() => {
-    if(IsSaaSClient == 'Y'){
-    channelApi.getChannelCategoryListForSaaS({companyCode:userInfo.CompanyCode}).then(response => {
-      setChannelCategory(channleInfo);
-      setChannelCategoryList(response.data.result);
-    });
-  }else{
-    channelApi.getChannelCategoryList().then(response => {
-      setChannelCategory(channleInfo);
-      setChannelCategoryList(response.data.result);
-    });
-  }
+    if (IsSaaSClient == 'Y') {
+      channelApi
+        .getChannelCategoryListForSaaS({ companyCode: userInfo.CompanyCode })
+        .then(response => {
+          setChannelCategory(channleInfo);
+          setChannelCategoryList(response.data.result);
+        });
+    } else {
+      channelApi.getChannelCategoryList().then(response => {
+        setChannelCategory(channleInfo);
+        setChannelCategoryList(response.data.result);
+      });
+    }
   }, []);
 
   return (
@@ -275,4 +278,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChannelInfoDetailView;
+export default withSecurityScreen(ChannelInfoDetailView);

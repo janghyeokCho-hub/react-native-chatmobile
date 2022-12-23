@@ -13,6 +13,7 @@ import MessageView from '@C/chat/chatroom/normal/MessageView';
 import SearchView from '@C/common/search/SearchView';
 import * as fileUtil from '@/lib/fileUtil';
 import { Text } from 'react-native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChatRoom = ({ navigation, route }) => {
   const userId = useSelector(({ login }) => login.id);
@@ -45,13 +46,13 @@ const ChatRoom = ({ navigation, route }) => {
     return () => {
       dispatch(closeRoom());
     };
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     // init
     dispatch(getRoomInfo({ roomID }));
     setSearchVisible(false);
-  }, [roomID]);
+  }, [dispatch, roomID]);
 
   useEffect(() => {
     // presence - room members
@@ -67,7 +68,7 @@ const ChatRoom = ({ navigation, route }) => {
         dispatch(delTargetUserList(room.members.map(item => item.presence)));
       }
     };
-  }, [room]);
+  }, [dispatch, room]);
 
   const handleMessage = async ({
     message,
@@ -158,4 +159,4 @@ const ChatRoom = ({ navigation, route }) => {
   );
 };
 
-export default ChatRoom;
+export default withSecurityScreen(ChatRoom);

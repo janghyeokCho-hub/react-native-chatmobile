@@ -14,6 +14,7 @@ import ChatMenuBox from '../layer/ChatMenuBox';
 import Drawer from 'react-native-drawer';
 import { getTopPadding } from '@/lib/device/common';
 import { getDic } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const MakeRoom = ({ route, navigation }) => {
   const blockUser = useSelector(({ login }) => login.blockList);
@@ -250,4 +251,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MakeRoom;
+export default withSecurityScreen(MakeRoom);

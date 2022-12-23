@@ -10,6 +10,8 @@ import { isJSONStr } from '@/lib/common';
 import LoadingWrap from '@COMMON/LoadingWrap';
 import { modifyRoomSetting } from '@/modules/room';
 import { modifyChannelSetting } from '@/modules/channel';
+import { withSecurityScreen } from '@/withSecurityScreen';
+
 const ChatSettingBox = ({ route, navigation }) => {
   const { info, isChannel } = route.params;
 
@@ -148,4 +150,4 @@ const styles = StyleSheet.create({
   contentBox: { flex: 1, backgroundColor: 'white', flexDirection: 'column' },
 });
 
-export default ChatSettingBox;
+export default withSecurityScreen(ChatSettingBox);

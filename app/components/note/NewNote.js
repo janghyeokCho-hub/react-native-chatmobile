@@ -55,6 +55,7 @@ import {
 import DirectionIcon from '@/components/common/icons/DirectionIcon';
 import AddChannelIcon from '@/components/common/icons/AddChannelIcon';
 import NoteFile from '@/components/note/NoteFile';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const styles = StyleSheet.create({
   contanier: {
@@ -675,4 +676,4 @@ function NewNote({ navigation, route }) {
   );
 }
 
-export default React.memo(NewNote);
+export default React.memo(withSecurityScreen(NewNote));

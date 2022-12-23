@@ -23,6 +23,7 @@ import ChannelMessageView from '@C/channel/channelroom/ChannelMessageView';
 import * as fileUtil from '@/lib/fileUtil';
 import SearchView from '@C/common/search/SearchView';
 import { Text } from 'react-native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChannelRoom = ({ navigation, route }) => {
   let roomID;
@@ -188,4 +189,4 @@ const ChannelRoom = ({ navigation, route }) => {
   );
 };
 
-export default ChannelRoom;
+export default withSecurityScreen(ChannelRoom);

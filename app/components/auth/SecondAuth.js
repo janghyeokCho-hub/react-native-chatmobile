@@ -11,6 +11,7 @@ import {
 import { getDic } from '@/config';
 import BackButtonIcon from '@C/common/icons/BackButtonIcon';
 import BiometricsContainer from '@C/biometrics/BiometricsContainer';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const SecondAuth = ({
   route,
@@ -34,7 +35,9 @@ const SecondAuth = ({
     secPassword.map(item => {
       ref.push(item);
     });
-    if (ref.length < 4) ref.push(value);
+    if (ref.length < 4) {
+      ref.push(value);
+    }
     if (ref.length == 4) {
       const doubleCheckEvent =
         route != null ? route.params.handlePasswordDoubleCheckEvent : null;
@@ -368,4 +371,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SecondAuth;
+export default withSecurityScreen(SecondAuth);

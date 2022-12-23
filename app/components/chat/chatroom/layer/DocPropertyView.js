@@ -18,6 +18,7 @@ import { updateDocument } from '@/lib/api/shareDoc';
 import { sendMessage, sendChannelMessage } from '@/modules/message';
 import { rematchingMember } from '@/modules/room';
 import { getDocItem as getDocItemAPI } from '@API/shareDoc';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const DocPropertyView = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -313,4 +314,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 });
-export default DocPropertyView;
+
+export default withSecurityScreen(DocPropertyView);

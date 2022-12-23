@@ -28,6 +28,7 @@ import OrgChartList from '@C/orgchart/OrgChartList';
 import ChatList from '@C/share/chat/ChatList';
 import ChannelList from '@C/share/channel/ChannelList';
 import { makeParams, handleMessage, handleShareFile } from '@C/share/share';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ShareContainer = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -759,4 +760,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-export default ShareContainer;
+
+export default withSecurityScreen(ShareContainer);

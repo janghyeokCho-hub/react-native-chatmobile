@@ -16,7 +16,6 @@ import DeviceInfo from 'react-native-device-info';
 import getUpdater from '@/lib/class/Updater';
 import getTheme from '@/config/theme';
 import ScreenCaptureSecure from 'react-native-screen-capture-secure';
-import { withSecurityScreen } from './withSecurityScreen';
 
 // OS 폰트 크기 무시
 Text.defaultProps = Text.defaultProps || {};
@@ -119,4 +118,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withSecurityScreen(App);
+export default App;

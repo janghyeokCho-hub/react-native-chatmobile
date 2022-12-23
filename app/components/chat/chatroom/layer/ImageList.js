@@ -24,6 +24,7 @@ import Svg, { Path } from 'react-native-svg';
 import { getDic, getConfig } from '@/config';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Dimensions } from 'react-native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ImageFile = forwardRef(
   ({ item, index, handleSelectList, selectedIndexes }, ref) => {
@@ -401,4 +402,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ImageList;
+export default withSecurityScreen(ImageList);

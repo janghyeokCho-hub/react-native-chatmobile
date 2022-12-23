@@ -23,6 +23,7 @@ import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { isBlockCheck } from '@/lib/api/orgchart';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const InviteMember = ({ route, navigation }) => {
   const { colors, sizes } = useTheme();
@@ -222,7 +223,7 @@ const InviteMember = ({ route, navigation }) => {
             } else {
               handleAddBtnCallback(inviteMembers);
             }
-          } else
+          } else {
             Alert.alert(null, getDic('Msg_ExceptExistEmpty'), [
               {
                 text: getDic('Ok'),
@@ -231,6 +232,7 @@ const InviteMember = ({ route, navigation }) => {
                 },
               },
             ]);
+          }
         });
       } else {
         handleAddBtnCallback(inviteMembers);
@@ -299,7 +301,9 @@ const InviteMember = ({ route, navigation }) => {
       handleClose();
     }
 
-    if (callBack) callBack();
+    if (callBack) {
+      callBack();
+    }
   };
 
   return (
@@ -520,4 +524,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InviteMember;
+export default withSecurityScreen(InviteMember);

@@ -19,6 +19,7 @@ import { getDictionary } from '@/lib/common';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
 import { filterSearchGroupMember } from '@/lib/contactUtil';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const OrgChartList = ({ viewType, checkObj, group, navigation }) => {
   const { colors, sizes } = useTheme();
@@ -320,4 +321,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrgChartList;
+export default withSecurityScreen(OrgChartList);

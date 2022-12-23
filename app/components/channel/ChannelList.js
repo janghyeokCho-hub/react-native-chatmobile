@@ -19,6 +19,7 @@ import { getDic } from '@/config';
 import * as channelApi from '@/lib/api/channel';
 import { moveToChannelRoom } from '@/lib/channelUtil';
 import { getConfig } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChannelList = ({ navigation }) => {
   const { sizes } = useTheme();
@@ -132,8 +133,11 @@ const ChannelList = ({ navigation }) => {
     let updateList = [];
     if (channelList) {
       channelList.forEach(c => {
-        if (c.categoryCode === null) updateList.push(c.roomId);
-        else if (c.updateDate === null) updateList.push(c.roomId);
+        if (c.categoryCode === null) {
+          updateList.push(c.roomId);
+        } else if (c.updateDate === null) {
+          updateList.push(c.roomId);
+        }
       });
     }
     if (updateList.length > 0) {
@@ -259,4 +263,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChannelList;
+export default withSecurityScreen(ChannelList);

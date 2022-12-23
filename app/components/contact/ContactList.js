@@ -16,6 +16,7 @@ import { getDic } from '@/config';
 import { getAbsence } from '@/modules/absence';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { getContacts } from '@/modules/contact';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ContactList = ({ viewType, checkObj, navigation }) => {
   const chineseWall = useSelector(({ login }) => login.chineseWall);
@@ -340,4 +341,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ContactList;
+export default withSecurityScreen(ContactList);

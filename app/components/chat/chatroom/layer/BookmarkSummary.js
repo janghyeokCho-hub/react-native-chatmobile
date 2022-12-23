@@ -16,6 +16,7 @@ import useSWR from 'swr';
 import { isBlockCheck } from '@/lib/api/orgchart';
 import { isJSONStr, getJobInfo, getSysMsgFormatStr } from '@/lib/common';
 import { getBookmarkList, deleteBookmark } from '@API/message';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const BookmarkSummary = ({ route, navigation }) => {
   const { roomID } = route.params;
@@ -274,4 +275,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookmarkSummary;
+export default withSecurityScreen(BookmarkSummary);

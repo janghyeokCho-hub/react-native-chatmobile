@@ -23,6 +23,7 @@ import { CommonActions } from '@react-navigation/native';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import { getJobInfo } from '@/lib/common';
 import { getDic } from '@/config';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const cancelBtnImg = require('@C/assets/ico_cancelbutton.png');
 const selectDelImg = require('@C/assets/ico_select_delete.png');
@@ -416,4 +417,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SelectChannelMemberView;
+export default withSecurityScreen(SelectChannelMemberView);

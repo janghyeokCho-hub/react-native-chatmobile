@@ -13,6 +13,7 @@ import { logoutRequest } from '@/modules/login';
 import Svg, { G, Path, Circle, Rect } from 'react-native-svg';
 import { getDic } from '@/config';
 import { useTheme } from '@react-navigation/native';
+import { withSecurityScreen } from '@/withSecurityScreen';
 
 const UserSetting = ({ navigation, props }) => {
   const { sizes } = useTheme();
@@ -44,7 +45,6 @@ const UserSetting = ({ navigation, props }) => {
       { cancelable: true },
     );
   };
-
 
   return (
     <View style={styles.container}>
@@ -408,4 +408,4 @@ const styles = StyleSheet.create({
   wrapButtonTitle: { marginLeft: 10 },
 });
 
-export default UserSetting;
+export default withSecurityScreen(UserSetting);
