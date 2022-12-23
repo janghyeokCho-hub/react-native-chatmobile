@@ -168,8 +168,7 @@ const SearchHeader = ({
       <View style={styles.top}>
         <View
           style={{
-            width:
-              Platform.OS === 'ios' && pickerItems?.length === 1 ? 120 : 36,
+            width: 140,
             ...styles.searchIcon,
           }}
         >
