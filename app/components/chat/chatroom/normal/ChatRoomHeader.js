@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ProfileBox from '@/components/common/ProfileBox';
 import {
@@ -15,6 +15,7 @@ import { getDic } from '@/config';
 import { getJobInfo } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import { Alert } from 'react-native';
+import RoomMemberBox from '@C/chat/RoomMemberBox';
 
 const makeRoomName = (room, id, isInherit, sizes) => {
   // 방 이름 생성하는 규칙 처리 필요
@@ -25,7 +26,9 @@ const makeRoomName = (room, id, isInherit, sizes) => {
 
       if (room.roomType === 'M') {
         filterMember = room.members.filter(item => {
-          if (item.id === id) return false;
+          if (item.id === id) {
+            return false;
+          }
           return true;
         });
       } else if (room.roomType === 'O') {
@@ -44,8 +47,17 @@ const makeRoomName = (room, id, isInherit, sizes) => {
               img={target.photoPath}
               style={styles.headerProfile}
             />
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: "50%" }}>
-              <Text style={{ fontSize: sizes.default, maxWidth:'100%' }} numberOfLines={2}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 10,
+              }}
+            >
+              <Text
+                style={{ fontSize: sizes.default, maxWidth: '100%' }}
+                numberOfLines={1}
+              >
                 {getJobInfo(target)}
               </Text>
               {target.isMobile === 'Y' && (
@@ -99,18 +111,40 @@ const makeRoomName = (room, id, isInherit, sizes) => {
             img={target.photoPath}
             style={styles.headerProfile}
           />
-          <View>
-            <Text style={{ fontSize: sizes.default }}>{target.name}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
+              {target.name}
+            </Text>
           </View>
         </>
       );
     } else {
       return (
         <>
-          <View>
-            <Text style={{ fontSize: sizes.default }}>
-              {room.roomName == '' ? getDic('GroupChatRoom') : room.roomName} (
-              {room.members.length})
+          <RoomMemberBox
+            type="G"
+            data={room.members}
+            roomID={room.roomID}
+            style={styles.headerProfile}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
+              {room.roomName == ''
+                ? getDic('GroupChatRoom', '그룹채팅방')
+                : room.roomName}{' '}
+              ({room.members.length})
             </Text>
           </View>
         </>
@@ -127,7 +161,7 @@ const ChatRoomHeader = ({
   onSearchBox,
   openSideMenu,
   navigation,
-  cancelToken
+  cancelToken,
 }) => {
   const { colors, sizes } = useTheme();
   const { tempMessage, id } = useSelector(({ message, login }) => ({
@@ -148,33 +182,39 @@ const ChatRoomHeader = ({
     onSearchBox(true);
   };
 
-  const backButtonHandler = () => {
+  const backButtonHandler = useCallback(() => {
     if (tempMessage && tempMessage.length > 0) {
-      tempMessage.map(item => {
-        if (item.sendFileInfo && item.sendFileInfo.files.length > 0) {
-          Alert.alert(getDic('Eumtalk'), getDic('Msg_FileSendingClose'), [
-            {
-              text: getDic('Ok'),
-              onPress: () => {
-                cancelToken.cancel();
-                navigation.dispatch(CommonActions.goBack);
-              },
+      const hasPendingFile = tempMessage.some(
+        item => item.sendFileInfo && item.sendFileInfo.files.length > 0,
+      );
+
+      if (hasPendingFile) {
+        Alert.alert(getDic('Eumtalk'), getDic('Msg_FileSendingClose'), [
+          {
+            text: getDic('Ok'),
+            onPress: () => {
+              cancelToken.cancel();
+              navigation.dispatch(CommonActions.goBack);
             },
-            {
-              text: getDic('Cancel'),
-            },
-          ]);
-        }
-      });
-      return true;
-    } else navigation.dispatch(CommonActions.goBack);
-  };
+          },
+          { text: getDic('Cancel') },
+        ]);
+
+        return true;
+      }
+    }
+
+    navigation.dispatch(CommonActions.goBack);
+  }, [tempMessage, cancelToken, navigation]);
 
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backButtonHandler,
+    );
 
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
+      BackHandler.removeEventListener('hardwareBackPress', backHandler);
     };
   }, [backButtonHandler]);
 
@@ -205,7 +245,9 @@ const ChatRoomHeader = ({
                   );
                 }
               });
-            } else navigation.dispatch(CommonActions.goBack);
+            } else {
+              navigation.dispatch(CommonActions.goBack);
+            }
           }}
         >
           <Svg width="7.131" height="12.78" viewBox="0 0 7.131 12.78">
@@ -218,10 +260,8 @@ const ChatRoomHeader = ({
             />
           </Svg>
         </TouchableOpacity>
-
-        {roomInfo && roomName}
-
-        <View style={styles.leftMenuBox}>
+        <View style={styles.roomTitle}>{roomInfo && roomName}</View>
+        <View style={styles.rightMenuBox}>
           <>
             {/* 검색 버튼 */}
             {onSearchBox &&
@@ -268,32 +308,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
     borderBottomColor: '#DDDDDD',
     borderBottomWidth: 1,
+    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingLeft: 20,
+    paddingRight: 20,
   },
-  topBackBtn: {
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-  },
-  searchBtn: {
-    padding: 20,
-    paddingRight: 0,
-    height: '100%',
+  topBackBtn: { flex: 1 },
+  roomTitle: {
+    flex: 2,
+    flexDirection: 'row',
     justifyContent: 'center',
   },
-  menuBtn: {
-    padding: 20,
-    paddingLeft: 22,
-    height: '100%',
-    justifyContent: 'center',
-  },
-  leftMenuBox: {
+  rightMenuBox: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
+  searchBtn: { marginRight: 15 },
+  menuBtn: {},
   headerProfile: {
     width: 40,
     height: 40,

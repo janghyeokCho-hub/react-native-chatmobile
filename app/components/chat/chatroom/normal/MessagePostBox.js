@@ -184,14 +184,14 @@ const MessagePostBox = ({
       }
       dispatch(setPostReplyMessage(null));
     },
-    [currentChannel, postAction, scrollToStart, replyID, replyInfo],
+    [handleSendImage, dispatch, currentChannel, postAction, replyID, replyInfo],
   );
 
   useEffect(() => {
     if (currentChannel) {
       handleTextChange(context);
     }
-  }, [currentChannel, context]);
+  }, [currentChannel, context, handleTextChange]);
 
   useEffect(() => {
     setInputLock(isLock);
@@ -490,7 +490,9 @@ const MessagePostBox = ({
               }`,
               [{ text: getDic('Ok') }],
             );
-          } else handleImageChange(data);
+          } else {
+            handleImageChange(data);
+          }
         },
         () => {},
       );
@@ -660,7 +662,7 @@ const MessagePostBox = ({
                 }
               }}
             >
-              <View style={[styles.extensionBtn, { marginRight: 5 }]}>
+              <View style={[styles.extensionBtn, { marginRight: 10 }]}>
                 <View>
                   <Image source={ico_plus} />
                 </View>
@@ -671,8 +673,11 @@ const MessagePostBox = ({
             disabled={disabled}
             onPress={e => {
               if (!disabled && !inputLock) {
-                if (extension == 'S') onExtension('');
-                else onExtension('S');
+                if (extension == 'S') {
+                  onExtension('');
+                } else {
+                  onExtension('S');
+                }
                 Keyboard.dismiss();
                 e.stopPropagation();
               }
@@ -862,8 +867,11 @@ const MessagePostBox = ({
             </TouchableOpacity>
           </View>
         )}
-      {extension === 'S' && <StickerLayer onClick={handleEmoticon} />}
+      {/* 확장 메뉴 목록 */}
       {extension === 'E' && <ExtensionLayer onClick={extensionCallback} />}
+      {/* 이모티콘 목록 */}
+      {extension === 'S' && <StickerLayer onClick={handleEmoticon} />}
+      {/* 공유파일 목록 */}
       {extension === 'D' && (
         <ShareDocLayer
           handleDocumentControl={handleDocumentControl}
@@ -882,10 +890,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
     flexDirection: 'row',
     width: '100%',
-    padding: 5,
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingTop: 10,
+    paddingBottom: 10,
+    alignItems: 'center',
   },
   buttonBox: {
-    marginTop: 3,
     /**
      * 2021.04.30
      * minWidth, maxWidth
@@ -901,8 +912,8 @@ const styles = StyleSheet.create({
     maxWidth: 80,
     height: '100%',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'flex-start',
   },
   extensionBtn: {
     width: 30,
@@ -916,6 +927,8 @@ const styles = StyleSheet.create({
   },
   messageInput: {
     flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
     padding: 5,
     borderRadius: 15,
     justifyContent: 'center',
@@ -923,17 +936,14 @@ const styles = StyleSheet.create({
   },
   messagePostBox: {
     width: '100%',
-    maxHeight: 80,
+    minHeight: 20,
+    maxHeight: 100,
     paddingTop: 0,
     marginLeft: 5,
     paddingBottom: 0,
   },
-
   sendBtnWrap: {
     width: 40,
-    marginTop: 3,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
   },
   sendBtn: {
     alignItems: 'center',
