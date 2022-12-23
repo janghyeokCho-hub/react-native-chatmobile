@@ -184,14 +184,14 @@ const MessagePostBox = ({
       }
       dispatch(setPostReplyMessage(null));
     },
-    [currentChannel, postAction, scrollToStart, replyID, replyInfo],
+    [handleSendImage, dispatch, currentChannel, postAction, replyID, replyInfo],
   );
 
   useEffect(() => {
     if (currentChannel) {
       handleTextChange(context);
     }
-  }, [currentChannel, context]);
+  }, [currentChannel, context, handleTextChange]);
 
   useEffect(() => {
     setInputLock(isLock);
@@ -893,6 +893,7 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     paddingRight: 15,
     paddingTop: 10,
+    paddingBottom: 10,
     alignItems: 'center',
   },
   buttonBox: {
