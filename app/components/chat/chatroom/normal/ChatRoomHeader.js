@@ -26,7 +26,9 @@ const makeRoomName = (room, id, isInherit, sizes) => {
 
       if (room.roomType === 'M') {
         filterMember = room.members.filter(item => {
-          if (item.id === id) return false;
+          if (item.id === id) {
+            return false;
+          }
           return true;
         });
       } else if (room.roomType === 'O') {
@@ -45,8 +47,17 @@ const makeRoomName = (room, id, isInherit, sizes) => {
               img={target.photoPath}
               style={styles.headerProfile}
             />
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: "50%" }}>
-              <Text style={{ fontSize: sizes.default, maxWidth:'100%' }} numberOfLines={2}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 10,
+              }}
+            >
+              <Text
+                style={{ fontSize: sizes.default, maxWidth: '100%' }}
+                numberOfLines={1}
+              >
                 {getJobInfo(target)}
               </Text>
               {target.isMobile === 'Y' && (
@@ -100,8 +111,16 @@ const makeRoomName = (room, id, isInherit, sizes) => {
             img={target.photoPath}
             style={styles.headerProfile}
           />
-          <View>
-            <Text style={{ fontSize: sizes.default }}>{target.name}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
+              {target.name}
+            </Text>
           </View>
         </>
       );
@@ -142,7 +161,7 @@ const ChatRoomHeader = ({
   onSearchBox,
   openSideMenu,
   navigation,
-  cancelToken
+  cancelToken,
 }) => {
   const { colors, sizes } = useTheme();
   const { tempMessage, id } = useSelector(({ message, login }) => ({
@@ -226,7 +245,9 @@ const ChatRoomHeader = ({
                   );
                 }
               });
-            } else navigation.dispatch(CommonActions.goBack);
+            } else {
+              navigation.dispatch(CommonActions.goBack);
+            }
           }}
         >
           <Svg width="7.131" height="12.78" viewBox="0 0 7.131 12.78">
@@ -239,10 +260,8 @@ const ChatRoomHeader = ({
             />
           </Svg>
         </TouchableOpacity>
-
-        {roomInfo && roomName}
-
-        <View style={styles.leftMenuBox}>
+        <View style={styles.roomTitle}>{roomInfo && roomName}</View>
+        <View style={styles.rightMenuBox}>
           <>
             {/* 검색 버튼 */}
             {onSearchBox &&
@@ -289,32 +308,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
     borderBottomColor: '#DDDDDD',
     borderBottomWidth: 1,
+    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingLeft: 20,
+    paddingRight: 20,
   },
-  topBackBtn: {
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-  },
-  searchBtn: {
-    padding: 20,
-    paddingRight: 0,
-    height: '100%',
+  topBackBtn: { flex: 1 },
+  roomTitle: {
+    flex: 2,
+    flexDirection: 'row',
     justifyContent: 'center',
   },
-  menuBtn: {
-    padding: 20,
-    paddingLeft: 22,
-    height: '100%',
-    justifyContent: 'center',
-  },
-  leftMenuBox: {
+  rightMenuBox: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
+  searchBtn: { marginRight: 15 },
+  menuBtn: {},
   headerProfile: {
     width: 40,
     height: 40,
