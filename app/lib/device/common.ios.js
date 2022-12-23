@@ -11,8 +11,11 @@ export const getTopPadding = () => {
 
 export const getBottomPadding = () => {
   // StatusBar 직접 import 해서 계산
-  if (isIphoneX()) return getBottomSpace(true);
-  else return 0;
+  if (isIphoneX()) {
+    return getBottomSpace(true);
+  } else {
+    return getStatusBarHeight(true);
+  }
 };
 
 export const getScreenWidth = () => {
