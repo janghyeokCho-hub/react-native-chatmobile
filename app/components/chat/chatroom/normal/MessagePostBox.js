@@ -912,6 +912,7 @@ const styles = StyleSheet.create({
     maxWidth: 80,
     height: '100%',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   extensionBtn: {
