@@ -1,39 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import * as channelApi from '@API/channel';
 import { getTopPadding, getBottomPadding } from '@/lib/device/common';
 import NotFoundIcon from '@/components/common/icons/NotFoundIcon';
 import TitleInputBox from '@COMMON/TitleInputBox';
-import { getDic, getServer, getConfig } from '@/config';
+import { getDic, getServer } from '@/config';
 import { withSecurityScreen } from '@/withSecurityScreen';
 
 const ChannelInfoDetailView = ({ route, navigation }) => {
   const channleInfo = route.params.channelInfo;
-  const [channelCategory, setChannelCategory] = useState({});
-  const [channelCategoryList, setChannelCategoryList] = useState([]);
-
-  const userInfo = useSelector(({ login }) => login.userInfo);
-
   const [viewDropDownMenu, setViewDropDownMenu] = useState(false);
-
-  const IsSaaSClient = getConfig('IsSaaSClient', 'N');
-
-  useEffect(() => {
-    if (IsSaaSClient == 'Y') {
-      channelApi
-        .getChannelCategoryListForSaaS({ companyCode: userInfo.CompanyCode })
-        .then(response => {
-          setChannelCategory(channleInfo);
-          setChannelCategoryList(response.data.result);
-        });
-    } else {
-      channelApi.getChannelCategoryList().then(response => {
-        setChannelCategory(channleInfo);
-        setChannelCategoryList(response.data.result);
-      });
-    }
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -56,49 +31,6 @@ const ChannelInfoDetailView = ({ route, navigation }) => {
             justifyContent: 'center',
             alignItems: 'center',
             margin: 'auto',
-          }}
-          onPress={() => {
-            const modalBtn = [
-              {
-                title: '카메라로 촬영하기',
-                onPress: () => {
-                  imageUtil.selectImageWithCamera(
-                    data => {
-                      setLoading(true);
-                      handleImageChange(data);
-                    },
-                    () => {
-                      setLoading(false);
-                    },
-                  );
-                },
-              },
-              {
-                title: '갤러리에서 선택하기',
-                onPress: () => {
-                  setLoading(true);
-                  imageUtil.selectImageWithLibrary(
-                    data => {
-                      setLoading(true);
-                      handleImageChange(data);
-                    },
-                    () => {
-                      setLoading(false);
-                    },
-                  );
-                },
-              },
-            ];
-            dispatch(
-              changeModal({
-                modalData: {
-                  closeOnTouchOutside: true,
-                  type: 'normal',
-                  buttonList: modalBtn,
-                },
-              }),
-            );
-            dispatch(openModal());
           }}
         >
           {!channleInfo.iconPath ? (
@@ -136,9 +68,6 @@ const ChannelInfoDetailView = ({ route, navigation }) => {
           editable={false}
           title={getDic('ChannelName')}
           placeholder={getDic('Msg_InputChannelName')}
-          onChageTextHandler={text => {
-            setChannelName(text);
-          }}
           value={channleInfo.roomName}
         />
         {/* Input ChannelDescription */}
@@ -146,9 +75,6 @@ const ChannelInfoDetailView = ({ route, navigation }) => {
           editable={false}
           title={getDic('ChannelDescription')}
           placeholder={getDic('Msg_InputChannelDesc')}
-          onChageTextHandler={text => {
-            setChannelDescription(text);
-          }}
           value={channleInfo.description}
         />
       </View>
@@ -166,13 +92,7 @@ const ChannelInfoDetailView = ({ route, navigation }) => {
               alignItems: 'center',
             }}
           >
-            {(channelCategory == null && (
-              <Text style={styles.dropdownText}>select any items...</Text>
-            )) || (
-              <Text style={styles.dropdownText}>
-                {channelCategory.categoryName}
-              </Text>
-            )}
+            <Text style={styles.dropdownText}>{channleInfo.categoryName}</Text>
           </View>
         </View>
         <View />
