@@ -35,7 +35,9 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
   const [channelIcon, setChannelIcon] = useState({});
   const [channelName, setChannelName] = useState('');
   const [channelDescription, setChannelDescription] = useState('');
-  const [channelCategory, setChannelCategory] = useState({});
+  const [channelCategory, setChannelCategory] = useState(
+    channleInfo.categoryCode || {},
+  );
   const [channelCategoryList, setChannelCategoryList] = useState([]);
   const [viewDropDownMenu, setViewDropDownMenu] = useState(false);
 
@@ -79,6 +81,8 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
 
   const handleImageChangeForiOS = file => {
     const files = [];
+    console.log('files : ', file);
+
     if (file.fileName == null) {
       let filename = file.uri.split('/');
       filename = filename[filename.length - 1];
@@ -87,7 +91,7 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
         size: file.fileSize,
         type: file.type,
         uri: file.uri ? file.uri : file.origURL,
-        data: file.data,
+        data: file.uri ? file.uri : file.origURL,
       });
     } else {
       files.push({
@@ -95,7 +99,7 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
         size: file.fileSize,
         type: file.type,
         uri: file.uri ? file.uri : file.origURL,
-        data: file.data,
+        data: file.uri ? file.uri : file.origURL,
       });
     }
     setChannelIcon(files[0]);
@@ -113,7 +117,7 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
         type: file.type,
         uri: file.uri,
         path: file.path,
-        data: file.data,
+        data: file.uri,
       });
     } else {
       files.push({
@@ -122,7 +126,7 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
         type: file.type,
         uri: file.uri,
         path: file.path,
-        data: file.data,
+        data: file.uri,
       });
     }
 

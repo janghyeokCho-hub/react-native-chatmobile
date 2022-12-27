@@ -74,12 +74,14 @@ export function createGetChannelCategoriesSaga() {
       let data = {};
       let response = {};
 
-      if(action.payload){
-        response = yield call(channelApi.getChannelCategoryListForSaaS,{companyCode:action.payload.companyCode});
-      }else{
+      if (action.payload) {
+        response = yield call(channelApi.getChannelCategoryListForSaaS, {
+          companyCode: action.payload.companyCode,
+        });
+      } else {
         response = yield call(channelApi.getChannelCategoryList);
       }
-      
+
       data = response.data;
 
       yield put({
@@ -309,7 +311,7 @@ export function createModifyChannelInfoSaga() {
         console.log('createModifyChannelInfoSaga => ', response);
         yield put({
           type: 'channel/MODIFY_CHANNELINFO_SUCCESS',
-          payload: {...response.data,iconPath:action.payload.iconPath},
+          payload: { ...response.data, iconPath: action.payload.iconPath },
         });
       } catch (e) {
         yield fork(exceptionHandler, { e: e, redirectError: false });

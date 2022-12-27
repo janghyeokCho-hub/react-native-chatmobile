@@ -1036,35 +1036,27 @@ const channelActionHandlers = handleActions(
     },
     [MODIFY_CHANNELINFO_SUCCESS]: (state, action) => {
       return produce(state, draft => {
-        const roomId = parseInt(action.payload.result.roomID);
-        const channelIdx = draft.channels.findIndex(c => c.roomId === roomId);
+        const { result } = action.payload;
+        const roomId = result.roomID;
+        const channelIdx = draft.channels.findIndex(c => c.roomId == roomId);
         if (channelIdx > -1) {
-          const { result } = action.payload;
-          const categoryIdx = draft.categories.findIndex(
-            c => c.categoryCode === result.categoryCode,
-          );
-
-          let categoryCode = result.categoryCode;
-          let categoryName = '';
-          if (categoryIdx > -1) {
-            categoryName = draft.categories[categoryIdx].categoryName;
-          } else {
-            // invalid
-            categoryCode = '';
-          }
-
           const newChannel = {
             ...draft.channels[channelIdx],
             roomName: result.roomName,
             description: result.description,
-            categoryCode,
-            categoryName,
-            iconPath: action.payload.iconPath,
+            categoryCode: result.categoryCode,
           };
+
+          if (action.payload.iconPath) {
+            newChannel['iconPath'] = action.payload.iconPath;
+          }
 
           draft.channels[channelIdx] = newChannel;
 
-          if (draft.currentChannel && draft.currentChannel.roomId == roomId) {
+          if (
+            (draft.currentChannel && draft.currentChannel.roomId == roomId) ||
+            draft.currentChannel.roomID == roomId
+          ) {
             // draft.currentChannel.roomName = action.payload.result.roomName;
             draft.currentChannel = newChannel;
           }
