@@ -333,19 +333,11 @@ const ChangeChannelInfoView = ({ route, navigation }) => {
                 if (response.data.status == 'SUCCESS') {
                   if (channelIcon.data) {
                     const formData = new FormData();
-                    if (Platform.OS === 'ios') {
-                      formData.append('file', {
-                        uri: channelIcon.uri,
-                        type: channelIcon.type,
-                        name: channelIcon.name,
-                      });
-                    } else {
-                      formData.append('file', {
-                        uri: channelIcon.uri,
-                        type: channelIcon.type,
-                        name: channelIcon.name,
-                      });
-                    }
+                    formData.append('file', {
+                      uri: channelIcon.uri,
+                      type: channelIcon.type,
+                      name: channelIcon.name,
+                    });
                     formData.append('roomId', channleInfo.roomId);
 
                     uploadChannelIcon(formData)
