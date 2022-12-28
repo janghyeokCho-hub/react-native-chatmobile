@@ -87,7 +87,7 @@ const CreateChannelView = ({ navigation, route }) => {
         size: file.fileSize,
         type: file.type,
         uri: file.uri ? file.uri : file.origURL,
-        data: file.data,
+        data: file.uri ? file.uri : file.origURL,
       });
     } else {
       files.push({
@@ -95,7 +95,7 @@ const CreateChannelView = ({ navigation, route }) => {
         size: file.fileSize,
         type: file.type,
         uri: file.uri ? file.uri : file.origURL,
-        data: file.data,
+        data: file.uri ? file.uri : file.origURL,
       });
     }
     setChannelIcon(files[0]);
@@ -113,7 +113,7 @@ const CreateChannelView = ({ navigation, route }) => {
         type: file.type,
         uri: file.uri,
         path: file.path,
-        data: file.data,
+        data: file.uri,
       });
     } else {
       files.push({
@@ -122,7 +122,7 @@ const CreateChannelView = ({ navigation, route }) => {
         type: file.type,
         uri: file.uri,
         path: file.path,
-        data: file.data,
+        data: file.uri,
       });
     }
     setChannelIcon(files[0]);
