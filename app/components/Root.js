@@ -161,7 +161,7 @@ const Root = ({ stack, theme }) => {
                 name="ChannelInfo"
                 component={ChannelInfoDetailView}
                 options={({ navigation }) => ({
-                  title: getDic('ChannelInfo'),
+                  title: getDic('ChannelInfo', '채널 정보 보기'),
                   headerShown: true,
                   headerLeft: () => (
                     <TouchableOpacity
@@ -197,7 +197,7 @@ const Root = ({ stack, theme }) => {
                 name="ChangeChannelInfo"
                 component={ChangeChannelInfoView}
                 options={({ navigation }) => ({
-                  title: getDic('ChangeChannelInfo'),
+                  title: getDic('ChangeChannelInfo', '채널 정보 수정'),
                   headerShown: true,
                   headerLeft: () => (
                     <TouchableOpacity
