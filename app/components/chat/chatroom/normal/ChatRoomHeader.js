@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { getServer } from '@/config';
 import ProfileBox from '@/components/common/ProfileBox';
 import {
   View,
@@ -7,12 +8,13 @@ import {
   StyleSheet,
   BackHandler,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import Svg, { Path, G, Rect, Circle } from 'react-native-svg';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { getDic } from '@/config';
-import { getJobInfo } from '@/lib/common';
+import { getJobInfo, getBackgroundColor } from '@/lib/common';
 import { useTheme } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import RoomMemberBox from '@C/chat/RoomMemberBox';
@@ -120,6 +122,52 @@ const makeRoomName = (room, id, isInherit, sizes) => {
           >
             <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
               {target.name}
+            </Text>
+          </View>
+        </>
+      );
+    } else if (room.roomType === 'C') {
+      return (
+        <>
+          {room.iconPath ? (
+            <Image
+              source={{ uri: `${getServer('HOST')}${room.iconPath}` }}
+              style={styles.headerProfile}
+            />
+          ) : (
+            <View
+              style={[
+                styles.headerProfile,
+                {
+                  borderRadius: 15,
+                  backgroundColor: getBackgroundColor(room.roomName),
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  fontSize: 17,
+                  padding: 12,
+                  textAlign: 'center',
+                  color: '#fff',
+                }}
+              >
+                {(room.roomName && room.roomName[0]) || ''}
+              </Text>
+            </View>
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ fontSize: sizes.default }} numberOfLines={1}>
+              {room.roomName == ''
+                ? getDic('GroupChatRoom', '그룹채팅방')
+                : room.roomName}{' '}
+              ({room.members.length})
             </Text>
           </View>
         </>
