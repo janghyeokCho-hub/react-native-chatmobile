@@ -12,7 +12,7 @@ index 3618a5e..3967bf7 100644
      export function isExpo(): boolean;
  }
 diff --git a/node_modules/react-native-status-bar-height/index.js b/node_modules/react-native-status-bar-height/index.js
-index 08fd56b..8a92363 100644
+index 08fd56b..a319f4a 100644
 --- a/node_modules/react-native-status-bar-height/index.js
 +++ b/node_modules/react-native-status-bar-height/index.js
 @@ -4,6 +4,8 @@ const STATUSBAR_DEFAULT_HEIGHT = 20;
@@ -31,8 +31,8 @@ index 08fd56b..8a92363 100644
 +const IP14_WIDTH = 393;
 +const IP14_HEIGHT = 852;
 +
-+const IP14MAX_WIDTH = 428;
-+const IP14MAX_HEIGHT = 926;
++const IP14MAX_WIDTH = 430;
++const IP14MAX_HEIGHT = 932;
 +
  const { height: W_HEIGHT, width: W_WIDTH } = Dimensions.get('window');
  
