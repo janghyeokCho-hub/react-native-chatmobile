@@ -529,7 +529,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
 
         // TODO: 다른 사람이 보낸 메시지 도착 시 아래로 가지않도록 수정 필요
         // 한페이지 이상 스크롤을 올렸을 경우
-        if (!useScroll && nativeEvent.contentOffset.y > 0) {
+        if (!useScroll && nativeEvent.contentOffset.y > 100) {
           setUseScroll(true);
           setBottomView(true);
         } else if (bottomEnd && useScroll && nativeEvent.contentOffset.y <= 0) {
