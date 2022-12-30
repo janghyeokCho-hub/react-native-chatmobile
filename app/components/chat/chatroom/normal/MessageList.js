@@ -251,8 +251,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   }, [dispatch, targetMessageData, currentRoom, topEnd, refresh]);
 
   /**
-   * Reply 본문 메시지로 이동시
-   * 스크롤 하단 이동시
+   * Reply 본문 메시지로 이동 후 스크롤 하단 이동시
    * 본문메시지부터 마지막 메시지 도달시까지
    * 정해진 LOAD_CNT 수 만큼 메시지를 불러옴
    */
@@ -310,7 +309,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         y: 0,
         animated: true,
       });
-    }, 200);
+    }, 300);
   }, [dispatch, ref]);
 
   const goToOriginMsg = useCallback(
@@ -529,7 +528,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
 
         // TODO: 다른 사람이 보낸 메시지 도착 시 아래로 가지않도록 수정 필요
         // 한페이지 이상 스크롤을 올렸을 경우
-        if (!useScroll && nativeEvent.contentOffset.y > 0) {
+        if (!useScroll && nativeEvent.contentOffset.y > 100) {
           setUseScroll(true);
           setBottomView(true);
         } else if (bottomEnd && useScroll && nativeEvent.contentOffset.y <= 0) {
