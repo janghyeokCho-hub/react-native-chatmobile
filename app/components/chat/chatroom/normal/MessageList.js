@@ -251,8 +251,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
   }, [dispatch, targetMessageData, currentRoom, topEnd, refresh]);
 
   /**
-   * Reply 본문 메시지로 이동시
-   * 스크롤 하단 이동시
+   * Reply 본문 메시지로 이동 후 스크롤 하단 이동시
    * 본문메시지부터 마지막 메시지 도달시까지
    * 정해진 LOAD_CNT 수 만큼 메시지를 불러옴
    */
@@ -310,7 +309,7 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
         y: 0,
         animated: true,
       });
-    }, 200);
+    }, 300);
   }, [dispatch, ref]);
 
   const goToOriginMsg = useCallback(
