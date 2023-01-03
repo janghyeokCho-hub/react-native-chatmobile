@@ -133,8 +133,8 @@ android {
         applicationId "com.chatmobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 11503
-        versionName "1.15.3"
+        versionCode 11504
+        versionName "1.15.4"
         multiDexEnabled true
     }
     splits {
