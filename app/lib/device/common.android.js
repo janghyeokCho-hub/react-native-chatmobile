@@ -4,6 +4,7 @@ import RNRestart from 'react-native-restart';
 import TextInputReset from 'react-native-text-input-reset';
 import { getDic } from '@/config';
 import SendIntentAndroid from 'react-native-send-intent';
+import JailMonkey from 'jail-monkey';
 
 export const getTopPadding = () => {
   // StatusBar 직접 import 해서 계산
@@ -43,4 +44,21 @@ export const restartApp = () => {
 
 export const resetInput = ref => {
   TextInputReset.resetKeyboardInput(findNodeHandle(ref));
+};
+
+/**
+ * @Author 조장혁
+ * @description OS 루팅 변조 확인되면 종료 시키는 함수
+ */
+export const getRootingChack = () => {
+  if (JailMonkey.isJailBroken()) {
+    Alert.alert('이음톡', '이 장치는 루팅 변조로 확인되어 앱을 종료합니다.', [
+      {
+        text: getDic('Ok', '확인'),
+        onPress: () => {
+          exitApp();
+        },
+      },
+    ]);
+  }
 };

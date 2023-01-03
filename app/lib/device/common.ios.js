@@ -4,6 +4,7 @@ import { isIphoneX, getBottomSpace } from 'react-native-iphone-x-helper';
 import RNExitApp from 'react-native-exit-app';
 import RNRestart from 'react-native-restart';
 import { getDic } from '@/config';
+import JailMonkey from 'jail-monkey';
 
 export const getTopPadding = () => {
   return getStatusBarHeight(true);
@@ -46,4 +47,21 @@ export const restartApp = () => {
 
 export const resetInput = ref => {
   ref && ref.clear();
+};
+
+/**
+ * @Author 조장혁
+ * @description OS 루팅 변조 확인되면 종료 시키는 함수
+ */
+export const getRootingChack = () => {
+  if (JailMonkey.isJailBroken()) {
+    Alert.alert('이음톡', '이 장치는 루팅 변조로 확인되어 앱을 종료합니다.', [
+      {
+        text: getDic('Ok', '확인'),
+        onPress: () => {
+          exitApp();
+        },
+      },
+    ]);
+  }
 };
