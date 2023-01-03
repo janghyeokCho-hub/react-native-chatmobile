@@ -48,15 +48,31 @@ export const resetInput = ref => {
 
 /**
  * @Author 조장혁
- * @description OS 루팅 변조 확인되면 종료 시키는 함수
+ * @description OS 루팅 변조 또는 디버깅 모드가 탐지되면 앱을 종료시킴
  */
-export const getRootingCheck = () => {
+export const getMobileSecurity = () => {
   if (JailMonkey.isJailBroken()) {
     Alert.alert(
       getDic('Eumtalk', '이음톡'),
       getDic(
         'Msg_Rooting_ExitApp',
         '이 장치는 루팅 변조로 식별되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
+        },
+      ],
+    );
+  } else if (JailMonkey.isDebuggedMode() || JailMonkey.AdbEnabled()) {
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Debugging_ExitApp',
+        '디버깅 모드가 탐지되어 앱을 종료합니다.',
       ),
       [
         {

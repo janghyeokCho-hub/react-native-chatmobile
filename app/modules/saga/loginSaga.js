@@ -28,7 +28,7 @@ import { getConfig, getDic, initConfig } from '@/config';
 import { getChineseWall } from '@/lib/api/orgchart';
 import { checkDatabaseMigration } from '@/lib/appData/migrations';
 import { syncUserDefinedSettings } from '@/lib/userSettingUtil';
-import { getRootingCheck } from '@/lib/device/common';
+import { getMobileSecurityCheck } from '@/lib/device/common';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -536,7 +536,7 @@ export function createSyncTokenOfflineSaga(type) {
 export function* preLoginSuccessSaga(action) {
   const isSaaSClient = getConfig('IsSaaSClient', 'N') === 'Y';
   const useUserSettingSync = getConfig('UseUserSettingSync', 'N') === 'Y';
-  const useRootingCheck = getConfig('UseRootingCheck', 'N') === 'Y';
+  const useMobileSecurity = getConfig('UseMobileSecurity', 'N') === 'Y';
 
   const userId = action.payload.id;
 
@@ -579,7 +579,7 @@ export function* preLoginSuccessSaga(action) {
     }
   }
 
-  if (useRootingCheck) {
-    getRootingCheck();
+  if (useMobileSecurity) {
+    getMobileSecurityCheck();
   }
 }
