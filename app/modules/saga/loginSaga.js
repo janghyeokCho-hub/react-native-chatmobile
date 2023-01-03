@@ -28,7 +28,7 @@ import { getConfig, getDic, initConfig } from '@/config';
 import { getChineseWall } from '@/lib/api/orgchart';
 import { checkDatabaseMigration } from '@/lib/appData/migrations';
 import { syncUserDefinedSettings } from '@/lib/userSettingUtil';
-import { getRootingChack } from '@/lib/device/common';
+import { getRootingCheck } from '@/lib/device/common';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -580,6 +580,6 @@ export function* preLoginSuccessSaga(action) {
   }
 
   if (useRootingCheck) {
-    getRootingChack();
+    getRootingCheck();
   }
 }

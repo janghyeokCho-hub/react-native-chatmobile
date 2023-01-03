@@ -50,7 +50,7 @@ export const resetInput = ref => {
  * @Author 조장혁
  * @description OS 루팅 변조 확인되면 종료 시키는 함수
  */
-export const getRootingChack = () => {
+export const getRootingCheck = () => {
   if (JailMonkey.isJailBroken()) {
     Alert.alert(
       getDic('Eumtalk', '이음톡'),
