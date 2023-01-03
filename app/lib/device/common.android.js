@@ -52,13 +52,20 @@ export const resetInput = ref => {
  */
 export const getRootingChack = () => {
   if (JailMonkey.isJailBroken()) {
-    Alert.alert('이음톡', '이 장치는 루팅 변조로 확인되어 앱을 종료합니다.', [
-      {
-        text: getDic('Ok', '확인'),
-        onPress: () => {
-          exitApp();
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Rooting_ExitApp',
+        '이 장치는 루팅 변조로 식별되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 };
