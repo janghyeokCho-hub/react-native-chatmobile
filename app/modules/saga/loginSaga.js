@@ -28,6 +28,7 @@ import { getConfig, getDic, initConfig } from '@/config';
 import { getChineseWall } from '@/lib/api/orgchart';
 import { checkDatabaseMigration } from '@/lib/appData/migrations';
 import { syncUserDefinedSettings } from '@/lib/userSettingUtil';
+import { getMobileSecurityCheck } from '@/lib/device/common';
 
 export function createLoginRequestSaga(loginType, syncType) {
   const SUCCESS = `${loginType}_SUCCESS`;
@@ -535,6 +536,8 @@ export function createSyncTokenOfflineSaga(type) {
 export function* preLoginSuccessSaga(action) {
   const isSaaSClient = getConfig('IsSaaSClient', 'N') === 'Y';
   const useUserSettingSync = getConfig('UseUserSettingSync', 'N') === 'Y';
+  const useMobileSecurity = getConfig('UseMobileSecurity', 'N') === 'Y';
+
   const userId = action.payload.id;
 
   // db 버전 검사 && migration
@@ -574,5 +577,9 @@ export function* preLoginSuccessSaga(action) {
     } catch (err) {
       console.log('preLoginSuccessSaga occured an error: ', err);
     }
+  }
+
+  if (useMobileSecurity) {
+    getMobileSecurityCheck();
   }
 }

@@ -16,6 +16,7 @@
     "@react-native-picker/picker": "^2.4.2",
     "@stream-io/flat-list-mvcp": "^0.10.2",
     "base-64": "^0.1.0",
+    "jail-monkey": "^2.8.0",
     "jetifier": "^1.6.6",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",

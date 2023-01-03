@@ -4,6 +4,7 @@ import RNRestart from 'react-native-restart';
 import TextInputReset from 'react-native-text-input-reset';
 import { getDic } from '@/config';
 import SendIntentAndroid from 'react-native-send-intent';
+import JailMonkey from 'jail-monkey';
 
 export const getTopPadding = () => {
   // StatusBar 직접 import 해서 계산
@@ -43,4 +44,44 @@ export const restartApp = () => {
 
 export const resetInput = ref => {
   TextInputReset.resetKeyboardInput(findNodeHandle(ref));
+};
+
+/**
+ * @Author 조장혁
+ * @description OS 루팅 변조 또는 디버깅 모드가 탐지되면 앱을 종료시킴
+ */
+export const getMobileSecurity = () => {
+  if (JailMonkey.isJailBroken()) {
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Rooting_ExitApp',
+        '이 장치는 루팅 변조로 식별되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
+        },
+      ],
+    );
+  } else if (JailMonkey.isDebuggedMode() || JailMonkey.AdbEnabled()) {
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Debugging_ExitApp',
+        '디버깅 모드가 탐지되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
+        },
+      ],
+    );
+  }
 };

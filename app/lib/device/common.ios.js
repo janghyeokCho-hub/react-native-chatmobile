@@ -4,6 +4,7 @@ import { isIphoneX, getBottomSpace } from 'react-native-iphone-x-helper';
 import RNExitApp from 'react-native-exit-app';
 import RNRestart from 'react-native-restart';
 import { getDic } from '@/config';
+import JailMonkey from 'jail-monkey';
 
 export const getTopPadding = () => {
   return getStatusBarHeight(true);
@@ -46,4 +47,44 @@ export const restartApp = () => {
 
 export const resetInput = ref => {
   ref && ref.clear();
+};
+
+/**
+ * @Author 조장혁
+ * @description OS 루팅 변조 또는 디버깅 모드가 탐지되면 앱을 종료시킴
+ */
+export const getMobileSecurity = () => {
+  if (JailMonkey.isJailBroken()) {
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Rooting_ExitApp',
+        '이 장치는 루팅 변조로 식별되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
+        },
+      ],
+    );
+  } else if (JailMonkey.isDebuggedMode()) {
+    Alert.alert(
+      getDic('Eumtalk', '이음톡'),
+      getDic(
+        'Msg_Debugging_ExitApp',
+        '디버깅 모드가 탐지되어 앱을 종료합니다.',
+      ),
+      [
+        {
+          text: getDic('Ok', '확인'),
+          onPress: () => {
+            exitApp();
+          },
+        },
+      ],
+    );
+  }
 };
