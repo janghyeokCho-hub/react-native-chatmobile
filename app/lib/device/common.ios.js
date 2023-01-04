@@ -53,7 +53,7 @@ export const resetInput = ref => {
  * @Author 조장혁
  * @description OS 루팅 변조 또는 디버깅 모드가 탐지되면 앱을 종료시킴
  */
-export const getMobileSecurity = () => {
+export const getMobileSecurityCheck = () => {
   if (JailMonkey.isJailBroken()) {
     Alert.alert(
       getDic('Eumtalk', '이음톡'),
