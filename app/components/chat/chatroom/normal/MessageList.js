@@ -95,6 +95,15 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
     setMessageData(newMessageData);
   }, [messages, tempMessage, currentRoom]);
 
+  useEffect(() => {
+    if (!tempMessage?.length && ref.current) {
+      ref.current.scrollToOffset({
+        y: 0,
+        animated: true,
+      });
+    }
+  }, [tempMessage, ref]);
+
   /**
    * 메시지 이동시 이동된 메시지 기준으로
    * 최하단으로 이동시 replyFlag 변경으로 인해 다시 messageData 사용
@@ -146,13 +155,13 @@ const MessageList = React.forwardRef(({ onExtension, navigation }, ref) => {
       dispatch(setPostAction(false));
       if (replyFlag) {
         handlePageInit();
-      } else {
-        setTimeout(() => {
-          ref.current.scrollToOffset({
-            y: 0,
-            animated: true,
-          });
-        }, 200);
+        // } else {
+        //   setTimeout(() => {
+        //     ref.current.scrollToOffset({
+        //       y: 0,
+        //       animated: true,
+        //     });
+        //   }, 300);
       }
     }
   }, [dispatch, postAction, replyFlag, ref]);
