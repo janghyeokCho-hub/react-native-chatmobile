@@ -336,7 +336,6 @@ export const convertChildren = ({
  * @param {*string} context 사용자 입력 텍스트
  * @returns {*string} 금칙어 목록에 포함된 단어
  */
-
 export const getForbiddenWord = (forbiddenWordList = [], context, dispatch) => {
   const forbiddenWord = forbiddenWordList.filter(word =>
     context.includes(word),
