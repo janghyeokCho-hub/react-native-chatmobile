@@ -16,6 +16,7 @@ import {
   Image,
   PermissionsAndroid,
 } from 'react-native';
+import { getForbiddenWord } from '@/lib/messageUtil';
 
 import ChannelMentionBox from '@C/channel/channelroom/controls/ChannelMentionBox';
 import KeySpacer from '@C/common/layout/KeySpacer';
@@ -145,6 +146,16 @@ const MessagePostBox = ({
         const regExp = new RegExp('(<br>|<br/>|<br />)', 'gi');
         inputContext = inputContext.replace(regExp, '\n');
         inputContext = inputContext.replace(/\s+$/, ''); // 마지막 공백문자 전부 제거
+
+        const forbiddenWordList = getConfig('forbiddenWord', []);
+        if (forbiddenWordList?.length) {
+          const data = getForbiddenWord(forbiddenWordList, context, dispatch);
+
+          if (data?.length) {
+            setContext('');
+            return;
+          }
+        }
 
         // 멘션
         if (currentChannel) {
