@@ -69,28 +69,32 @@ export const loggerInit = () => {
 };
 
 const fileDownload = async (optionObj, callback) => {
-  RNFS.downloadFile(optionObj).promise.then(response => {
-    if (optionObj.imageOrVideo) {
-      CameraRoll.save(`file://${optionObj.toFile}`, {
-        album: 'eumtalk',
-      })
-        .then(() => {
-          // cache file delete
-          RNFS.unlink(optionObj.toFile);
-          // image의 경우 앨범의 경로로 경로 변경.
-          optionObj.toFile =
-            RNFS.PicturesDirectoryPath +
-            '/eumtalk/' +
-            optionObj.toFile.slice(optionObj.toFile.lastIndexOf('/') + 1);
-          callback(response);
+  RNFS.downloadFile(optionObj)
+    .promise.then(response => {
+      if (optionObj.imageOrVideo) {
+        CameraRoll.save(`file://${optionObj.toFile}`, {
+          album: 'eumtalk',
         })
-        .catch(() => {
-          callback(response);
-        });
-    } else {
-      callback(response);
-    }
-  });
+          .then(() => {
+            // cache file delete
+            RNFS.unlink(optionObj.toFile);
+            // image의 경우 앨범의 경로로 경로 변경.
+            optionObj.toFile =
+              RNFS.PicturesDirectoryPath +
+              '/eumtalk/' +
+              optionObj.toFile.slice(optionObj.toFile.lastIndexOf('/') + 1);
+            callback(response);
+          })
+          .catch(() => {
+            callback(response);
+          });
+      } else {
+        callback(response);
+      }
+    })
+    .catch(e => {
+      console.log('RNFS.downloadFile Error : ', e);
+    });
 };
 
 export const downloadByToken = async (
@@ -100,7 +104,7 @@ export const downloadByToken = async (
 ) => {
   const imageOrVideo = isImageOrVideo(fileName);
   let directoryName = [{ type: 'Plain', data: 'Eumtalk' }];
-  let directoryPath = 'Eumtalk';
+  let directoryPath = 'Download/Eumtalk';
   let filePath = null;
   let downloadPath = null;
 
@@ -182,29 +186,43 @@ export const downloadByToken = async (
     };
   }
 
-  RNFS.exists(filePath).then(async result => {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      null,
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      if (result) {
-        fileDownload(optionObj, callbackFn);
-      } else {
-        RNFS.mkdir(filePath).then(() => {
-          fileDownload(optionObj, callbackFn);
-        });
+  RNFS.exists(filePath)
+    .then(async result => {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          null,
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          if (result) {
+            fileDownload(optionObj, callbackFn);
+          } else {
+            RNFS.mkdir(filePath)
+              .then(() => {
+                fileDownload(optionObj, callbackFn);
+              })
+              .catch(e => {
+                console.log(e);
+                Alert.alert(null, '폴더 생성 실패', [{ text: getDic('Ok') }]);
+              });
+          }
+        } else {
+          Alert.alert(
+            null,
+            getDic(
+              'Msg_StoragePermissionError',
+              '저장공간 권한이 없어 다운로드가 불가능합니다.\n저장공간 권한을 승인한 뒤 다시 시도하시길바랍니다.',
+            ),
+            [{ text: getDic('Ok') }],
+          );
+        }
+      } catch (e) {
+        console.log(e);
       }
-    } else {
-      Alert.alert(
-        null,
-        getDic(
-          'Msg_StoragePermissionError',
-          '저장공간 권한이 없어 다운로드가 불가능합니다.\n저장공간 권한을 승인한 뒤 다시 시도하시길바랍니다.',
-        )[{ text: getDic('Ok') }],
-      );
-    }
-  });
+    })
+    .catch(e => {
+      console.log(e);
+    });
 };
 
 export const downloadByTokenAlert = (item, progressCallback) => {
