@@ -329,6 +329,20 @@ export const convertChildren = ({
   return returnJSX;
 };
 
+/**
+ * @description 금칙어 처리 함수
+ * @param {*Array} forbiddenWordList 금칙어 목록
+ * @param {*string} context 사용자 입력 텍스트
+ * @returns {*string} 금칙어 목록에 포함된 단어
+ */
+export const getForbiddenWord = (forbiddenWordList = [], context) => {
+  const forbiddenWord = forbiddenWordList.filter(word =>
+    context.includes(word),
+  );
+
+  return forbiddenWord;
+};
+
 const styles = StyleSheet.create({
   lineBreaker: {
     flexGrow: 1,
