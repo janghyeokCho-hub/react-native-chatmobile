@@ -2,9 +2,8 @@ import * as dbAction from '@/lib/appData/action';
 import * as messageApi from '@API/message';
 import { openModal, changeModal } from '@/modules/modal';
 import { Plain, Link, Tag, Sticker, Mention } from '@C/chat/message/types';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import React from 'react';
-import { getDic } from '@/config';
 
 export const getMessage = async (
   roomID,
@@ -336,19 +335,11 @@ export const convertChildren = ({
  * @param {*string} context 사용자 입력 텍스트
  * @returns {*string} 금칙어 목록에 포함된 단어
  */
-export const getForbiddenWord = (forbiddenWordList = [], context, dispatch) => {
+export const getForbiddenWord = (forbiddenWordList = [], context) => {
   const forbiddenWord = forbiddenWordList.filter(word =>
     context.includes(word),
   );
 
-  if (forbiddenWord?.length) {
-    Alert.alert(
-      getDic(
-        'Msg_ForbiddenWord',
-        `내용에 금지된 단어(${forbiddenWord.join()})가 포함되어있습니다.`,
-      ),
-    );
-  }
   return forbiddenWord;
 };
 
