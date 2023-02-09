@@ -278,7 +278,8 @@ const ChannelMenuBox = ({ title, roomInfo, handleClose, navigation }) => {
         pushID: await messaging().getToken(),
         value: tempValue,
       };
-      await modifyRoomNotification(roomInfo.roomID, params);
+
+      await modifyRoomNotification(roomInfo.roomId, params);
     } catch (err) {
       // revoke state on error
       setNotification(notification);
