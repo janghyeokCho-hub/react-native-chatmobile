@@ -231,9 +231,9 @@ const ChatRoomHeader = ({
   };
 
   const backButtonHandler = useCallback(() => {
-    if (tempMessage && tempMessage.length > 0) {
+    if (tempMessage?.length) {
       const hasPendingFile = tempMessage.some(
-        item => item.sendFileInfo && item.sendFileInfo.files.length > 0,
+        item => item.sendFileInfo?.files.length > 0,
       );
 
       if (hasPendingFile) {
@@ -249,10 +249,12 @@ const ChatRoomHeader = ({
         ]);
 
         return true;
+      } else {
+        navigation.dispatch(CommonActions.goBack);
       }
+    } else {
+      navigation.dispatch(CommonActions.goBack);
     }
-
-    navigation.dispatch(CommonActions.goBack);
   }, [tempMessage, cancelToken, navigation]);
 
   useEffect(() => {
@@ -261,9 +263,7 @@ const ChatRoomHeader = ({
       backButtonHandler,
     );
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    };
+    return () => backHandler.remove();
   }, [backButtonHandler]);
 
   return (
