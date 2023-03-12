@@ -23,9 +23,3 @@ cd <root>/ios
 pod install
 Xcode > Product > Archive 
 ```
-
-
-## Work history
-
-
-
