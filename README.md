@@ -11,13 +11,15 @@ A service that provides webtoons and web novels
 ```bash
 yarn dev
 ```
-* build
-** Android
+
+# build
+* Android
 ```bash
 cd <root>/android
 ./gradlew assembleRelease
 ```
-** IOS
+
+* IOS
 ```bash
 cd <root>/ios
 pod install
